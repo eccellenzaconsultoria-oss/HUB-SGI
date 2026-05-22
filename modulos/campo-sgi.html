@@ -121,6 +121,40 @@ label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase
 .cat-asp{font-size:13px;font-weight:500;color:var(--text)}
 .cat-imp{font-size:11px;color:var(--text2);margin-top:2px}
 
+/* Modal de ajuda */
+.help-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;overflow-y:auto;padding:16px}
+.help-modal-bg.open{display:block}
+.help-modal{background:var(--white);border-radius:var(--r);max-width:680px;margin:0 auto;overflow:hidden}
+.help-head{padding:16px 20px;background:var(--gray-l);border-bottom:1px solid var(--gray-b);display:flex;justify-content:space-between;align-items:center}
+.help-body{padding:20px;max-height:80vh;overflow-y:auto;font-size:13px;line-height:1.8;color:var(--text)}
+.help-body h3{font-size:13px;font-weight:700;color:var(--text);margin:16px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--gray-b)}
+.help-body h3:first-child{margin-top:0}
+.help-body table{width:100%;border-collapse:collapse;margin:8px 0 14px;font-size:12px}
+.help-body th{background:var(--gray-l);padding:6px 10px;text-align:left;font-weight:600;border:1px solid var(--gray-b)}
+.help-body td{padding:6px 10px;border:1px solid var(--gray-b);vertical-align:top}
+.help-body .ex{background:var(--green-l);border-left:3px solid var(--green);padding:8px 12px;border-radius:4px;font-size:12px;margin:8px 0}
+.help-body .warn{background:var(--amber-l);border-left:3px solid var(--amber);padding:8px 12px;border-radius:4px;font-size:12px;margin:8px 0}
+.help-btn-q{background:none;border:1.5px solid var(--gray-b);border-radius:50%;width:22px;height:22px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;margin-left:6px;transition:all .15s}
+.help-btn-q:hover{background:var(--blue-l);border-color:var(--blue);color:var(--blue)}
+
+/* Checklist imprimível */
+@media print {
+  body * { visibility: hidden; }
+  #print-checklist, #print-checklist * { visibility: visible; }
+  #print-checklist { position: fixed; inset: 0; background: white; padding: 20px; z-index:9999; overflow:visible }
+  .no-print { display: none !important; }
+}
+.print-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;overflow-y:auto;padding:16px}
+.print-modal-bg.open{display:block}
+.print-modal{background:var(--white);border-radius:var(--r);max-width:860px;margin:0 auto;overflow:hidden}
+.cl-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+.cl-table th{background:#f0f0f0;padding:7px 10px;text-align:left;font-weight:600;border:1px solid #ccc;font-size:11px}
+.cl-table td{padding:7px 10px;border:1px solid #ccc;vertical-align:top}
+.cl-table tr:nth-child(even) td{background:#fafafa}
+.cl-check{width:24px;text-align:center;font-size:16px}
+.cl-code{font-family:monospace;font-weight:700;font-size:11px;color:var(--green-d);white-space:nowrap}
+.cl-code.sst{color:var(--blue-d)}
+
 /* Responsivo mobile */
 @media(max-width:600px){
   .row-2,.row-3,.row-5{grid-template-columns:repeat(5,1fr);gap:12px}
@@ -168,7 +202,9 @@ label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <div class="autosave" id="autosave-ind">✓ Salvo</div>
+        <button class="btn btn-sm btn-outline" style="color:#fff;border-color:rgba(255,255,255,.4)" onclick="showHelp()">❓ Critérios</button>
         <button class="btn btn-sm btn-outline" style="color:#fff;border-color:rgba(255,255,255,.4)" onclick="showCatalogo()">📖 Catálogo</button>
+        <button class="btn btn-sm btn-outline" style="color:#fff;border-color:rgba(255,255,255,.4)" onclick="showPrintChecklist()">🖨️ Checklist</button>
         <button class="btn btn-sm btn-outline" style="color:#fff;border-color:rgba(255,255,255,.4)" onclick="backToSplash()">← Sair</button>
       </div>
     </div>
@@ -297,6 +333,7 @@ label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase
             <div class="score-widget" id="score-widget-14">
               <div class="score-num" id="score-num-14" style="color:var(--gray)">—</div>
               <div class="score-label" id="score-nivel-14" style="color:var(--gray)">Aguardando</div>
+              <div style="font-size:10px;color:var(--text2);margin-top:3px" id="score-formula-14"></div>
               <div id="sig-badge-14"></div>
             </div>
           </div>
@@ -405,6 +442,7 @@ label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase
             <div class="score-widget" id="score-widget-45">
               <div class="score-num" id="score-num-45" style="color:var(--gray)">—</div>
               <div class="score-label" id="score-nivel-45" style="color:var(--gray)">Aguardando</div>
+              <div style="font-size:10px;color:var(--text2);margin-top:3px" id="score-formula-45"></div>
             </div>
           </div>
         </div>
@@ -687,28 +725,37 @@ function calcScore14() {
   var s = parseInt(document.getElementById('f-sev').value)    || 0;
   var a = parseInt(document.getElementById('f-abrang').value) || 0;
   var score = f && p && s && a ? f * p * s * a : 0;
-  var info  = scoreInfo(score);
-  var numEl = document.getElementById('score-num-14');
-  var nivEl = document.getElementById('score-nivel-14');
-  var sigEl = document.getElementById('sig-badge-14');
-  var widEl = document.getElementById('score-widget-14');
+  var limite = 50;
+  var info   = scoreInfo(score);
+  var numEl  = document.getElementById('score-num-14');
+  var nivEl  = document.getElementById('score-nivel-14');
+  var sigEl  = document.getElementById('sig-badge-14');
+  var widEl  = document.getElementById('score-widget-14');
+  var fmlEl  = document.getElementById('score-formula-14');
 
   numEl.textContent = score || '—';
   numEl.style.color = info.color;
   nivEl.textContent = info.nivel;
   nivEl.style.color = info.color;
-  widEl.style.borderColor = score ? info.color : 'transparent';
+  widEl.style.borderColor = score ? info.color : 'var(--gray-b)';
   widEl.style.background  = score ? info.color + '10' : 'var(--gray-l)';
 
-  if (score) {
-    var sig = score >= 50 ? 'S' : 'N';
-    sigEl.innerHTML = '<span class="sig-badge ' + (sig==='S'?'sig-s':'sig-n') + '">'
-      + (sig==='S' ? '⚠️ Significativo' : '✅ Não significativo') + '</span>';
-  } else {
-    sigEl.innerHTML = '';
+  if (fmlEl) fmlEl.textContent = score
+    ? 'F:'+f+' × P:'+p+' × S:'+s+' × A:'+a+' = '+score
+    : [!f?'Frequência':'',!p?'Probabilidade':'',!s?'Severidade':'',!a?'Abrangência':''].filter(Boolean).length
+      ? '⚠️ Falta: '+[!f?'Freq':'',!p?'Prob':'',!s?'Sev':'',!a?'Abrang':''].filter(Boolean).join(', ')
+      : '';
+
+  if (sigEl) {
+    if (score) {
+      var isSig = score >= limite;
+      sigEl.innerHTML = '<span class="sig-badge '+(isSig?'sig-s':'sig-n')+'">'
+        + (isSig ? '⚠️ Significativo (≥50)' : '✅ Não significativo (<50)') + '</span>';
+    } else {
+      sigEl.innerHTML = '';
+    }
   }
 }
-
 function calcScore45() {
   var f = parseInt(document.getElementById('f-freq45').value)   || 0;
   var p = parseInt(document.getElementById('f-prob45').value)   || 0;
@@ -719,16 +766,21 @@ function calcScore45() {
   var numEl = document.getElementById('score-num-45');
   var nivEl = document.getElementById('score-nivel-45');
   var widEl = document.getElementById('score-widget-45');
+  var fmlEl = document.getElementById('score-formula-45');
 
   numEl.textContent = score || '—';
   numEl.style.color = info.color;
   nivEl.textContent = info.nivel;
   nivEl.style.color = info.color;
-  widEl.style.borderColor = score ? info.color : 'transparent';
+  widEl.style.borderColor = score ? info.color : 'var(--gray-b)';
   widEl.style.background  = score ? info.color + '10' : 'var(--gray-l)';
-}
 
-// ═══ ADICIONAR ITENS ════════════════════════════════════════════
+  if (fmlEl) fmlEl.textContent = score
+    ? 'F:'+f+' × P:'+p+' × S:'+s+' × A:'+a+' = '+score
+    : [!f?'Freq':'',!p?'Prob':'',!s?'Sev':'',!a?'Abrang':''].filter(Boolean).length
+      ? '⚠️ Falta: '+[!f?'Freq':'',!p?'Prob':'',!s?'Sev':'',!a?'Abrang':''].filter(Boolean).join(', ')
+      : '';
+}
 function addItem14001() {
   var asp  = document.getElementById('f-aspecto').value.trim();
   var imp  = document.getElementById('f-impacto').value.trim();
@@ -1001,7 +1053,243 @@ function clearAll() {
       }
     }
   } catch(e) {}
+
+// ═══ MODAL DE AJUDA / CRITÉRIOS ═══════════════════════════════════
+function showHelp() {
+  document.getElementById('help-modal').classList.add('open');
+}
+function closeHelp() {
+  document.getElementById('help-modal').classList.remove('open');
+}
+
+// ═══ CHECKLIST IMPRIMÍVEL ═════════════════════════════════════════
+function showPrintChecklist() {
+  var cat    = APP.mode === 'env' ? CAT14 : CAT45;
+  var isEnv  = APP.mode === 'env';
+  var org    = document.getElementById('f-org').value || '___________________________';
+  var resp   = document.getElementById('f-resp').value || '___________________________';
+  var area   = document.getElementById('f-area').value || '___________________________';
+  var proc   = document.getElementById('f-processo').value || '___________________________';
+  var atv    = document.getElementById('f-atividade').value || '___________________________';
+  var data   = document.getElementById('f-data').value
+    ? new Date(document.getElementById('f-data').value+'T12:00:00').toLocaleDateString('pt-BR')
+    : '___/___/______';
+
+  var norma  = isEnv ? 'ISO 14001:2015 — Aspectos & Impactos Ambientais' : 'ISO 45001:2018 — Perigos & Riscos de SST';
+  var col3   = isEnv ? 'Aspecto Ambiental' : 'Perigo SST';
+  var col4   = isEnv ? 'Impacto Ambiental' : 'Risco / Consequência';
+
+  // Cabeçalho
+  var html = '<div style="font-family:Arial,sans-serif;font-size:12px;color:#111">'
+    + '<div style="text-align:center;margin-bottom:16px">'
+    + '<div style="font-size:16px;font-weight:700;margin-bottom:4px">CHECKLIST DE LEVANTAMENTO DE CAMPO</div>'
+    + '<div style="font-size:13px;color:#444;margin-bottom:12px">'+norma+'</div>'
+    + '</div>'
+
+    // Dados do levantamento
+    + '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:12px">'
+    + '<tr>'
+    + '<td style="padding:5px 8px;border:1px solid #ccc;width:15%;font-weight:600;background:#f5f5f5">Organização</td>'
+    + '<td style="padding:5px 8px;border:1px solid #ccc;width:35%">'+org+'</td>'
+    + '<td style="padding:5px 8px;border:1px solid #ccc;width:15%;font-weight:600;background:#f5f5f5">Data</td>'
+    + '<td style="padding:5px 8px;border:1px solid #ccc;width:35%">'+data+'</td>'
+    + '</tr>'
+    + '<tr>'
+    + '<td style="padding:5px 8px;border:1px solid #ccc;font-weight:600;background:#f5f5f5">Responsável</td>'
+    + '<td style="padding:5px 8px;border:1px solid #ccc">'+resp+'</td>'
+    + '<td style="padding:5px 8px;border:1px solid #ccc;font-weight:600;background:#f5f5f5">Área / Setor</td>'
+    + '<td style="padding:5px 8px;border:1px solid #ccc">'+area+'</td>'
+    + '</tr>'
+    + '<tr>'
+    + '<td style="padding:5px 8px;border:1px solid #ccc;font-weight:600;background:#f5f5f5">Processo</td>'
+    + '<td style="padding:5px 8px;border:1px solid #ccc">'+proc+'</td>'
+    + '<td style="padding:5px 8px;border:1px solid #ccc;font-weight:600;background:#f5f5f5">Atividade</td>'
+    + '<td style="padding:5px 8px;border:1px solid #ccc">'+atv+'</td>'
+    + '</tr>'
+    + '</table>'
+
+    // Instruções
+    + '<div style="background:#fff8e1;border-left:4px solid #ffc107;padding:8px 12px;margin-bottom:14px;font-size:11px">'
+    + '<strong>Como usar:</strong> Marque (✓) os '+(isEnv?'aspectos':'perigos')+' identificados nesta atividade. '
+    + 'Anote as notas de F, P, S e A na coluna correspondente. '
+    + 'Depois, sente-se com o sistema e registre cada item usando o código da primeira coluna.'
+    + '</div>'
+
+    // Tabela de itens
+    + '<table class="cl-table" style="width:100%;border-collapse:collapse;font-size:11px">'
+    + '<thead>'
+    + '<tr style="background:#e8f5ef">'
+    + '<th style="width:24px;padding:6px 4px;border:1px solid #ccc;text-align:center">✓</th>'
+    + '<th style="width:48px;padding:6px 8px;border:1px solid #ccc">Código</th>'
+    + '<th style="padding:6px 8px;border:1px solid #ccc">'+col3+'</th>'
+    + '<th style="padding:6px 8px;border:1px solid #ccc">'+col4+'</th>'
+    + (isEnv
+        ? '<th style="width:80px;padding:6px 4px;border:1px solid #ccc;text-align:center">Etapa CV</th>'
+        : '<th style="width:80px;padding:6px 4px;border:1px solid #ccc;text-align:center">Hierarquia</th>')
+    + '<th style="width:28px;padding:6px 4px;border:1px solid #ccc;text-align:center">F</th>'
+    + '<th style="width:28px;padding:6px 4px;border:1px solid #ccc;text-align:center">P</th>'
+    + '<th style="width:28px;padding:6px 4px;border:1px solid #ccc;text-align:center">S</th>'
+    + '<th style="width:28px;padding:6px 4px;border:1px solid #ccc;text-align:center">A</th>'
+    + '<th style="width:52px;padding:6px 4px;border:1px solid #ccc;text-align:center">Score</th>'
+    + '</tr>'
+    + '</thead><tbody>';
+
+  // Itens do catálogo
+  cat.forEach(function(c, i) {
+    var bg = i % 2 === 0 ? '#fff' : '#fafafa';
+    html += '<tr style="background:'+bg+'">'
+      + '<td style="padding:5px 4px;border:1px solid #ccc;text-align:center">☐</td>'
+      + '<td style="padding:5px 8px;border:1px solid #ccc;font-family:monospace;font-weight:700;font-size:11px;color:'+(isEnv?'#0d6b50':'#0e3d6e')+'">'+c[0]+'</td>'
+      + '<td style="padding:5px 8px;border:1px solid #ccc">'+c[1]+'</td>'
+      + '<td style="padding:5px 8px;border:1px solid #ccc;color:#555">'+c[2]+'</td>'
+      + '<td style="padding:5px 4px;border:1px solid #ccc"></td>'
+      + '<td style="padding:5px 4px;border:1px solid #ccc"></td>'
+      + '<td style="padding:5px 4px;border:1px solid #ccc"></td>'
+      + '<td style="padding:5px 4px;border:1px solid #ccc"></td>'
+      + '<td style="padding:5px 4px;border:1px solid #ccc"></td>'
+      + '<td style="padding:5px 4px;border:1px solid #ccc"></td>'
+      + '</tr>';
+  });
+
+  // Linhas em branco para aspectos não catalogados
+  for (var b = 0; b < 5; b++) {
+    html += '<tr style="background:#fffde7">'
+      + '<td style="padding:5px 4px;border:1px solid #ccc;text-align:center">☐</td>'
+      + '<td style="padding:5px 8px;border:1px solid #ccc;font-size:10px;color:#999">Outro</td>'
+      + '<td style="padding:5px 8px;border:1px solid #ccc"></td>'
+      + '<td style="padding:5px 8px;border:1px solid #ccc"></td>'
+      + '<td style="padding:5px 4px;border:1px solid #ccc"></td>'
+      + '<td style="padding:5px 4px;border:1px solid #ccc"></td>'
+      + '<td style="padding:5px 4px;border:1px solid #ccc"></td>'
+      + '<td style="padding:5px 4px;border:1px solid #ccc"></td>'
+      + '<td style="padding:5px 4px;border:1px solid #ccc"></td>'
+      + '<td style="padding:5px 4px;border:1px solid #ccc"></td>'
+      + '</tr>';
+  }
+
+  html += '</tbody></table>'
+
+  // Legenda de escalas
+  + '<div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:10px">'
+  + '<div><strong>Frequência (F):</strong> 1-Rara | 2-Ocasional | 3-Frequente | 4-Muito freq. | 5-Contínua</div>'
+  + '<div><strong>Probabilidade (P):</strong> 1-Muito improvável | 2-Improvável | 3-Possível | 4-Provável | 5-Muito provável</div>'
+  + '<div><strong>Severidade (S):</strong> 1-Insignificante | 2-Menor | 3-Moderada | 4-Maior | 5-Catastrófica</div>'
+  + '<div><strong>Abrangência (A):</strong> 1-Local | 2-Vizinhança | 3-Comunidade | 4-Município | 5-Regional</div>'
+  + '</div>'
+  + '<div style="margin-top:8px;font-size:10px;color:#666">Score = F × P × S × A (máx. 625) · Significativo: Score ≥ 50 · '+(isEnv?'Etapa CV: 1-Aquisição | 2-Design | 3-Produção | 4-Transporte | 5-Uso | 6-Fim de vida':'Hierarquia: 1-Eliminação | 2-Substituição | 3-Eng. | 4-Adm. | 5-EPI')+'</div>'
+
+  // Rodapé de assinatura
+  + '<div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;font-size:11px">'
+  + '<div><div style="border-top:1px solid #999;padding-top:4px;margin-top:24px">Responsável pelo levantamento</div></div>'
+  + '<div><div style="border-top:1px solid #999;padding-top:4px;margin-top:24px">Técnico Ambiental / Segurança</div></div>'
+  + '<div><div style="border-top:1px solid #999;padding-top:4px;margin-top:24px">Data e assinatura</div></div>'
+  + '</div>'
+  + '</div>';
+
+  document.getElementById('print-checklist').innerHTML = html;
+  document.getElementById('print-modal-title').textContent = '🖨️ Checklist — ' + (isEnv ? 'Aspectos & Impactos (ISO 14001)' : 'Perigos & Riscos SST (ISO 45001)');
+  document.getElementById('print-modal').classList.add('open');
+}
+
+function closePrintChecklist() {
+  document.getElementById('print-modal').classList.remove('open');
+}
+
 })();
 </script>
+
+<!-- ═══ MODAL: CRITÉRIOS E AJUDA ═══ -->
+<div class="help-modal-bg" id="help-modal">
+  <div class="help-modal">
+    <div class="help-head no-print">
+      <div style="font-size:14px;font-weight:700">❓ Critérios de Avaliação — Matriz F × P × S × A</div>
+      <button onclick="closeHelp()" style="background:none;border:none;cursor:pointer;font-size:22px;color:var(--text2)">×</button>
+    </div>
+    <div class="help-body">
+      <div class="warn">A significância é calculada pela fórmula: <strong>Score = F × P × S × A</strong> (escala 1–625). Score ≥ 50 = Significativo.</div>
+
+      <h3>🔁 F — Frequência da atividade ou aspecto</h3>
+      <p>Com que frequência essa atividade acontece ou o aspecto ocorre?</p>
+      <table>
+        <tr><th>Nota</th><th>Descrição</th><th>Referência</th></tr>
+        <tr><td><strong>1</strong></td><td>Rara</td><td>Menos de 1 vez por ano (ex.: parada geral de manutenção)</td></tr>
+        <tr><td><strong>2</strong></td><td>Ocasional</td><td>1 a 12 vezes por ano (ex.: manutenção preventiva mensal)</td></tr>
+        <tr><td><strong>3</strong></td><td>Frequente</td><td>Mais de 12 vezes/ano — mensal ou quinzenal</td></tr>
+        <tr><td><strong>4</strong></td><td>Muito frequente</td><td>Semanal — toda semana ocorre</td></tr>
+        <tr><td><strong>5</strong></td><td>Contínua</td><td>Diária ou permanente (ex.: consumo de energia, geração de efluente)</td></tr>
+      </table>
+
+      <h3>🎲 P — Probabilidade de o impacto ocorrer</h3>
+      <p>Qual a chance de que esse aspecto cause o impacto identificado?</p>
+      <table>
+        <tr><th>Nota</th><th>Descrição</th><th>Referência</th></tr>
+        <tr><td><strong>1</strong></td><td>Muito improvável</td><td>Nunca ocorreu nesta instalação ou setor similar</td></tr>
+        <tr><td><strong>2</strong></td><td>Improvável</td><td>Já ocorreu no setor, mas não nesta instalação</td></tr>
+        <tr><td><strong>3</strong></td><td>Possível</td><td>Já ocorreu nesta instalação ao menos uma vez</td></tr>
+        <tr><td><strong>4</strong></td><td>Provável</td><td>Ocorre algumas vezes por ano nesta instalação</td></tr>
+        <tr><td><strong>5</strong></td><td>Muito provável</td><td>Ocorre regularmente — esperado que aconteça</td></tr>
+      </table>
+
+      <h3>⚡ S — Severidade do impacto ambiental ou SST</h3>
+      <p>Qual a gravidade do impacto se ele ocorrer?</p>
+      <table>
+        <tr><th>Nota</th><th>Descrição</th><th>Referência ambiental / SST</th></tr>
+        <tr><td><strong>1</strong></td><td>Insignificante</td><td>Impacto imperceptível ou reversível imediatamente (ex.: poeira local, leve ruído)</td></tr>
+        <tr><td><strong>2</strong></td><td>Menor</td><td>Impacto local, reversível em curto prazo sem intervenção externa</td></tr>
+        <tr><td><strong>3</strong></td><td>Moderada</td><td>Impacto reversível com intervenção técnica em médio prazo</td></tr>
+        <tr><td><strong>4</strong></td><td>Maior</td><td>Impacto reversível somente em longo prazo; pode gerar passivo ambiental ou afastamento</td></tr>
+        <tr><td><strong>5</strong></td><td>Catastrófica</td><td>Impacto irreversível, morte, dano permanente ao ecossistema ou à saúde humana</td></tr>
+      </table>
+
+      <h3>🌍 A — Abrangência do impacto</h3>
+      <p>Qual a área ou população afetada caso o impacto ocorra?</p>
+      <table>
+        <tr><th>Nota</th><th>Descrição</th><th>Referência</th></tr>
+        <tr><td><strong>1</strong></td><td>Local</td><td>Dentro dos limites da instalação — sem extravasar a planta</td></tr>
+        <tr><td><strong>2</strong></td><td>Vizinhança</td><td>Imóveis lindeiros, vias públicas imediatas</td></tr>
+        <tr><td><strong>3</strong></td><td>Comunidade</td><td>Bairro, comunidade próxima, córrego local</td></tr>
+        <tr><td><strong>4</strong></td><td>Município</td><td>Abrange o município — rio, manancial, área urbana</td></tr>
+        <tr><td><strong>5</strong></td><td>Regional</td><td>Bacia hidrográfica, estado, região ou transfronteiriço</td></tr>
+      </table>
+
+      <h3>📊 Níveis de Score e Significância</h3>
+      <table>
+        <tr><th>Score</th><th>Nível</th><th>Significância (limite padrão ≥ 50)</th></tr>
+        <tr><td>1 – 24</td><td style="color:#1D9E75;font-weight:600">BAIXO</td><td>✅ Não significativo</td></tr>
+        <tr><td>25 – 49</td><td style="color:#BA7517;font-weight:600">MÉDIO</td><td>✅ Não significativo</td></tr>
+        <tr><td style="background:#fff3cd"><strong>50 – 99</strong></td><td style="color:#BA7517;font-weight:600;background:#fff3cd">MÉDIO</td><td style="background:#fff3cd"><strong>⚠️ Significativo</strong></td></tr>
+        <tr><td>100 – 249</td><td style="color:#E85D24;font-weight:600">ALTO</td><td>⚠️ Significativo</td></tr>
+        <tr><td>250 – 625</td><td style="color:#A32D2D;font-weight:600">CRÍTICO</td><td>⚠️ Significativo</td></tr>
+      </table>
+
+      <div class="ex">
+        <strong>Exemplo prático:</strong> Vazamento de amônia em câmara fria.<br>
+        F:1 (raro) × P:2 (improvável) × S:5 (catastrófico) × A:5 (regional) = <strong>Score 50 → Significativo!</strong><br>
+        <em>Mesmo com baixa frequência e probabilidade, a catastroficidade e abrangência tornam o aspecto significativo.</em>
+      </div>
+
+      <div class="warn">
+        <strong>Lembre-se:</strong> O limite de significância (padrão ≥ 50) pode ser ajustado pela organização conforme seu contexto e tolerância ao risco. Documente o critério escolhido no procedimento de levantamento.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: CHECKLIST IMPRIMÍVEL ═══ -->
+<div class="print-modal-bg" id="print-modal">
+  <div class="print-modal">
+    <div class="help-head no-print">
+      <div style="font-size:14px;font-weight:700" id="print-modal-title">🖨️ Checklist para Campo</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-sm" style="background:var(--green);color:#fff;border-radius:6px" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+        <button onclick="closePrintChecklist()" style="background:none;border:none;cursor:pointer;font-size:22px;color:var(--text2)">×</button>
+      </div>
+    </div>
+    <div id="print-checklist" style="padding:20px">
+      <!-- Conteúdo gerado dinamicamente -->
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
