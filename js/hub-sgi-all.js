@@ -1307,31 +1307,31 @@ function exportCSV14001() {
     // Linhas de dados com fórmulas
     var dataRows = [HEADER];
     for (var r = 0; r < 50; r++) {
-      var rowNum = r + 3; // linha no Excel (1=header, 2=linha1, ...)
-      var colA   = 'A' + rowNum; // Codigo
-      var colG   = 'G' + rowNum; // Probabilidade
-      var colH   = 'H' + rowNum; // Severidade
-      var colI   = 'I' + rowNum; // Score
+      var rowNum = r + 2; // linha no Excel (1=header, 2=primeira linha de dados)
+      var colA   = 'A' + rowNum;
+      var colG   = 'G' + rowNum;
+      var colH   = 'H' + rowNum;
+      var colI   = 'I' + rowNum;
       dataRows.push([
-        { t:'s', v:'' },                                        // A: Codigo (usuário digita)
-        { t:'s', v:'' },                                        // B: Atividade
-        { t:'s', v:'' },                                        // C: Etapa
-        // D: Aspecto — PROCV pelo código
-        { t:'s', f:'IF('+colA+'="","",IFERROR(VLOOKUP('+colA+',Catalogo14001!$A:$B,2,0),"Código não encontrado"))' },
-        // E: Impacto — PROCV pelo código
-        { t:'s', f:'IF('+colA+'="","",IFERROR(VLOOKUP('+colA+',Catalogo14001!$A:$C,3,0),""))' },
-        { t:'s', v:'' },                                        // F: Condição
-        { t:'n', v:null },                                      // G: Probabilidade
-        { t:'n', v:null },                                      // H: Severidade
-        // I: Score = P x S
+        { t:'s', v:'' },  // A: Codigo (usuário digita — ex.: A09, A14)
+        { t:'s', v:'' },  // B: Atividade / Produto / Serviço
+        { t:'s', v:'' },  // C: Etapa do Ciclo de Vida (dropdown)
+        // D: Aspecto — preenchido automaticamente pelo PROCV
+        { t:'s', f:'IF(UPPER('+colA+')="","",IFERROR(VLOOKUP(UPPER('+colA+'),Catalogo14001!$A:$B,2,0),"Código não encontrado — preencha manualmente"))' },
+        // E: Impacto — preenchido automaticamente pelo PROCV
+        { t:'s', f:'IF(UPPER('+colA+')="","",IFERROR(VLOOKUP(UPPER('+colA+'),Catalogo14001!$A:$C,3,0),""))' },
+        { t:'s', v:'' },  // F: Condição [N/A/E] (dropdown)
+        { t:'n', v:null }, // G: Probabilidade [1-5]
+        { t:'n', v:null }, // H: Severidade [1-5]
+        // I: Score = Probabilidade × Severidade (automático)
         { t:'n', f:'IF(AND(ISNUMBER('+colG+'),ISNUMBER('+colH+')),'+colG+'*'+colH+',"")' },
-        // J: Significância automática
+        // J: Significância automática (S se Score>=10, N se Score<10)
         { t:'s', f:'IF('+colI+'="","",IF('+colI+'>=10,"S","N"))' },
-        // K: Critério
-        { t:'s', f:'IF('+colI+'="","",IF('+colI+'>=10,"Score >= 10 (significativo)","Score < 10 (não significativo)"))' },
-        { t:'s', v:'' },                                        // L: Responsável
-        { t:'s', v:'' },                                        // M: Área
-        { t:'s', v:'' },                                        // N: Observações
+        // K: Critério de Significância (automático)
+        { t:'s', f:'IF('+colI+'="","",IF('+colI+'>=17,"Crítico (17-25)",IF('+colI+'>=10,"Alto/Crítico — Score >= 10 (SIGNIFICATIVO)","Score < 10 — Não significativo")))' },
+        { t:'s', v:'' },  // L: Responsável
+        { t:'s', v:'' },  // M: Área / Setor
+        { t:'s', v:'' },  // N: Observações
       ]);
     }
 
@@ -1496,32 +1496,32 @@ function exportCSV45001() {
 
     var dataRows45 = [HEADER45];
     for (var r = 0; r < 50; r++) {
-      var rowNum = r + 3;
+      var rowNum = r + 2; // linha 2 = primeira linha de dados
       var colA = 'A' + rowNum;
       var colF = 'F' + rowNum;
       var colG = 'G' + rowNum;
       var colH = 'H' + rowNum;
       dataRows45.push([
-        { t:'s', v:'' },  // A: Código
-        { t:'s', v:'' },  // B: Atividade
-        // C: Perigo — PROCV
-        { t:'s', f:'IF('+colA+'="","",IFERROR(VLOOKUP('+colA+',Catalogo45001!$A:$B,2,0),"Código não encontrado"))' },
-        // D: Risco — PROCV
-        { t:'s', f:'IF('+colA+'="","",IFERROR(VLOOKUP('+colA+',Catalogo45001!$A:$C,3,0),""))' },
-        { t:'s', v:'' },  // E: Condição
-        { t:'n', v:null }, // F: Probabilidade
-        { t:'n', v:null }, // G: Severidade
-        // H: Grau = P x S
+        { t:'s', v:'' },  // A: Código (usuário digita — ex.: S01, S09)
+        { t:'s', v:'' },  // B: Atividade / Produto / Serviço
+        // C: Perigo SST — preenchido automaticamente
+        { t:'s', f:'IF(UPPER('+colA+')="","",IFERROR(VLOOKUP(UPPER('+colA+'),Catalogo45001!$A:$B,2,0),"Código não encontrado — preencha manualmente"))' },
+        // D: Risco/Consequência — preenchido automaticamente
+        { t:'s', f:'IF(UPPER('+colA+')="","",IFERROR(VLOOKUP(UPPER('+colA+'),Catalogo45001!$A:$C,3,0),""))' },
+        { t:'s', v:'' },  // E: Condição [N/A/E] (dropdown)
+        { t:'n', v:null }, // F: Probabilidade [1-5]
+        { t:'n', v:null }, // G: Severidade [1-5]
+        // H: Grau do Risco = P × S (automático)
         { t:'n', f:'IF(AND(ISNUMBER('+colF+'),ISNUMBER('+colG+')),'+colF+'*'+colG+',"")' },
-        // I: Nível de risco
-        { t:'s', f:'IF('+colH+'="","",IF('+colH+'>=17,"Crítico",IF('+colH+'>=10,"Alto",IF('+colH+'>=5,"Médio","Baixo"))))' },
-        { t:'s', v:'' },  // J: Controle existente
-        { t:'s', v:'' },  // K: Hierarquia
-        { t:'s', v:'' },  // L: Controle adicional
+        // I: Nível do Risco (automático)
+        { t:'s', f:'IF('+colH+'="","",IF('+colH+'>=17,"CRÍTICO (17-25)",IF('+colH+'>=10,"ALTO (10-16)",IF('+colH+'>=5,"MÉDIO (5-9)","BAIXO (1-4)"))))' },
+        { t:'s', v:'' },  // J: Controle Existente
+        { t:'s', v:'' },  // K: Nível Hierarquia (dropdown)
+        { t:'s', v:'' },  // L: Controle Adicional Necessário
         { t:'s', v:'' },  // M: Responsável
         { t:'s', v:'' },  // N: Prazo
-        { t:'s', v:'' },  // O: Área
-        { t:'s', v:'' },  // P: Observações/NR
+        { t:'s', v:'' },  // O: Área / Setor
+        { t:'s', v:'' },  // P: Observações / NR Aplicável
       ]);
     }
 
@@ -2779,6 +2779,430 @@ function exportAta() {
   a.download='Ata_Analise_Critica_'+org.replace(/\s+/g,'_')+'_'+new Date().toISOString().slice(0,10)+'.txt';
   a.click();
 }
+
+
+
+// ═══════════════════════════════════════════════════════════════════
+// FORMULÁRIOS DE CAMPO — 14001 e 45001
+// ═══════════════════════════════════════════════════════════════════
+
+// Catálogos inline para os formulários
+var CAMPO_CAT14 = {
+  'A01':['Geração de resíduo sólido não perigoso','Contaminação do solo'],
+  'A02':['Geração de resíduo perigoso (Classe I)','Contaminação do solo e água subterrânea'],
+  'A03':['Consumo de energia elétrica','Esgotamento de recursos não renováveis / emissão de CO₂'],
+  'A04':['Consumo de água','Esgotamento de recursos hídricos'],
+  'A05':['Emissão de efluente líquido','Contaminação de corpos d\'água'],
+  'A06':['Emissão atmosférica (COVs / fumos / poeiras)','Poluição do ar / danos à saúde'],
+  'A07':['Consumo de matéria-prima / insumos','Esgotamento de recursos naturais'],
+  'A08':['Geração de ruído','Perturbação da comunidade / perda auditiva'],
+  'A09':['Vazamento / derramamento de óleo ou produto químico','Contaminação do solo e água'],
+  'A10':['Emissão de CO₂ e gases de efeito estufa','Contribuição ao aquecimento global'],
+  'A11':['Consumo excessivo de combustível','Emissão de GEE / esgotamento de recursos'],
+  'A12':['Geração de efluente sanitário','Contaminação de recursos hídricos'],
+  'A13':['Geração de embalagens e resíduos de papel','Contaminação do solo'],
+  'A14':['Vazamento de óleo lubrificante','Contaminação do solo e água subterrânea'],
+  'A15':['Armazenamento inadequado de produtos químicos','Risco de contaminação do solo e água'],
+  'A16':['Uso de substâncias perigosas','Risco de contaminação ambiental e danos à saúde'],
+  'A17':['Emissão de material particulado','Poluição atmosférica / doenças respiratórias'],
+  'A18':['Geração de resíduo de construção civil (RCC)','Ocupação irregular de solo / contaminação'],
+  'A19':['Descarte inadequado de lâmpadas fluorescentes','Contaminação por mercúrio'],
+  'A20':['Descarte inadequado de pilhas e baterias','Contaminação do solo por metais pesados'],
+  'A21':['Consumo de papel e materiais de escritório','Desmatamento / esgotamento de recursos'],
+  'A22':['Uso de refrigerantes (CFC/HFC)','Destruição da camada de ozônio / efeito estufa'],
+  'A23':['Contaminação do solo por resíduos sólidos','Degradação ambiental'],
+  'A24':['Supressão de vegetação / impermeabilização','Perda de biodiversidade / escoamento superficial'],
+  'A25':['Geração de odores','Incômodo à comunidade / qualidade do ar'],
+};
+
+var CAMPO_CAT45 = {
+  'S01':['Trabalho em altura (>2m)','Queda com fraturas graves, TCE ou óbito'],
+  'S02':['Operação de máquinas com partes móveis','Esmagamento, amputação, cortes graves'],
+  'S03':['Manuseio de produtos químicos perigosos','Intoxicação, queimadura química, doenças ocupacionais'],
+  'S04':['Exposição ao ruído acima do limite (NR-15)','Perda auditiva induzida por ruído (PAIR)'],
+  'S05':['Exposição ao calor excessivo','Exaustão térmica, insolação, queimaduras'],
+  'S06':['Atividades com esforço repetitivo / posturas inadequadas','LER/DORT, tendinite, lombalgia'],
+  'S07':['Operação de empilhadeira / veículos internos','Atropelamento, colisão, queda de carga'],
+  'S08':['Trabalho em espaço confinado','Asfixia, intoxicação, soterramento'],
+  'S09':['Instalações elétricas / trabalho com energia','Choque elétrico, arco elétrico, queimadura, óbito'],
+  'S10':['Manuseio e levantamento de cargas pesadas','Lombalgia, hérnia de disco, distensão muscular'],
+  'S11':['Exposição a agentes biológicos','Infecções, doenças transmissíveis'],
+  'S12':['Atividades com ferramentas manuais cortantes','Cortes, perfurações, abrasões'],
+  'S13':['Exposição a vibrações (mãos-braços ou corpo inteiro)','SDBB, lombalgias, neuropatias'],
+  'S14':['Trabalho em superfícies escorregadias','Queda no mesmo nível com contusões ou fraturas'],
+  'S15':['Exposição a poeiras / fibras (sílica, amianto, etc.)','Silicose, asbestose, cânceres ocupacionais'],
+  'S16':['Trabalho noturno / turnos prolongados','Fadiga, distúrbios do sono, erros operacionais'],
+  'S17':['Incêndio / explosão','Queimaduras graves, intoxicação por fumaça, óbito'],
+  'S18':['Uso de EPI inadequado ou sem uso','Agravamento de todos os outros riscos'],
+  'S19':['Pressão psicológica / assédio moral','Burnout, ansiedade, depressão, afastamentos'],
+  'S20':['Exposição a radiações ionizantes','Cânceres, leucemia, danos genéticos'],
+  'S21':['Trabalho em ambientes com iluminação inadequada','Fadiga visual, acidentes por falta de visibilidade'],
+  'S22':['Contato com superfícies quentes / frias extremas','Queimaduras térmicas / criogênicas'],
+  'S23':['Uso de equipamentos de pressão (vasos, caldeiras)','Explosão, liberação de vapor, queimadura'],
+  'S24':['Transporte e armazenagem de materiais inflamáveis','Incêndio, explosão, intoxicação'],
+  'S25':['Trabalho em proximidade a linhas elétricas de alta tensão','Arco elétrico, eletrocussão'],
+  'S26':['Atividades com animais peçonhentos / vetores','Acidentes ofídicos, escorpiônicos, doenças'],
+  'S27':['Trabalho sob chuva / intempéries','Queda, choque elétrico, hipotermia'],
+  'S28':['Operação de caldeiras e vasos de pressão','Explosão, queimadura por vapor'],
+  'S29':['Falta de sinalização de segurança','Acidentes por desconhecimento de riscos'],
+  'S30':['Trabalho isolado / sem supervisão','Agravamento de acidentes por falta de socorro'],
+};
+
+var ETAPAS_CV = [
+  '','1-Aquisição de matérias-primas','2-Design/Projeto',
+  '3-Produção/Operação','4-Transporte/Entrega',
+  '5-Utilização pelo cliente','6-Tratamento fim de vida'
+];
+
+var HIERARQ_SST = [
+  '','1-Eliminação','2-Substituição',
+  '3-Controles de engenharia','4-Controles administrativos','5-EPI'
+];
+
+var campo14Rows = 0;
+var campo45Rows = 0;
+
+// ── Helpers ──────────────────────────────────────────────────────
+function calcScore14(rowId) {
+  var p = parseInt(document.getElementById('c14-prob-'+rowId).value) || 0;
+  var s = parseInt(document.getElementById('c14-sev-'+rowId).value)  || 0;
+  var score = p && s ? p * s : 0;
+  var scoreEl = document.getElementById('c14-score-'+rowId);
+  var sigEl   = document.getElementById('c14-sig-'+rowId);
+  if (!scoreEl) return;
+  var color = score >= 17 ? '#A32D2D' : score >= 10 ? '#E85D24' : score >= 5 ? '#BA7517' : score > 0 ? '#1D9E75' : '#9e9c99';
+  var nivel = score >= 17 ? 'Crítico' : score >= 10 ? 'Alto' : score >= 5 ? 'Médio' : score > 0 ? 'Baixo' : '—';
+  scoreEl.innerHTML = '<div class="campo-score" style="color:'+color+';background:'+color+'15">'+(score||'—')+'</div><div class="campo-score-label">'+nivel+'</div>';
+  if (sigEl) {
+    var sig = score >= 10 ? 'S' : score > 0 ? 'N' : '—';
+    var sigClass = sig === 'S' ? 'cs-s' : sig === 'N' ? 'cs-n' : '';
+    sigEl.innerHTML = '<span class="campo-sig '+sigClass+'">'+(sig==='S'?'⚠️ Significativo':sig==='N'?'✅ Não significativo':'—')+'</span>';
+  }
+}
+
+function calcScore45(rowId) {
+  var p = parseInt(document.getElementById('c45-prob-'+rowId).value) || 0;
+  var s = parseInt(document.getElementById('c45-sev-'+rowId).value)  || 0;
+  var score = p && s ? p * s : 0;
+  var scoreEl = document.getElementById('c45-score-'+rowId);
+  if (!scoreEl) return;
+  var color = score >= 17 ? '#A32D2D' : score >= 10 ? '#E85D24' : score >= 5 ? '#BA7517' : score > 0 ? '#1D9E75' : '#9e9c99';
+  var nivel = score >= 17 ? 'CRÍTICO' : score >= 10 ? 'ALTO' : score >= 5 ? 'MÉDIO' : score > 0 ? 'BAIXO' : '—';
+  scoreEl.innerHTML = '<div class="campo-score" style="color:'+color+';background:'+color+'15">'+(score||'—')+'</div><div class="campo-score-label">'+nivel+'</div>';
+}
+
+function fillCat14(rowId) {
+  var code = document.getElementById('c14-code-'+rowId).value.toUpperCase().trim();
+  var aspEl = document.getElementById('c14-asp-'+rowId);
+  var impEl = document.getElementById('c14-imp-'+rowId);
+  var cat = CAMPO_CAT14[code];
+  if (cat) {
+    if (aspEl && !aspEl.value) aspEl.value = cat[0];
+    if (impEl && !impEl.value) impEl.value = cat[1];
+    aspEl.style.borderColor = 'var(--green)';
+    impEl.style.borderColor = 'var(--green)';
+    setTimeout(function(){ if(aspEl) aspEl.style.borderColor=''; if(impEl) impEl.style.borderColor=''; }, 2000);
+  }
+  document.getElementById('c14-code-'+rowId).value = code; // força maiúsculo
+}
+
+function fillCat45(rowId) {
+  var code = document.getElementById('c45-code-'+rowId).value.toUpperCase().trim();
+  var perEl = document.getElementById('c45-per-'+rowId);
+  var risEl = document.getElementById('c45-ris-'+rowId);
+  var cat = CAMPO_CAT45[code];
+  if (cat) {
+    if (perEl && !perEl.value) perEl.value = cat[0];
+    if (risEl && !risEl.value) risEl.value = cat[1];
+    perEl.style.borderColor = 'var(--blue)';
+    risEl.style.borderColor = 'var(--blue)';
+    setTimeout(function(){ if(perEl) perEl.style.borderColor=''; if(risEl) risEl.style.borderColor=''; }, 2000);
+  }
+  document.getElementById('c45-code-'+rowId).value = code;
+}
+
+// ── Formulário 14001 ─────────────────────────────────────────────
+function openCampo14001() {
+  campo14Rows = 0;
+  document.getElementById('campo14001-rows').innerHTML = '';
+  document.getElementById('c14-activity').value = '';
+  document.getElementById('c14-owner').value = '';
+  document.getElementById('c14-sector').value = '';
+  addCampo14001Row();
+  addCampo14001Row();
+  document.getElementById('campo14001-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCampo14001() {
+  document.getElementById('campo14001-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function addCampo14001Row() {
+  campo14Rows++;
+  var id = campo14Rows;
+  var etapasOpts = ETAPAS_CV.map(function(e){
+    return '<option value="'+e+'">'+e+'</option>';
+  }).join('');
+  var probOpts = '<option value="">—</option>' + [1,2,3,4,5].map(function(n){
+    return '<option value="'+n+'">'+n+'</option>';
+  }).join('');
+
+  var html = '<div class="campo-item" id="c14-item-'+id+'">'
+    + '<div style="display:grid;grid-template-columns:36px 130px 1fr 1fr 100px 70px 70px 90px 90px 36px;gap:8px;align-items:start">'
+    // Número
+    + '<div style="padding-top:8px"><div class="campo-item-num" style="background:var(--green-d)">'+id+'</div></div>'
+    // Código
+    + '<div><input type="text" id="c14-code-'+id+'" placeholder="Ex.: A09" maxlength="4" '
+    + 'oninput="fillCat14('+id+')" '
+    + 'style="font-family:monospace;font-weight:600;font-size:14px;text-transform:uppercase;letter-spacing:.05em;text-align:center">'
+    + '<div style="font-size:9px;color:var(--text3);margin-top:3px;text-align:center">A01–A25</div></div>'
+    // Aspecto
+    + '<div><input type="text" id="c14-asp-'+id+'" placeholder="Preenchido automaticamente pelo código ou digite aqui" style="font-size:12px"></div>'
+    // Impacto
+    + '<div><input type="text" id="c14-imp-'+id+'" placeholder="Preenchido automaticamente pelo código ou digite aqui" style="font-size:12px"></div>'
+    // Etapa
+    + '<div><select id="c14-etapa-'+id+'" style="font-size:11px">'+etapasOpts+'</select></div>'
+    // Prob
+    + '<div><select id="c14-prob-'+id+'" onchange="calcScore14('+id+')" style="font-size:13px;font-weight:600;text-align:center">'+probOpts+'</select>'
+    + '<div style="font-size:9px;color:var(--text3);margin-top:2px;text-align:center">Prob.</div></div>'
+    // Sev
+    + '<div><select id="c14-sev-'+id+'" onchange="calcScore14('+id+')" style="font-size:13px;font-weight:600;text-align:center">'+probOpts+'</select>'
+    + '<div style="font-size:9px;color:var(--text3);margin-top:2px;text-align:center">Sev.</div></div>'
+    // Score
+    + '<div id="c14-score-'+id+'"><div class="campo-score" style="color:#9e9c99;background:#f5f5f3">—</div><div class="campo-score-label">Score</div></div>'
+    // Significância
+    + '<div id="c14-sig-'+id+'"><span class="campo-sig" style="color:#9e9c99">—</span></div>'
+    // Remover
+    + '<div style="padding-top:6px"><button onclick="removeCampo14Row('+id+')" '
+    + 'style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--text3)" title="Remover">×</button></div>'
+    + '</div>'
+    // Linha extra: condição e observação
+    + '<div style="display:grid;grid-template-columns:100px 1fr;gap:8px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--gray-b)">'
+    + '<div><label style="font-size:10px;color:var(--text2)">Condição</label>'
+    + '<select id="c14-cond-'+id+'" style="font-size:12px">'
+    + '<option value="N">N — Normal</option><option value="A">A — Anormal</option><option value="E">E — Emergência</option>'
+    + '</select></div>'
+    + '<div><label style="font-size:10px;color:var(--text2)">Observação</label>'
+    + '<input type="text" id="c14-obs-'+id+'" placeholder="Observações adicionais..." style="font-size:12px"></div>'
+    + '</div>'
+    + '</div>';
+
+  var container = document.getElementById('campo14001-rows');
+  container.insertAdjacentHTML('beforeend', html);
+  updateCampo14Count();
+
+  // Foca no campo de código da nova linha
+  setTimeout(function(){
+    var el = document.getElementById('c14-code-'+id);
+    if (el) el.focus();
+  }, 100);
+}
+
+function removeCampo14Row(id) {
+  var el = document.getElementById('c14-item-'+id);
+  if (el) { el.style.animation='fi .2s reverse'; setTimeout(function(){ if(el) el.remove(); updateCampo14Count(); }, 180); }
+}
+
+function updateCampo14Count() {
+  var rows = document.querySelectorAll('[id^="c14-item-"]');
+  var el = document.getElementById('c14-count');
+  if (el) el.textContent = rows.length + ' aspecto(s) no formulário';
+}
+
+function saveCampo14001() {
+  var activity = document.getElementById('c14-activity').value.trim();
+  var owner    = document.getElementById('c14-owner').value.trim();
+  var sector   = document.getElementById('c14-sector').value.trim();
+  var added = 0, skipped = 0;
+
+  for (var id = 1; id <= campo14Rows; id++) {
+    var itemEl = document.getElementById('c14-item-'+id);
+    if (!itemEl) continue;
+    var asp  = (document.getElementById('c14-asp-'+id)||{}).value;
+    var imp  = (document.getElementById('c14-imp-'+id)||{}).value;
+    var prob = parseInt((document.getElementById('c14-prob-'+id)||{}).value) || 0;
+    var sev  = parseInt((document.getElementById('c14-sev-'+id)||{}).value)  || 0;
+    if (!asp || !prob || !sev) { skipped++; continue; }
+    var score = prob * sev;
+    var cls   = score >= 17 ? 'crit' : score >= 10 ? 'high' : score >= 5 ? 'med' : 'low';
+    S.apItems.push({
+      type:'env',
+      catCode: (document.getElementById('c14-code-'+id)||{}).value || '',
+      asp:     asp,
+      imp:     imp,
+      lifecycle: (document.getElementById('c14-etapa-'+id)||{}).value || '3-Produção/Operação',
+      cond:    (document.getElementById('c14-cond-'+id)||{}).value || 'N',
+      prob:    prob, sev: sev, score: score, cls: cls,
+      activity: activity, owner: owner, sector: sector,
+      obs:     (document.getElementById('c14-obs-'+id)||{}).value || '',
+      sig:     score >= 10 ? 'S' : 'N',
+      sigCrit: score >= 10 ? 'Score >= 10 (significativo)' : 'Score < 10 (não significativo)',
+      fromField: true
+    });
+    added++;
+  }
+
+  closeCampo14001();
+  if (added > 0) {
+    renderAPItems();
+    alert('✅ ' + added + ' aspecto(s) adicionado(s) ao SGI com sucesso!'
+      + (skipped > 0 ? '\n\n⚠️ ' + skipped + ' linha(s) ignorada(s) por falta de aspecto ou probabilidade/severidade.' : ''));
+    goTo('s2');
+  } else {
+    alert('Nenhum aspecto foi adicionado. Verifique se preencheu pelo menos o Aspecto, Probabilidade e Severidade.');
+  }
+}
+
+// ── Formulário 45001 ─────────────────────────────────────────────
+function openCampo45001() {
+  campo45Rows = 0;
+  document.getElementById('campo45001-rows').innerHTML = '';
+  document.getElementById('c45-activity').value = '';
+  document.getElementById('c45-owner').value = '';
+  document.getElementById('c45-sector').value = '';
+  document.getElementById('c45-nr').value = '';
+  addCampo45001Row();
+  addCampo45001Row();
+  document.getElementById('campo45001-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCampo45001() {
+  document.getElementById('campo45001-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function addCampo45001Row() {
+  campo45Rows++;
+  var id = campo45Rows;
+  var hierOpts = HIERARQ_SST.map(function(h){
+    return '<option value="'+h+'">'+h+'</option>';
+  }).join('');
+  var probOpts = '<option value="">—</option>' + [1,2,3,4,5].map(function(n){
+    return '<option value="'+n+'">'+n+'</option>';
+  }).join('');
+
+  var html = '<div class="campo-item" id="c45-item-'+id+'">'
+    + '<div style="display:grid;grid-template-columns:36px 130px 1fr 1fr 70px 70px 90px 120px 36px;gap:8px;align-items:start">'
+    // Número
+    + '<div style="padding-top:8px"><div class="campo-item-num" style="background:var(--blue-d)">'+id+'</div></div>'
+    // Código
+    + '<div><input type="text" id="c45-code-'+id+'" placeholder="Ex.: S09" maxlength="4" '
+    + 'oninput="fillCat45('+id+')" '
+    + 'style="font-family:monospace;font-weight:600;font-size:14px;text-transform:uppercase;letter-spacing:.05em;text-align:center">'
+    + '<div style="font-size:9px;color:var(--text3);margin-top:3px;text-align:center">S01–S30</div></div>'
+    // Perigo
+    + '<div><input type="text" id="c45-per-'+id+'" placeholder="Preenchido automaticamente pelo código ou digite aqui" style="font-size:12px"></div>'
+    // Risco
+    + '<div><input type="text" id="c45-ris-'+id+'" placeholder="Preenchido automaticamente pelo código ou digite aqui" style="font-size:12px"></div>'
+    // Prob
+    + '<div><select id="c45-prob-'+id+'" onchange="calcScore45('+id+')" style="font-size:13px;font-weight:600;text-align:center">'+probOpts+'</select>'
+    + '<div style="font-size:9px;color:var(--text3);margin-top:2px;text-align:center">Prob.</div></div>'
+    // Sev
+    + '<div><select id="c45-sev-'+id+'" onchange="calcScore45('+id+')" style="font-size:13px;font-weight:600;text-align:center">'+probOpts+'</select>'
+    + '<div style="font-size:9px;color:var(--text3);margin-top:2px;text-align:center">Sev.</div></div>'
+    // Grau
+    + '<div id="c45-score-'+id+'"><div class="campo-score" style="color:#9e9c99;background:#f5f5f3">—</div><div class="campo-score-label">Grau</div></div>'
+    // Nível
+    + '<div id="c45-nivel-'+id+'" style="padding-top:6px;font-size:11px;color:var(--text2)">—</div>'
+    // Remover
+    + '<div style="padding-top:6px"><button onclick="removeCampo45Row('+id+')" '
+    + 'style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--text3)" title="Remover">×</button></div>'
+    + '</div>'
+    // Linha extra: controle existente + hierarquia + controle adicional
+    + '<div style="display:grid;grid-template-columns:1fr 160px 1fr;gap:8px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--gray-b)">'
+    + '<div><label style="font-size:10px;color:var(--text2)">Controle Existente</label>'
+    + '<input type="text" id="c45-ctrl-'+id+'" placeholder="Ex.: Linha de vida, sinalização" style="font-size:12px"></div>'
+    + '<div><label style="font-size:10px;color:var(--text2)">Hierarquia de Controle</label>'
+    + '<select id="c45-hier-'+id+'" style="font-size:11px">'+hierOpts+'</select></div>'
+    + '<div><label style="font-size:10px;color:var(--text2)">Controle Adicional Necessário</label>'
+    + '<input type="text" id="c45-cadd-'+id+'" placeholder="Ex.: Implementar ancoragem móvel" style="font-size:12px"></div>'
+    + '</div>'
+    + '</div>';
+
+  var container = document.getElementById('campo45001-rows');
+  container.insertAdjacentHTML('beforeend', html);
+  updateCampo45Count();
+
+  setTimeout(function(){
+    var el = document.getElementById('c45-code-'+id);
+    if (el) el.focus();
+  }, 100);
+}
+
+function removeCampo45Row(id) {
+  var el = document.getElementById('c45-item-'+id);
+  if (el) { el.style.animation='fi .2s reverse'; setTimeout(function(){ if(el) el.remove(); updateCampo45Count(); }, 180); }
+}
+
+function updateCampo45Count() {
+  var rows = document.querySelectorAll('[id^="c45-item-"]');
+  var el = document.getElementById('c45-count');
+  if (el) el.textContent = rows.length + ' perigo(s) no formulário';
+}
+
+function saveCampo45001() {
+  var activity = document.getElementById('c45-activity').value.trim();
+  var owner    = document.getElementById('c45-owner').value.trim();
+  var sector   = document.getElementById('c45-sector').value.trim();
+  var nr       = document.getElementById('c45-nr').value.trim();
+  var added = 0, skipped = 0;
+
+  for (var id = 1; id <= campo45Rows; id++) {
+    var itemEl = document.getElementById('c45-item-'+id);
+    if (!itemEl) continue;
+    var per  = (document.getElementById('c45-per-'+id)||{}).value;
+    var ris  = (document.getElementById('c45-ris-'+id)||{}).value;
+    var prob = parseInt((document.getElementById('c45-prob-'+id)||{}).value) || 0;
+    var sev  = parseInt((document.getElementById('c45-sev-'+id)||{}).value)  || 0;
+    if (!per || !prob || !sev) { skipped++; continue; }
+    var score = prob * sev;
+    var cls   = score >= 17 ? 'crit' : score >= 10 ? 'high' : score >= 5 ? 'med' : 'low';
+    var nivel = score >= 17 ? 'Crítico' : score >= 10 ? 'Alto' : score >= 5 ? 'Médio' : 'Baixo';
+    S.apItems.push({
+      type:'sst',
+      catCode:   (document.getElementById('c45-code-'+id)||{}).value || '',
+      asp:       per,
+      imp:       ris,
+      control:   (document.getElementById('c45-ctrl-'+id)||{}).value || '',
+      hierarchy: (document.getElementById('c45-hier-'+id)||{}).value || '',
+      addControl:(document.getElementById('c45-cadd-'+id)||{}).value || '',
+      prob:    prob, sev: sev, score: score, cls: cls,
+      activity: activity, owner: owner, sector: sector,
+      obs:     nr,
+      nivel:   nivel,
+      fromField: true
+    });
+    added++;
+  }
+
+  closeCampo45001();
+  if (added > 0) {
+    renderAPItems();
+    alert('✅ ' + added + ' perigo(s) adicionado(s) ao SGI com sucesso!'
+      + (skipped > 0 ? '\n\n⚠️ ' + skipped + ' linha(s) ignorada(s) por falta de perigo ou probabilidade/severidade.' : ''));
+    goTo('s2');
+  } else {
+    alert('Nenhum perigo foi adicionado. Verifique se preencheu pelo menos o Perigo, Probabilidade e Severidade.');
+  }
+}
+
+// Atualiza o display de Nível no 45001 (chamado no calcScore45)
+var _calcScore45Orig = calcScore45;
+calcScore45 = function(rowId) {
+  _calcScore45Orig(rowId);
+  var p = parseInt((document.getElementById('c45-prob-'+rowId)||{}).value) || 0;
+  var s = parseInt((document.getElementById('c45-sev-'+rowId)||{}).value)  || 0;
+  var score = p && s ? p * s : 0;
+  var nivelEl = document.getElementById('c45-nivel-'+rowId);
+  if (nivelEl) {
+    var nivel = score >= 17 ? 'CRÍTICO' : score >= 10 ? 'ALTO' : score >= 5 ? 'MÉDIO' : score > 0 ? 'BAIXO' : '—';
+    var color = score >= 17 ? 'var(--red)' : score >= 10 ? '#E85D24' : score >= 5 ? 'var(--amber)' : score > 0 ? 'var(--green-d)' : 'var(--text3)';
+    nivelEl.innerHTML = '<span style="font-weight:700;color:'+color+'">'+nivel+'</span>';
+  }
+};
 
 
 
