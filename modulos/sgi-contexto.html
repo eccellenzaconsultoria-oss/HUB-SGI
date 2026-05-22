@@ -289,13 +289,14 @@
         Inclui: <strong>Atividade/Produto/Serviço · Ciclo de vida · Aspecto · Impacto · P × S · Significância</strong>
       </p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-        <button class="btn btn-sm" style="background:var(--green);color:#fff;border-color:var(--green);font-weight:500" onclick="exportCSV14001()">⬇️ Baixar planilha 14001 (.csv)</button>
+        <button class="btn btn-sm" style="background:var(--green);color:#fff;border-color:var(--green);font-weight:500" onclick="exportCSV14001()">⬇️ Baixar planilha 14001 (.xlsx)</button>
+        <button class="btn btn-sm" style="background:var(--green-d);color:#fff;border-color:var(--green-d);font-weight:500" onclick="openCampo14001()">📋 Formulário de campo — 14001</button>
       </div>
       <div style="border-top:1px dashed #a8dfc8;padding-top:8px;margin-top:4px">
         <div style="font-size:11px;font-weight:600;color:var(--green-d);margin-bottom:4px">📥 Importar após preenchimento:</div>
         <label class="btn btn-sm" style="background:var(--green-d);color:#fff;border-color:var(--green-d);font-weight:500;cursor:pointer;display:inline-flex">
-          📂 Importar 14001 .csv
-          <input type="file" id="import-csv-14001" accept=".csv" style="display:none" onchange="importCSV14001(this)">
+          📂 Importar 14001 .xlsx/.csv
+          <input type="file" id="import-csv-14001" accept=".xlsx,.csv" style="display:none" onchange="importCSV14001(this)">
         </label>
         <div id="import-status-14001" style="font-size:11px;color:var(--green-d);margin-top:6px"></div>
       </div>
@@ -308,13 +309,14 @@
         Inclui: <strong>Atividade/Produto/Serviço · Perigo · Risco · P × S · Grau · Hierarquia de controles</strong>
       </p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-        <button class="btn btn-sm" style="background:var(--blue);color:#fff;border-color:var(--blue);font-weight:500" onclick="exportCSV45001()">⬇️ Baixar planilha 45001 (.csv)</button>
+        <button class="btn btn-sm" style="background:var(--blue);color:#fff;border-color:var(--blue);font-weight:500" onclick="exportCSV45001()">⬇️ Baixar planilha 45001 (.xlsx)</button>
+        <button class="btn btn-sm" style="background:var(--blue-d);color:#fff;border-color:var(--blue-d);font-weight:500" onclick="openCampo45001()">📋 Formulário de campo — 45001</button>
       </div>
       <div style="border-top:1px dashed #a8cef0;padding-top:8px;margin-top:4px">
         <div style="font-size:11px;font-weight:600;color:var(--blue-d);margin-bottom:4px">📥 Importar após preenchimento:</div>
         <label class="btn btn-sm" style="background:var(--blue-d);color:#fff;border-color:var(--blue-d);font-weight:500;cursor:pointer;display:inline-flex">
-          📂 Importar 45001 .csv
-          <input type="file" id="import-csv-45001" accept=".csv" style="display:none" onchange="importCSV45001(this)">
+          📂 Importar 45001 .xlsx/.csv
+          <input type="file" id="import-csv-45001" accept=".xlsx,.csv" style="display:none" onchange="importCSV45001(this)">
         </label>
         <div id="import-status-45001" style="font-size:11px;color:var(--blue-d);margin-top:6px"></div>
       </div>
@@ -848,6 +850,104 @@
     <div class="flex fend mt2" style="gap:8px">
       <button class="btn" onclick="closeMod('ap-modal')">Cancelar</button>
       <button class="btn btn-g" onclick="saveAP()">Salvar item</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Formulário de Campo ISO 14001 -->
+<div class="campo-modal-bg" id="campo14001-modal">
+  <div class="campo-modal">
+    <div class="campo-header">
+      <div>
+        <div class="campo-header-title">📋 Formulário de Campo — Levantamento de Aspectos e Impactos</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">ISO 14001:2015 · Cláusula 6.1.2 · Selecione o código e preencha os dados</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-sm btn-g" onclick="addCampo14001Row()">+ Adicionar linha</button>
+        <button class="btn btn-sm" style="background:var(--green);color:#fff;border-color:var(--green);font-weight:500" onclick="saveCampo14001()">💾 Salvar no SGI</button>
+        <button onclick="closeCampo14001()" style="background:none;border:none;cursor:pointer;font-size:22px;color:var(--text2);padding:0 4px">×</button>
+      </div>
+    </div>
+    <div class="campo-body">
+      <!-- Cabeçalho das colunas -->
+      <div style="display:grid;grid-template-columns:36px 130px 1fr 1fr 100px 70px 70px 90px 90px 36px;gap:8px;padding:6px 10px;background:var(--gray-l);border-radius:6px;margin-bottom:8px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em">
+        <div>#</div>
+        <div>Código</div>
+        <div>Aspecto Ambiental</div>
+        <div>Impacto Ambiental</div>
+        <div>Etapa C.V.</div>
+        <div>Prob.</div>
+        <div>Sev.</div>
+        <div>Score</div>
+        <div>Signif.</div>
+        <div></div>
+      </div>
+      <!-- Linhas do formulário -->
+      <div id="campo14001-rows"></div>
+      <!-- Atividade global -->
+      <div style="margin-top:12px;padding:12px 14px;background:var(--gray-l);border-radius:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div><label style="font-size:11px">Atividade / Produto / Serviço</label><input type="text" id="c14-activity" placeholder="Ex.: Manutenção de máquinas" style="font-size:12px"></div>
+          <div><label style="font-size:11px">Responsável</label><input type="text" id="c14-owner" placeholder="Ex.: Técnico Ambiental" style="font-size:12px"></div>
+          <div><label style="font-size:11px">Área / Setor</label><input type="text" id="c14-sector" placeholder="Ex.: Produção" style="font-size:12px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="campo-footer">
+      <div style="font-size:12px;color:var(--text2)" id="c14-count">0 aspecto(s) adicionado(s)</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="closeCampo14001()">Cancelar</button>
+        <button class="btn" style="background:var(--green);color:#fff;border-color:var(--green);font-weight:600" onclick="saveCampo14001()">💾 Salvar todos no SGI</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Formulário de Campo ISO 45001 -->
+<div class="campo-modal-bg" id="campo45001-modal">
+  <div class="campo-modal">
+    <div class="campo-header">
+      <div>
+        <div class="campo-header-title">📋 Formulário de Campo — Levantamento de Perigos e Riscos SST</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">ISO 45001:2018 · Cláusula 6.1.2 · Selecione o código e preencha os dados</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-sm btn-g" onclick="addCampo45001Row()">+ Adicionar linha</button>
+        <button class="btn btn-sm" style="background:var(--blue);color:#fff;border-color:var(--blue);font-weight:500" onclick="saveCampo45001()">💾 Salvar no SGI</button>
+        <button onclick="closeCampo45001()" style="background:none;border:none;cursor:pointer;font-size:22px;color:var(--text2);padding:0 4px">×</button>
+      </div>
+    </div>
+    <div class="campo-body">
+      <!-- Cabeçalho -->
+      <div style="display:grid;grid-template-columns:36px 130px 1fr 1fr 70px 70px 90px 120px 36px;gap:8px;padding:6px 10px;background:var(--gray-l);border-radius:6px;margin-bottom:8px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em">
+        <div>#</div>
+        <div>Código</div>
+        <div>Perigo SST</div>
+        <div>Risco / Consequência</div>
+        <div>Prob.</div>
+        <div>Sev.</div>
+        <div>Grau</div>
+        <div>Nível</div>
+        <div></div>
+      </div>
+      <!-- Linhas -->
+      <div id="campo45001-rows"></div>
+      <!-- Dados globais -->
+      <div style="margin-top:12px;padding:12px 14px;background:var(--gray-l);border-radius:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px">
+          <div><label style="font-size:11px">Atividade / Processo</label><input type="text" id="c45-activity" placeholder="Ex.: Operação de empilhadeira" style="font-size:12px"></div>
+          <div><label style="font-size:11px">Responsável</label><input type="text" id="c45-owner" placeholder="Ex.: Técnico de Segurança" style="font-size:12px"></div>
+          <div><label style="font-size:11px">Área / Setor</label><input type="text" id="c45-sector" placeholder="Ex.: Logística" style="font-size:12px"></div>
+          <div><label style="font-size:11px">NR Aplicável</label><input type="text" id="c45-nr" placeholder="Ex.: NR-11, NR-12" style="font-size:12px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="campo-footer">
+      <div style="font-size:12px;color:var(--text2)" id="c45-count">0 perigo(s) adicionado(s)</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="closeCampo45001()">Cancelar</button>
+        <button class="btn" style="background:var(--blue);color:#fff;border-color:var(--blue);font-weight:600" onclick="saveCampo45001()">💾 Salvar todos no SGI</button>
+      </div>
     </div>
   </div>
 </div>
