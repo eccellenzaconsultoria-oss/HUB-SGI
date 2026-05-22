@@ -11,7 +11,7 @@ var S = {
     {id:'ibama', name:'IBAMA / Órgãos Ambientais', needs:['Conformidade com licenças ambientais','Relatórios periódicos de monitoramento','Plano de emergência ambiental atualizado'], exps:['Transparência proativa das informações','Ações de melhoria contínua do desempenho'], norm:'env', inf:5, int:3, obrig:'sim', sel:true},
     {id:'mte', name:'MTE / Auditores SST', needs:['Conformidade com NRs vigentes (NR-1, NR-9, NR-15...)', 'PGR e PCMSO atualizados','Registros de treinamentos e EPIs'], exps:['Cultura de SST evidenciada','Proatividade na gestão de riscos'], norm:'sst', inf:5, int:2, obrig:'sim', sel:true},
     {id:'clients', name:'Clientes', needs:['Produtos/serviços conformes e com qualidade assegurada','Certificações ISO comprovadas'], exps:['Relatórios de desempenho ambiental e SST','Fornecedor referência em ESG'], norm:'both', inf:4, int:4, obrig:'sim', sel:true},
-    {id:'community', name:'Comunidade local', needs:['Ausência de contaminação de solo e água','Conformidade com limites de ruído e emissões'], exps:['Participação em projetos socioambientais locais','Transparência sobre as atividades da empresa'], norm:'env', inf:3, int:3, obrig:'parcial', sel:false},
+    {id:'community', name:'Comunidade local', needs:['Ausência de alteração da qualidade do solo e da água','Conformidade com limites de ruído e emissões'], exps:['Participação em projetos socioambientais locais','Transparência sobre as atividades da empresa'], norm:'env', inf:3, int:3, obrig:'parcial', sel:false},
     {id:'suppliers', name:'Fornecedores', needs:['Recebimento claro dos requisitos ambientais e SST','Processo de homologação definido'], exps:['Parceria de longo prazo','Apoio para adequação às exigências'], norm:'both', inf:2, int:2, obrig:'parcial', sel:false},
     {id:'investors', name:'Acionistas / Investidores', needs:['Relatório de desempenho ESG','Gestão de passivos ambientais e SST'], exps:['Rating ESG elevado','Redução contínua de acidentes e incidentes'], norm:'both', inf:4, int:3, obrig:'sim', sel:false},
     {id:'insurers', name:'Seguradores', needs:['Histórico de acidentes atualizado','Planos de controle de riscos operacionais'], exps:['Proatividade na prevenção','Redução de sinistros ao longo do tempo'], norm:'sst', inf:3, int:2, obrig:'parcial', sel:false},
@@ -258,11 +258,14 @@ function saveAP(){
   var proc=document.getElementById('ap-proc').value.trim();
   var asp=document.getElementById('ap-asp').value.trim();
   if(!proc||!asp){alert('Preencha processo e aspecto/perigo.');return;}
-  var p=parseInt(document.getElementById('ap-prob').value);
-  var s=parseInt(document.getElementById('ap-sev').value);
-  var sc=p*s;
+  var f=parseInt(document.getElementById('ap-freq').value)||3;
+  var p=parseInt(document.getElementById('ap-prob').value)||3;
+  var s=parseInt(document.getElementById('ap-sev').value)||3;
+  var a=parseInt(document.getElementById('ap-abrang').value)||2;
+  var sc=f*p*s*a;
   var catCodeVal = document.getElementById('ap-asp-code').textContent || '';
-  S.apItems.push({type:document.getElementById('ap-type').value,proc:proc,asp:asp,imp:document.getElementById('ap-imp').value,cond:document.getElementById('ap-cond').value,prob:p,sev:s,score:sc,cls:sc<=4?'low':sc<=9?'med':sc<=16?'high':'crit',catCode:catCodeVal});
+  var scoreData = getAPScoreData();
+  S.apItems.push({type:document.getElementById('ap-type').value,proc:proc,asp:asp,imp:document.getElementById('ap-imp').value,cond:document.getElementById('ap-cond').value,prob:p,sev:s,score:sc,cls:sc>=250?'crit':sc>=100?'high':sc>=25?'med':'low',catCode:catCodeVal});
   document.getElementById('ap-proc').value=''; document.getElementById('ap-asp').value=''; document.getElementById('ap-imp').value='';
   closeMod('ap-modal'); renderAP();
 }
@@ -335,7 +338,7 @@ function addRO(){
   var p=parseInt(document.getElementById('ro-prob').value);
   var s=parseInt(document.getElementById('ro-sev').value);
   var sc=p*s;
-  S.roItems.push({type:document.getElementById('ro-type').value,norm:document.getElementById('ro-norm').value,desc:desc,src:document.getElementById('ro-src').value,prob:p,sev:s,score:sc,cls:sc<=4?'low':sc<=9?'med':sc<=16?'high':'crit',action:document.getElementById('ro-action').value,origin:document.getElementById('ro-origin').value,autoGen:false});
+  S.roItems.push({type:document.getElementById('ro-type').value,norm:document.getElementById('ro-norm').value,desc:desc,src:document.getElementById('ro-src').value,prob:p,sev:s,score:sc,cls:sc>=250?'crit':sc>=100?'high':sc>=25?'med':'low',action:document.getElementById('ro-action').value,origin:document.getElementById('ro-origin').value,autoGen:false});
   document.getElementById('ro-desc').value=''; document.getElementById('ro-src').value=''; document.getElementById('ro-action').value='';
   renderRO(); buildMatrix();
 }
@@ -867,12 +870,12 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 // ===== CATÁLOGO PADRONIZADO =====
 var CATALOG = [
   // ---- AMBIENTAIS (env) ----
-  {code:'A01',type:'env',asp:'Geração de resíduo sólido não perigoso',imp:'Contaminação do solo; sobrecarga de aterros sanitários',prob:3,sev:2},
-  {code:'A02',type:'env',asp:'Geração de resíduo sólido perigoso (Classe I)',imp:'Contaminação do solo e lençol freático; risco à saúde humana',prob:3,sev:4},
-  {code:'A03',type:'env',asp:'Geração de efluente líquido industrial',imp:'Contaminação de corpos hídricos; mortandade de fauna aquática',prob:3,sev:4},
-  {code:'A04',type:'env',asp:'Geração de efluente doméstico (esgoto sanitário)',imp:'Contaminação microbiológica de solo e água',prob:2,sev:3},
-  {code:'A05',type:'env',asp:'Emissão de material particulado (poeira/fumaça)',imp:'Poluição atmosférica; problemas respiratórios na comunidade',prob:3,sev:3},
-  {code:'A06',type:'env',asp:'Emissão de COVs (compostos orgânicos voláteis)',imp:'Poluição atmosférica; formação de ozônio troposférico',prob:3,sev:3},
+  {code:'A01',type:'env',asp:'Geração de resíduo sólido não perigoso',imp:'Alteração da qualidade do solo; sobrecarga de aterros sanitários',prob:3,sev:2},
+  {code:'A02',type:'env',asp:'Geração de resíduo sólido perigoso (Classe I)',imp:'Potencial alteração da qualidade do solo e lençol freático; risco à saúde humana',prob:3,sev:4},
+  {code:'A03',type:'env',asp:'Geração de efluente líquido industrial',imp:'Potencial alteração da qualidade dos corpos hídricos; mortandade de fauna aquática',prob:3,sev:4},
+  {code:'A04',type:'env',asp:'Geração de efluente doméstico (esgoto sanitário)',imp:'Potencial alteração microbiológicaobiológica de solo e água',prob:2,sev:3},
+  {code:'A05',type:'env',asp:'Emissão de material particulado (poeira/fumaça)',imp:'Alteração da qualidade do ar; problemas respiratórios na comunidade',prob:3,sev:3},
+  {code:'A06',type:'env',asp:'Emissão de COVs (compostos orgânicos voláteis)',imp:'Alteração da qualidade do ar; formação de ozônio troposférico',prob:3,sev:3},
   {code:'A07',type:'env',asp:'Emissão de gases de combustão (CO₂, NOx, SOx)',imp:'Contribuição ao efeito estufa; chuva ácida',prob:3,sev:3},
   {code:'A08',type:'env',asp:'Emissão de ruído acima do limite (NR-15 / CONAMA 01)',imp:'Poluição sonora; incômodo à comunidade; perda auditiva',prob:3,sev:3},
   {code:'A09',type:'env',asp:'Emissão de vibração',imp:'Incômodo à comunidade; danos a edificações vizinhas',prob:2,sev:2},
@@ -880,18 +883,18 @@ var CATALOG = [
   {code:'A11',type:'env',asp:'Consumo excessivo de água',imp:'Esgotamento de recursos hídricos; aumento de custos',prob:3,sev:3},
   {code:'A12',type:'env',asp:'Consumo excessivo de energia elétrica',imp:'Aumento da pegada de carbono; dependência energética',prob:3,sev:2},
   {code:'A13',type:'env',asp:'Consumo de combustível fóssil (diesel, gasolina, GNV)',imp:'Emissão de GEE; esgotamento de recursos não renováveis',prob:3,sev:3},
-  {code:'A14',type:'env',asp:'Vazamento de óleo lubrificante ou hidráulico',imp:'Contaminação do solo e da água superficial',prob:3,sev:4},
-  {code:'A15',type:'env',asp:'Vazamento de produto químico perigoso',imp:'Contaminação de solo, água e ar; risco à biota',prob:2,sev:5},
-  {code:'A16',type:'env',asp:'Derramamento acidental de substância perigosa',imp:'Contaminação imediata do ambiente; passivo ambiental',prob:2,sev:5},
-  {code:'A17',type:'env',asp:'Descarte inadequado de embalagens contaminadas',imp:'Contaminação do solo; veiculação de substâncias perigosas',prob:2,sev:3},
+  {code:'A14',type:'env',asp:'Vazamento de óleo lubrificante ou hidráulico',imp:'Potencial alteração da qualidade do solo e da água superficial',prob:3,sev:4},
+  {code:'A15',type:'env',asp:'Vazamento de produto químico perigoso',imp:'Potencial alteração da qualidade do solo, água e ar; risco à biota',prob:2,sev:5},
+  {code:'A16',type:'env',asp:'Derramamento acidental de substância perigosa',imp:'Potencial alteração imediata da qualidade ambiental; passivo ambiental',prob:2,sev:5},
+  {code:'A17',type:'env',asp:'Descarte inadequado de embalagens contaminadas',imp:'Potencial alteração da qualidade do solo; veiculação de substâncias perigosas',prob:2,sev:3},
   {code:'A18',type:'env',asp:'Uso de substâncias ozonodepletoras (CFCs, HCFCs)',imp:'Destruição da camada de ozônio',prob:2,sev:4},
   {code:'A19',type:'env',asp:'Supressão de vegetação nativa',imp:'Perda de biodiversidade; erosão do solo',prob:1,sev:4},
-  {code:'A20',type:'env',asp:'Geração de resíduo de construção e demolição (RCD)',imp:'Disposição irregular; contaminação do solo',prob:2,sev:2},
+  {code:'A20',type:'env',asp:'Geração de resíduo de construção e demolição (RCD)',imp:'Disposição irregular; alteração da qualidade do solo',prob:2,sev:2},
   {code:'A21',type:'env',asp:'Emissão de luz artificial (poluição luminosa)',imp:'Perturbação da fauna noturna; incômodo à comunidade',prob:2,sev:1},
-  {code:'A22',type:'env',asp:'Contaminação do solo por resíduo industrial',imp:'Passivo ambiental; risco à saúde humana e ecossistema',prob:2,sev:4},
-  {code:'A23',type:'env',asp:'Descarte de REEE (lixo eletrônico)',imp:'Metais pesados no solo; contaminação da cadeia trófica',prob:2,sev:3},
+  {code:'A22',type:'env',asp:'Alteração da qualidade do solo por resíduo industrial',imp:'Passivo ambiental; risco à saúde humana e ecossistema',prob:2,sev:4},
+  {code:'A23',type:'env',asp:'Descarte de REEE (lixo eletrônico)',imp:'Presença de metais pesados no solo; comprometimento da cadeia trófica',prob:2,sev:3},
   {code:'A24',type:'env',asp:'Geração de lodo de ETE/ETA',imp:'Disposição incorreta pode contaminar solo e água',prob:2,sev:3},
-  {code:'A25',type:'env',asp:'Uso de agrotóxico ou pesticida',imp:'Contaminação de solo e água; impacto na biodiversidade',prob:2,sev:4},
+  {code:'A25',type:'env',asp:'Uso de agrotóxico ou pesticida',imp:'Potencial alteração da qualidade do solo e água; impacto na biodiversidade',prob:2,sev:4},
   // ---- SST (sst) ----
   {code:'S01',type:'sst',asp:'Queda de pessoa em mesmo nível (escorregão, tropeço)',imp:'Contusão, fratura, afastamento',prob:4,sev:2},
   {code:'S02',type:'sst',asp:'Queda de pessoa em nível diferente (>2m — NR-35)',imp:'Fratura grave, TCE, óbito',prob:3,sev:5},
@@ -1138,11 +1141,11 @@ var CSV_HEADER = [
 ];
 
 var CSV_EXAMPLES = [
-  ['A14','env','Geração de resíduos sólidos','Descarte inadequado de óleo lubrificante usado','Contaminação do solo e lençol freático','N','3','4','','Manutenção',''],
+  ['A14','env','Geração de resíduos sólidos','Descarte inadequado de óleo lubrificante usado','Alteração da qualidade do solo e lençol freático','N','3','4','','Manutenção',''],
   ['S02','sst','Operação em altura','Queda de pessoa em nível diferente (>2m)','Fratura grave, TCE, óbito','N','2','5','','Manutenção','Verificar andaimes e cintos'],
   ['A06','env','Processos de pintura','Emissão de COVs (compostos orgânicos voláteis)','Poluição atmosférica local','N','4','3','','Produção',''],
   ['S05','sst','Operação de prensas','Contato com partes móveis de máquinas (NR-12)','Amputação, esmagamento, óbito','N','2','5','','Produção','NR-12 — proteções verificadas?'],
-  ['A03','env','Lavagem de peças','Geração de efluente líquido industrial','Contaminação de corpos hídricos','N','3','3','','Qualidade',''],
+  ['A03','env','Lavagem de peças','Geração de efluente líquido industrial','Potencial alteração da qualidade dos corpos hídricos','N','3','3','','Qualidade',''],
 ];
 
 function csvEscape(v) {
@@ -1258,31 +1261,31 @@ function exportCSV14001() {
     // ── Catálogo de aspectos (aba oculta para PROCV) ──────────────
     var CAT14 = [
       ['Codigo','Aspecto Ambiental','Impacto Ambiental Típico'],
-      ['A01','Geração de resíduo sólido não perigoso','Contaminação do solo'],
-      ['A02','Geração de resíduo perigoso (Classe I)','Contaminação do solo e água subterrânea'],
-      ['A03','Consumo de energia elétrica','Esgotamento de recursos não renováveis / emissão de CO₂'],
-      ['A04','Consumo de água','Esgotamento de recursos hídricos'],
-      ['A05','Emissão de efluente líquido','Contaminação de corpos d\'água'],
-      ['A06','Emissão atmosférica (COVs / fumos / poeiras)','Poluição do ar / danos à saúde'],
-      ['A07','Consumo de matéria-prima / insumos','Esgotamento de recursos naturais'],
-      ['A08','Geração de ruído','Perturbação da comunidade / perda auditiva'],
-      ['A09','Vazamento / derramamento de óleo ou produto químico','Contaminação do solo e água'],
-      ['A10','Emissão de CO₂ e gases de efeito estufa','Contribuição ao aquecimento global'],
-      ['A11','Consumo excessivo de combustível','Emissão de GEE / esgotamento de recursos'],
-      ['A12','Geração de efluente sanitário','Contaminação de recursos hídricos'],
-      ['A13','Geração de embalagens e resíduos de papel','Contaminação do solo'],
-      ['A14','Vazamento de óleo lubrificante','Contaminação do solo e água subterrânea'],
-      ['A15','Armazenamento inadequado de produtos químicos','Risco de contaminação do solo e água'],
-      ['A16','Uso de substâncias perigosas','Risco de contaminação ambiental e danos à saúde'],
-      ['A17','Emissão de material particulado','Poluição atmosférica / doenças respiratórias'],
-      ['A18','Geração de resíduo de construção civil (RCC)','Ocupação irregular de solo / contaminação'],
-      ['A19','Descarte inadequado de lâmpadas fluorescentes','Contaminação por mercúrio'],
-      ['A20','Descarte inadequado de pilhas e baterias','Contaminação do solo por metais pesados'],
-      ['A21','Consumo de papel e materiais de escritório','Desmatamento / esgotamento de recursos'],
-      ['A22','Uso de refrigerantes (CFC/HFC)','Destruição da camada de ozônio / efeito estufa'],
-      ['A23','Contaminação do solo por resíduos sólidos','Degradação ambiental'],
-      ['A24','Supressão de vegetação / impermeabilização','Perda de biodiversidade / escoamento superficial'],
-      ['A25','Geração de odores','Incômodo à comunidade / qualidade do ar'],
+      ['A01','Geração de resíduo sólido não perigoso','Comprometimento da capacidade de disposição de resíduos sólidos'],
+      ['A02','Geração de resíduo perigoso (Classe I)','Potencial alteração da qualidade do solo e dos recursos hídricos subterrâneos'],
+      ['A03','Consumo de energia elétrica','Esgotamento de recursos energéticos não renováveis / contribuição ao efeito estufa'],
+      ['A04','Consumo de água','Comprometimento da disponibilidade dos recursos hídricos'],
+      ['A05','Lançamento de efluente líquido','Potencial alteração da qualidade dos corpos d\'água superficiais'],
+      ['A06','Emissão atmosférica (COVs / fumos / poeiras)','Alteração da qualidade do ar / comprometimento da saúde humana'],
+      ['A07','Consumo de matéria-prima / insumos','Esgotamento de recursos naturais renováveis e não renováveis'],
+      ['A08','Geração de ruído e vibração','Alteração da qualidade sonora / incômodo à comunidade e fauna'],
+      ['A09','Potencial vazamento ou derramamento de óleo / produto químico','Potencial alteração da qualidade do solo e dos recursos hídricos'],
+      ['A10','Emissão de CO₂ e gases de efeito estufa (GEE)','Contribuição ao aquecimento global / alteração climática'],
+      ['A11','Consumo excessivo de combustível','Esgotamento de recursos não renováveis / emissão de GEE'],
+      ['A12','Geração de efluente sanitário','Potencial alteração da qualidade dos recursos hídricos superficiais e subterrâneos'],
+      ['A13','Geração de embalagens e resíduos de papel','Comprometimento da capacidade de disposição de resíduos sólidos'],
+      ['A14','Potencial vazamento de óleo lubrificante','Potencial alteração da qualidade do solo e dos recursos hídricos subterrâneos'],
+      ['A15','Armazenamento inadequado de produtos químicos','Risco de alteração da qualidade do solo e dos recursos hídricos'],
+      ['A16','Uso de substâncias perigosas','Risco de alteração da qualidade ambiental e comprometimento da saúde humana'],
+      ['A17','Emissão de material particulado','Alteração da qualidade do ar / comprometimento da visibilidade e saúde'],
+      ['A18','Geração de resíduo de construção civil (RCC)','Comprometimento da qualidade do solo / alteração da drenagem local'],
+      ['A19','Descarte inadequado de lâmpadas fluorescentes','Risco de alteração da qualidade do solo por substâncias tóxicas'],
+      ['A20','Descarte inadequado de pilhas e baterias','Risco de alteração da qualidade do solo por metais pesados'],
+      ['A21','Consumo de papel e materiais de escritório','Esgotamento de recursos florestais / geração de resíduos sólidos'],
+      ['A22','Uso de refrigerantes (CFC/HFC)','Comprometimento da camada de ozônio / contribuição ao efeito estufa'],
+      ['A23','Disposição inadequada de resíduos sólidos','Alteração da qualidade do solo / comprometimento da drenagem e paisagem'],
+      ['A24','Supressão de vegetação / impermeabilização','Redução da biodiversidade / alteração do ciclo hidrológico local'],
+      ['A25','Geração de odores','Alteração da qualidade do ar / incômodo à comunidade do entorno'],
     ];
 
     var wsCat = XL.utils.aoa_to_sheet(CAT14);
@@ -2783,36 +2786,186 @@ function exportAta() {
 
 
 // ═══════════════════════════════════════════════════════════════════
+// NOVA MATRIZ DE SIGNIFICÂNCIA: F × P × S × A (1–625)
+// Frequência × Probabilidade × Severidade × Abrangência
+// ═══════════════════════════════════════════════════════════════════
+
+// Limite de significância padrão (configurável pela organização)
+var SIG_LIMITE = 50;
+
+// Definições das escalas
+var ESCALA_FREQ = [
+  {v:1, label:'1 — Rara',          desc:'Menos de 1x/ano'},
+  {v:2, label:'2 — Ocasional',     desc:'1 a 12 vezes/ano'},
+  {v:3, label:'3 — Frequente',     desc:'Mensal'},
+  {v:4, label:'4 — Muito freq.',   desc:'Semanal'},
+  {v:5, label:'5 — Contínua',      desc:'Diária ou permanente'},
+];
+
+var ESCALA_PROB = [
+  {v:1, label:'1 — Muito improvável', desc:'Nunca ocorreu nesta instalação'},
+  {v:2, label:'2 — Improvável',       desc:'Já ocorreu no setor'},
+  {v:3, label:'3 — Possível',         desc:'Já ocorreu nesta instalação'},
+  {v:4, label:'4 — Provável',         desc:'Ocorre algumas vezes/ano'},
+  {v:5, label:'5 — Muito provável',   desc:'Ocorre regularmente'},
+];
+
+var ESCALA_SEV = [
+  {v:1, label:'1 — Insignificante', desc:'Impacto imperceptível ou reversível imediato'},
+  {v:2, label:'2 — Menor',         desc:'Impacto local reversível em curto prazo'},
+  {v:3, label:'3 — Moderada',      desc:'Impacto reversível em médio prazo'},
+  {v:4, label:'4 — Maior',         desc:'Impacto reversível em longo prazo'},
+  {v:5, label:'5 — Catastrófica',  desc:'Impacto irreversível ou permanente'},
+];
+
+var ESCALA_ABRANG = [
+  {v:1, label:'1 — Local',         desc:'Dentro dos limites da instalação'},
+  {v:2, label:'2 — Vizinhança',    desc:'Imóveis e vias lindeiras'},
+  {v:3, label:'3 — Comunidade',    desc:'Bairro ou comunidade próxima'},
+  {v:4, label:'4 — Município',     desc:'Abrange o município'},
+  {v:5, label:'5 — Regional',      desc:'Bacia hidrográfica, região ou transfronteiriço'},
+];
+
+// Calcula nível e cor baseado no score F×P×S×A (max 625)
+function scoreInfoFPSA(score) {
+  if (!score) return {color:'var(--gray)', nivel:'Aguardando', cls:'low'};
+  if (score >= 250) return {color:'#A32D2D', nivel:'CRÍTICO',  cls:'crit'};
+  if (score >= 100) return {color:'#E85D24', nivel:'ALTO',     cls:'high'};
+  if (score >= 25)  return {color:'#BA7517', nivel:'MÉDIO',    cls:'med'};
+  return               {color:'#1D9E75', nivel:'BAIXO',    cls:'low'};
+}
+
+// ── Atualiza modal de Aspectos/Perigos no S2 ─────────────────────
+// Adiciona os 4 campos à lógica de cálculo do modal
+function calcAPScore() {
+  var f = parseInt((document.getElementById('ap-freq')||{}).value)   || 0;
+  var p = parseInt((document.getElementById('ap-prob')||{}).value)   || 0;
+  var s = parseInt((document.getElementById('ap-sev')||{}).value)    || 0;
+  var a = parseInt((document.getElementById('ap-abrang')||{}).value) || 0;
+  var score = f && p && s && a ? f*p*s*a : 0;
+  var info  = scoreInfoFPSA(score);
+
+  var scoreEl = document.getElementById('ap-score-display');
+  var sigEl   = document.getElementById('ap-sig-display');
+
+  if (scoreEl) {
+    scoreEl.innerHTML = '<div style="font-size:28px;font-weight:800;color:'+info.color+'">'+
+      (score||'—')+'</div><div style="font-size:11px;color:'+info.color+';font-weight:600">'+
+      info.nivel+' (máx. 625)</div>';
+    scoreEl.style.background = score ? info.color+'12' : 'var(--gray-l)';
+    scoreEl.style.borderColor = score ? info.color : 'var(--gray-b)';
+  }
+  if (sigEl && score) {
+    var isSig = score >= SIG_LIMITE;
+    sigEl.innerHTML = '<span class="sig '+(isSig?'cs-s':'cs-n')+'">'+
+      (isSig ? '⚠️ SIGNIFICATIVO (score ≥ '+SIG_LIMITE+')' : '✅ Não significativo (score < '+SIG_LIMITE+')')+
+      '</span>';
+  } else if (sigEl) {
+    sigEl.innerHTML = '';
+  }
+  return {f:f, p:p, s:s, a:a, score:score, cls:info.cls, isSig: score >= SIG_LIMITE};
+}
+
+// Salva o score na estrutura do item
+function getAPScoreData() {
+  var r = calcAPScore();
+  return {
+    freq:   r.f, prob: r.p, sev: r.s, abrang: r.a,
+    score:  r.score, cls: r.cls,
+    sig:    r.score >= SIG_LIMITE ? 'S' : 'N',
+    sigCrit: r.score >= SIG_LIMITE ? 'Score '+r.score+' ≥ '+SIG_LIMITE+' (significativo)' : 'Score '+r.score+' < '+SIG_LIMITE+' (não significativo)',
+    nivel:  scoreInfoFPSA(r.score).nivel
+  };
+}
+
+
+
+// ═══════════════════════════════════════════════════════════════════
+// IMPORTAR JSON DO FORMULÁRIO DE CAMPO STANDALONE
+// ═══════════════════════════════════════════════════════════════════
+function importCampoJSON(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      if (!data.itens || !data.itens.length) {
+        alert('Arquivo JSON não contém itens válidos.'); return;
+      }
+      var added = 0;
+      data.itens.forEach(function(item) {
+        // Normaliza campos do formulário de campo para o formato do SGI
+        S.apItems.push({
+          type:      item.type || (data.tipo.includes('14001') ? 'env' : 'sst'),
+          catCode:   item.codigo || '',
+          asp:       item.asp || '',
+          imp:       item.imp || '',
+          lifecycle: item.ciclo || item.lifecycle || '',
+          cond:      item.cond || 'N',
+          prob:      item.prob, sev: item.sev, score: item.score,
+          cls:       item.cls || (item.score>=17?'crit':item.score>=10?'high':item.score>=5?'med':'low'),
+          sig:       item.sig || (item.score>=10?'S':'N'),
+          sigCrit:   item.sigTexto || (item.score>=10?'Score >= 10':'Score < 10'),
+          activity:  item.atividade || item.activity || '',
+          owner:     item.responsavel || item.owner || '',
+          sector:    item.area || item.sector || '',
+          obs:       item.obs || '',
+          // 45001 específico
+          control:   item.controle || item.control || '',
+          hierarchy: item.hierarquia || item.hierarchy || '',
+          addControl:item.addControl || '',
+          nivel:     item.nivel || '',
+          fromField: true,
+          fromJSON:  true,
+          importedAt: new Date().toISOString().slice(0,10)
+        });
+        added++;
+      });
+      input.value = '';
+      renderAPItems();
+      alert('✅ ' + added + ' item(ns) importado(s) do formulário de campo!'
+        + '\n\nOrganização: ' + (data.organizacao||'—')
+        + '\nResponsável: ' + (data.responsavel||'—')
+        + '\nData: ' + (data.data||'—'));
+    } catch(err) {
+      alert('Erro ao ler o arquivo JSON: ' + err.message);
+    }
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // FORMULÁRIOS DE CAMPO — 14001 e 45001
 // ═══════════════════════════════════════════════════════════════════
 
 // Catálogos inline para os formulários
 var CAMPO_CAT14 = {
-  'A01':['Geração de resíduo sólido não perigoso','Contaminação do solo'],
-  'A02':['Geração de resíduo perigoso (Classe I)','Contaminação do solo e água subterrânea'],
-  'A03':['Consumo de energia elétrica','Esgotamento de recursos não renováveis / emissão de CO₂'],
-  'A04':['Consumo de água','Esgotamento de recursos hídricos'],
-  'A05':['Emissão de efluente líquido','Contaminação de corpos d\'água'],
-  'A06':['Emissão atmosférica (COVs / fumos / poeiras)','Poluição do ar / danos à saúde'],
-  'A07':['Consumo de matéria-prima / insumos','Esgotamento de recursos naturais'],
-  'A08':['Geração de ruído','Perturbação da comunidade / perda auditiva'],
-  'A09':['Vazamento / derramamento de óleo ou produto químico','Contaminação do solo e água'],
-  'A10':['Emissão de CO₂ e gases de efeito estufa','Contribuição ao aquecimento global'],
-  'A11':['Consumo excessivo de combustível','Emissão de GEE / esgotamento de recursos'],
-  'A12':['Geração de efluente sanitário','Contaminação de recursos hídricos'],
-  'A13':['Geração de embalagens e resíduos de papel','Contaminação do solo'],
-  'A14':['Vazamento de óleo lubrificante','Contaminação do solo e água subterrânea'],
-  'A15':['Armazenamento inadequado de produtos químicos','Risco de contaminação do solo e água'],
-  'A16':['Uso de substâncias perigosas','Risco de contaminação ambiental e danos à saúde'],
-  'A17':['Emissão de material particulado','Poluição atmosférica / doenças respiratórias'],
-  'A18':['Geração de resíduo de construção civil (RCC)','Ocupação irregular de solo / contaminação'],
-  'A19':['Descarte inadequado de lâmpadas fluorescentes','Contaminação por mercúrio'],
-  'A20':['Descarte inadequado de pilhas e baterias','Contaminação do solo por metais pesados'],
-  'A21':['Consumo de papel e materiais de escritório','Desmatamento / esgotamento de recursos'],
-  'A22':['Uso de refrigerantes (CFC/HFC)','Destruição da camada de ozônio / efeito estufa'],
-  'A23':['Contaminação do solo por resíduos sólidos','Degradação ambiental'],
-  'A24':['Supressão de vegetação / impermeabilização','Perda de biodiversidade / escoamento superficial'],
-  'A25':['Geração de odores','Incômodo à comunidade / qualidade do ar'],
+  'A01':['Geração de resíduo sólido não perigoso','Comprometimento da capacidade de disposição de resíduos sólidos'],
+  'A02':['Geração de resíduo perigoso (Classe I)','Potencial alteração da qualidade do solo e dos recursos hídricos subterrâneos'],
+  'A03':['Consumo de energia elétrica','Esgotamento de recursos energéticos não renováveis / contribuição ao efeito estufa'],
+  'A04':['Consumo de água','Comprometimento da disponibilidade dos recursos hídricos'],
+  'A05':['Lançamento de efluente líquido','Potencial alteração da qualidade dos corpos d\'água superficiais'],
+  'A06':['Emissão atmosférica (COVs / fumos / poeiras)','Alteração da qualidade do ar / comprometimento da saúde humana'],
+  'A07':['Consumo de matéria-prima / insumos','Esgotamento de recursos naturais renováveis e não renováveis'],
+  'A08':['Geração de ruído e vibração','Alteração da qualidade sonora / incômodo à comunidade e fauna'],
+  'A09':['Potencial vazamento ou derramamento de óleo / produto químico','Potencial alteração da qualidade do solo e dos recursos hídricos'],
+  'A10':['Emissão de CO₂ e gases de efeito estufa (GEE)','Contribuição ao aquecimento global / alteração climática'],
+  'A11':['Consumo excessivo de combustível','Esgotamento de recursos não renováveis / emissão de GEE'],
+  'A12':['Geração de efluente sanitário','Potencial alteração da qualidade dos recursos hídricos superficiais e subterrâneos'],
+  'A13':['Geração de embalagens e resíduos de papel','Comprometimento da capacidade de disposição de resíduos sólidos'],
+  'A14':['Potencial vazamento de óleo lubrificante','Potencial alteração da qualidade do solo e dos recursos hídricos subterrâneos'],
+  'A15':['Armazenamento inadequado de produtos químicos','Risco de alteração da qualidade do solo e dos recursos hídricos'],
+  'A16':['Uso de substâncias perigosas','Risco de alteração da qualidade ambiental e comprometimento da saúde humana'],
+  'A17':['Emissão de material particulado','Alteração da qualidade do ar / comprometimento da visibilidade e saúde'],
+  'A18':['Geração de resíduo de construção civil (RCC)','Comprometimento da qualidade do solo / alteração da drenagem local'],
+  'A19':['Descarte inadequado de lâmpadas fluorescentes','Risco de alteração da qualidade do solo por substâncias tóxicas'],
+  'A20':['Descarte inadequado de pilhas e baterias','Risco de alteração da qualidade do solo por metais pesados'],
+  'A21':['Consumo de papel e materiais de escritório','Esgotamento de recursos florestais / geração de resíduos sólidos'],
+  'A22':['Uso de refrigerantes (CFC/HFC)','Comprometimento da camada de ozônio / contribuição ao efeito estufa'],
+  'A23':['Alteração da qualidade do solo por resíduos sólidos','Alteração da qualidade do solo / comprometimento da drenagem e paisagem'],
+  'A24':['Supressão de vegetação / impermeabilização','Redução da biodiversidade / alteração do ciclo hidrológico local'],
+  'A25':['Geração de odores','Alteração da qualidade do ar / incômodo à comunidade do entorno'],
 };
 
 var CAMPO_CAT45 = {
