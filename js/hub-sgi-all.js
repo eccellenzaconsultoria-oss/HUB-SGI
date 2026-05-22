@@ -1244,236 +1244,337 @@ function downloadCSV(content, filename) {
 }
 
 
-// ===== EXPORTAR ISO 14001 — XLSX via SheetJS =====
+// ===== EXPORTAR ISO 14001 — XLSX via SheetJS (com catálogo, dropdowns e fórmulas) =====
 function exportCSV14001() {
   var org = document.getElementById('org-name').value || 'Organizacao';
   var dt  = new Date().toLocaleDateString('pt-BR');
 
-  // Carrega SheetJS dinamicamente se não estiver disponível
   function doExport14001() {
-    var XLSX_lib = window.XLSX;
-    if (!XLSX_lib) { alert('Erro: biblioteca XLSX não carregada. Tente novamente.'); return; }
+    var XL = window.XLSX;
+    if (!XL) { alert('Biblioteca XLSX não carregada. Tente novamente.'); return; }
 
-    var wb = XLSX_lib.utils.book_new();
+    var wb = XL.utils.book_new();
 
-    // ── Aba de dados ──────────────────────────────────────────────
-    var cols14 = [
-      'Codigo (catalogo)',
-      'Atividade / Produto / Servico',
-      'Etapa do Ciclo de Vida',
-      'Aspecto Ambiental',
-      'Impacto Ambiental',
-      'Condicao [N/A/E]',
-      'Probabilidade [1-5]',
-      'Severidade [1-5]',
-      'Score (P x S)',
-      'Significancia [S/N]',
-      'Criterio de Significancia',
-      'Responsavel',
-      'Area / Setor',
-      'Observacoes'
+    // ── Catálogo de aspectos (aba oculta para PROCV) ──────────────
+    var CAT14 = [
+      ['Codigo','Aspecto Ambiental','Impacto Ambiental Típico'],
+      ['A01','Geração de resíduo sólido não perigoso','Contaminação do solo'],
+      ['A02','Geração de resíduo perigoso (Classe I)','Contaminação do solo e água subterrânea'],
+      ['A03','Consumo de energia elétrica','Esgotamento de recursos não renováveis / emissão de CO₂'],
+      ['A04','Consumo de água','Esgotamento de recursos hídricos'],
+      ['A05','Emissão de efluente líquido','Contaminação de corpos d\'água'],
+      ['A06','Emissão atmosférica (COVs / fumos / poeiras)','Poluição do ar / danos à saúde'],
+      ['A07','Consumo de matéria-prima / insumos','Esgotamento de recursos naturais'],
+      ['A08','Geração de ruído','Perturbação da comunidade / perda auditiva'],
+      ['A09','Vazamento / derramamento de óleo ou produto químico','Contaminação do solo e água'],
+      ['A10','Emissão de CO₂ e gases de efeito estufa','Contribuição ao aquecimento global'],
+      ['A11','Consumo excessivo de combustível','Emissão de GEE / esgotamento de recursos'],
+      ['A12','Geração de efluente sanitário','Contaminação de recursos hídricos'],
+      ['A13','Geração de embalagens e resíduos de papel','Contaminação do solo'],
+      ['A14','Vazamento de óleo lubrificante','Contaminação do solo e água subterrânea'],
+      ['A15','Armazenamento inadequado de produtos químicos','Risco de contaminação do solo e água'],
+      ['A16','Uso de substâncias perigosas','Risco de contaminação ambiental e danos à saúde'],
+      ['A17','Emissão de material particulado','Poluição atmosférica / doenças respiratórias'],
+      ['A18','Geração de resíduo de construção civil (RCC)','Ocupação irregular de solo / contaminação'],
+      ['A19','Descarte inadequado de lâmpadas fluorescentes','Contaminação por mercúrio'],
+      ['A20','Descarte inadequado de pilhas e baterias','Contaminação do solo por metais pesados'],
+      ['A21','Consumo de papel e materiais de escritório','Desmatamento / esgotamento de recursos'],
+      ['A22','Uso de refrigerantes (CFC/HFC)','Destruição da camada de ozônio / efeito estufa'],
+      ['A23','Contaminação do solo por resíduos sólidos','Degradação ambiental'],
+      ['A24','Supressão de vegetação / impermeabilização','Perda de biodiversidade / escoamento superficial'],
+      ['A25','Geração de odores','Incômodo à comunidade / qualidade do ar'],
     ];
 
-    var dataRows = [cols14];
+    var wsCat = XL.utils.aoa_to_sheet(CAT14);
+    wsCat['!cols'] = [{wch:10},{wch:45},{wch:50}];
+    XL.utils.book_append_sheet(wb, wsCat, 'Catalogo14001');
 
-    // Dados existentes do SGI
-    if (S.apItems && S.apItems.length) {
-      S.apItems.filter(function(a){ return a.type === 'env'; }).forEach(function(a) {
-        dataRows.push([
-          a.catCode||'', a.activity||'', a.lifecycle||'',
-          a.asp||'', a.imp||'', a.cond||'N',
-          a.prob||'', a.sev||'', a.score||'',
-          a.cls==='high'||a.cls==='crit'?'S':'N',
-          a.sigCrit||'Score >= 10', a.owner||'', a.sector||'', a.obs||''
-        ]);
-      });
+    // ── Aba de dados com fórmulas ─────────────────────────────────
+    var HEADER = [
+      'Codigo','Atividade / Produto / Serviço','Etapa do Ciclo de Vida',
+      'Aspecto Ambiental','Impacto Ambiental',
+      'Condição [N/A/E]','Probabilidade [1-5]','Severidade [1-5]',
+      'Score (P x S)','Significância [S/N]',
+      'Critério de Significância','Responsável','Área / Setor','Observações'
+    ];
+
+    var ETAPAS = [
+      '1-Aquisição de matérias-primas','2-Design/Projeto',
+      '3-Produção/Operação','4-Transporte/Entrega',
+      '5-Utilização pelo cliente','6-Tratamento fim de vida'
+    ];
+
+    // Linhas de dados com fórmulas
+    var dataRows = [HEADER];
+    for (var r = 0; r < 50; r++) {
+      var rowNum = r + 3; // linha no Excel (1=header, 2=linha1, ...)
+      var colA   = 'A' + rowNum; // Codigo
+      var colG   = 'G' + rowNum; // Probabilidade
+      var colH   = 'H' + rowNum; // Severidade
+      var colI   = 'I' + rowNum; // Score
+      dataRows.push([
+        { t:'s', v:'' },                                        // A: Codigo (usuário digita)
+        { t:'s', v:'' },                                        // B: Atividade
+        { t:'s', v:'' },                                        // C: Etapa
+        // D: Aspecto — PROCV pelo código
+        { t:'s', f:'IF('+colA+'="","",IFERROR(VLOOKUP('+colA+',Catalogo14001!$A:$B,2,0),"Código não encontrado"))' },
+        // E: Impacto — PROCV pelo código
+        { t:'s', f:'IF('+colA+'="","",IFERROR(VLOOKUP('+colA+',Catalogo14001!$A:$C,3,0),""))' },
+        { t:'s', v:'' },                                        // F: Condição
+        { t:'n', v:null },                                      // G: Probabilidade
+        { t:'n', v:null },                                      // H: Severidade
+        // I: Score = P x S
+        { t:'n', f:'IF(AND(ISNUMBER('+colG+'),ISNUMBER('+colH+')),'+colG+'*'+colH+',"")' },
+        // J: Significância automática
+        { t:'s', f:'IF('+colI+'="","",IF('+colI+'>=10,"S","N"))' },
+        // K: Critério
+        { t:'s', f:'IF('+colI+'="","",IF('+colI+'>=10,"Score >= 10 (significativo)","Score < 10 (não significativo)"))' },
+        { t:'s', v:'' },                                        // L: Responsável
+        { t:'s', v:'' },                                        // M: Área
+        { t:'s', v:'' },                                        // N: Observações
+      ]);
     }
 
-    // Exemplos se não houver dados
-    if (dataRows.length === 1) {
-      dataRows.push(['A14','Manutencao de maquinas','3-Producao/Operacao','Vazamento de oleo lubrificante','Contaminacao do solo e agua subterranea','N',3,4,12,'S','Score >= 10','Tecnico Amb.','Manutencao','Verificar bandeja de contencao']);
-      dataRows.push(['A06','Pintura de pecas','3-Producao/Operacao','Emissao de COVs','Poluicao atmosferica','N',4,3,12,'S','Score >= 10','Tecnico Amb.','Producao','']);
-      dataRows.push(['','','','','','','','','','','','','','']);
-    }
+    var ws14 = XL.utils.aoa_to_sheet(dataRows);
 
-    var ws14 = XLSX_lib.utils.aoa_to_sheet(dataRows);
-
-    // Largura das colunas (em caracteres)
+    // Larguras das colunas
     ws14['!cols'] = [
-      {wch:16}, // Codigo
-      {wch:35}, // Atividade
-      {wch:25}, // Etapa ciclo de vida
-      {wch:35}, // Aspecto
-      {wch:35}, // Impacto
-      {wch:14}, // Condicao
+      {wch:12}, // Codigo
+      {wch:32}, // Atividade
+      {wch:26}, // Etapa
+      {wch:40}, // Aspecto (preenchido por fórmula)
+      {wch:40}, // Impacto (preenchido por fórmula)
+      {wch:14}, // Condição
       {wch:16}, // Probabilidade
       {wch:14}, // Severidade
-      {wch:14}, // Score
-      {wch:16}, // Significancia
-      {wch:28}, // Criterio
-      {wch:20}, // Responsavel
-      {wch:20}, // Area
-      {wch:30}, // Observacoes
+      {wch:14}, // Score (fórmula)
+      {wch:16}, // Significância (fórmula)
+      {wch:30}, // Critério (fórmula)
+      {wch:20}, // Responsável
+      {wch:20}, // Área
+      {wch:30}, // Observações
     ];
 
-    // Freeze primeira linha (cabeçalho fixo)
+    // Freeze cabeçalho
     ws14['!freeze'] = {xSplit:0, ySplit:1};
 
-    XLSX_lib.utils.book_append_sheet(wb, ws14, 'Aspectos e Impactos');
+    // Validação de dados — dropdown para Etapa do Ciclo de Vida (coluna C)
+    if (!ws14['!dataValidation']) ws14['!dataValidation'] = [];
+    ws14['!dataValidation'].push({
+      sqref: 'C2:C51',
+      type: 'list',
+      formula1: '"' + ETAPAS.join(',') + '"',
+      showDropDown: false,
+      showErrorMessage: true,
+      errorTitle: 'Valor inválido',
+      error: 'Selecione uma etapa do ciclo de vida da lista.'
+    });
+    // Dropdown Condição
+    ws14['!dataValidation'].push({
+      sqref: 'F2:F51',
+      type: 'list',
+      formula1: '"N,A,E"',
+      showDropDown: false
+    });
 
-    // ── Aba instruções ──────────────────────────────────────────
+    XL.utils.book_append_sheet(wb, ws14, 'Aspectos e Impactos');
+
+    // ── Aba de instruções ─────────────────────────────────────────
     var instrRows = [
-      ['SGI - ISO 14001 | LEVANTAMENTO DE ASPECTOS E IMPACTOS AMBIENTAIS'],
-      ['Organizacao: ' + org + '   |   Data: ' + dt],
+      ['SGI — ISO 14001 | LEVANTAMENTO DE ASPECTOS E IMPACTOS AMBIENTAIS'],
+      ['Organização: ' + org + '   |   Data: ' + dt],
       [''],
-      ['INSTRUCOES:'],
-      ['1. Preencha a aba "Aspectos e Impactos" - nao altere o cabecalho'],
-      ['2. Uma linha por aspecto identificado'],
-      ['3. Use o Codigo do catalogo para padronizar (A01, A02...)'],
-      ['4. Score = Probabilidade x Severidade'],
-      ['5. Salve e importe de volta no SGI pelo botao IMPORTAR 14001'],
+      ['COMO USAR:'],
+      ['1. Na aba "Aspectos e Impactos", preencha a coluna A com o CÓDIGO do catálogo (ex.: A01, A14)'],
+      ['   → O Aspecto e o Impacto serão preenchidos AUTOMATICAMENTE por fórmula PROCV'],
+      ['2. Se o aspecto não estiver no catálogo, deixe o código em branco e preencha manualmente as colunas D e E'],
+      ['3. Preencha Probabilidade (G) e Severidade (H) com valores de 1 a 5'],
+      ['   → O Score (I) e a Significância (J) serão calculados AUTOMATICAMENTE'],
+      ['4. Preencha as colunas manuais: Condição, Responsável, Área e Observações'],
+      ['5. Salve o arquivo e importe de volta no SGI pelo botão IMPORTAR 14001'],
+      [''],
+      ['CATÁLOGO DE CÓDIGOS (também na aba "Catalogo14001"):'],
+      ['A01 — Geração de resíduo sólido não perigoso'],
+      ['A02 — Geração de resíduo perigoso (Classe I)'],
+      ['A03 — Consumo de energia elétrica'],
+      ['A04 — Consumo de água'],
+      ['A05 — Emissão de efluente líquido'],
+      ['A06 — Emissão atmosférica (COVs / fumos / poeiras)'],
+      ['A07 — Consumo de matéria-prima / insumos'],
+      ['A08 — Geração de ruído'],
+      ['A09 — Vazamento / derramamento de óleo ou produto químico'],
+      ['A10 — Emissão de CO₂ e gases de efeito estufa'],
+      ['... (ver aba Catalogo14001 para lista completa)'],
       [''],
       ['ETAPAS DO CICLO DE VIDA:'],
-      ['1-Aquisicao de materias-primas'],
-      ['2-Design/Projeto'],
-      ['3-Producao/Operacao'],
-      ['4-Transporte/Entrega'],
-      ['5-Utilizacao pelo cliente'],
-      ['6-Tratamento fim de vida'],
+      ['1-Aquisição de matérias-primas | 2-Design/Projeto | 3-Produção/Operação'],
+      ['4-Transporte/Entrega | 5-Utilização pelo cliente | 6-Tratamento fim de vida'],
       [''],
-      ['LEGENDA:'],
-      ['Condicao: N=Normal | A=Anormal | E=Emergencia'],
-      ['Probabilidade: 1=Muito baixa | 2=Baixa | 3=Media | 4=Alta | 5=Muito alta'],
-      ['Severidade: 1=Insignificante | 2=Menor | 3=Moderada | 4=Maior | 5=Catastrofica'],
-      ['Score P x S: 1-4 Baixo | 5-9 Medio | 10-16 Alto | 17-25 Critico'],
-      ['Significancia: S=Significativo | N=Nao significativo'],
+      ['LEGENDA PROBABILIDADE: 1=Muito baixa | 2=Baixa | 3=Média | 4=Alta | 5=Muito alta'],
+      ['LEGENDA SEVERIDADE: 1=Insignificante | 2=Menor | 3=Moderada | 4=Maior | 5=Catastrófica'],
+      ['SCORE: 1-4 Baixo | 5-9 Médio | 10-16 Alto | 17-25 Crítico'],
+      ['SIGNIFICÂNCIA AUTOMÁTICA: Score >= 10 = S (Significativo) | Score < 10 = N'],
     ];
-    var wsInstr = XLSX_lib.utils.aoa_to_sheet(instrRows);
-    wsInstr['!cols'] = [{wch:80}];
-    XLSX_lib.utils.book_append_sheet(wb, wsInstr, 'Instrucoes');
+    var wsInstr = XL.utils.aoa_to_sheet(instrRows);
+    wsInstr['!cols'] = [{wch:90}];
+    XL.utils.book_append_sheet(wb, wsInstr, 'Instrucoes');
 
-    // Gera e baixa o arquivo
-    XLSX_lib.writeFile(wb, 'SGI_14001_Aspectos_Impactos_' + new Date().toISOString().slice(0,10) + '.xlsx');
+    XL.writeFile(wb, 'SGI_14001_Aspectos_Impactos_' + new Date().toISOString().slice(0,10) + '.xlsx');
   }
 
-  // Carrega SheetJS se necessário
   if (!window.XLSX) {
     var s = document.createElement('script');
     s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
     s.onload = doExport14001;
     document.head.appendChild(s);
-  } else {
-    doExport14001();
-  }
+  } else { doExport14001(); }
 }
 
-// ===== EXPORTAR ISO 45001 — XLSX via SheetJS =====
+// ===== EXPORTAR ISO 45001 — XLSX via SheetJS (com catálogo, dropdowns e fórmulas) =====
 function exportCSV45001() {
   var org = document.getElementById('org-name').value || 'Organizacao';
   var dt  = new Date().toLocaleDateString('pt-BR');
 
   function doExport45001() {
-    var XLSX_lib = window.XLSX;
-    if (!XLSX_lib) { alert('Erro: biblioteca XLSX não carregada.'); return; }
+    var XL = window.XLSX;
+    if (!XL) { alert('Biblioteca XLSX não carregada.'); return; }
 
-    var wb = XLSX_lib.utils.book_new();
+    var wb = XL.utils.book_new();
 
-    var cols45 = [
-      'Codigo (catalogo)',
-      'Atividade / Produto / Servico',
-      'Perigo SST',
-      'Risco / Consequencia',
-      'Condicao [N/A/E]',
-      'Probabilidade [1-5]',
-      'Severidade [1-5]',
-      'Grau do Risco (P x S)',
-      'Nivel do Risco',
-      'Controle Existente',
-      'Nivel Hierarquia [1-5]',
-      'Controle Adicional Necessario',
-      'Responsavel',
-      'Prazo',
-      'Area / Setor',
-      'Observacoes / NR Aplicavel'
+    // Catálogo SST
+    var CAT45 = [
+      ['Codigo','Perigo SST','Risco / Consequência Típica'],
+      ['S01','Trabalho em altura (>2m)','Queda com fraturas graves, TCE ou óbito'],
+      ['S02','Operação de máquinas com partes móveis','Esmagamento, amputação, cortes graves'],
+      ['S03','Manuseio de produtos químicos perigosos','Intoxicação, queimadura química, doenças ocupacionais'],
+      ['S04','Exposição ao ruído acima do limite (NR-15)','Perda auditiva induzida por ruído (PAIR)'],
+      ['S05','Exposição ao calor excessivo','Exaustão térmica, insolação, queimaduras'],
+      ['S06','Atividades com esforço repetitivo / posturas inadequadas','LER/DORT, tendinite, lombalgia'],
+      ['S07','Operação de empilhadeira / veículos internos','Atropelamento, colisão, queda de carga'],
+      ['S08','Trabalho em espaço confinado','Asfixia, intoxicação, soterramento'],
+      ['S09','Instalações elétricas / trabalho com energia','Choque elétrico, arco elétrico, queimadura, óbito'],
+      ['S10','Manuseio e levantamento de cargas pesadas','Lombalgia, hérnia de disco, distensão muscular'],
+      ['S11','Exposição a agentes biológicos','Infecções, doenças transmissíveis'],
+      ['S12','Atividades com ferramentas manuais cortantes','Cortes, perfurações, abrasões'],
+      ['S13','Exposição a vibrações (mãos-braços ou corpo inteiro)','SDBB, lombalgias, neuropatias'],
+      ['S14','Trabalho em superfícies escorregadias','Queda no mesmo nível com contusões ou fraturas'],
+      ['S15','Exposição a poeiras / fibras (sílica, amianto, etc.)','Silicose, asbestose, cânceres ocupacionais'],
+      ['S16','Trabalho noturno / turnos prolongados','Fadiga, distúrbios do sono, erros operacionais'],
+      ['S17','Incêndio / explosão','Queimaduras graves, intoxicação por fumaça, óbito'],
+      ['S18','Uso de EPI inadequado ou sem uso','Agravamento de todos os outros riscos'],
+      ['S19','Pressão psicológica / assédio moral','Burnout, ansiedade, depressão, afastamentos'],
+      ['S20','Exposição a radiações ionizantes','Cânceres, leucemia, danos genéticos'],
+      ['S21','Trabalho em ambientes com iluminação inadequada','Fadiga visual, acidentes por falta de visibilidade'],
+      ['S22','Contato com superfícies quentes / frias extremas','Queimaduras térmicas / criogênicas'],
+      ['S23','Uso de equipamentos de pressão (vasos, caldeiras)','Explosão, liberação de vapor, queimadura'],
+      ['S24','Transporte e armazenagem de materiais inflamáveis','Incêndio, explosão, intoxicação'],
+      ['S25','Trabalho em proximidade a linhas elétricas de alta tensão','Arco elétrico, eletrocussão'],
+      ['S26','Atividades com animais peçonhentos / vetores','Acidentes ofídicos, escorpiônicos, doenças'],
+      ['S27','Trabalho sob chuva / intempéries','Queda, choque elétrico, hipotermia'],
+      ['S28','Operação de caldeiras e vasos de pressão','Explosão, queimadura por vapor'],
+      ['S29','Falta de sinalização de segurança','Acidentes por desconhecimento de riscos'],
+      ['S30','Trabalho isolado / sem supervisão','Agravamento de acidentes por falta de socorro'],
     ];
 
-    var dataRows = [cols45];
+    var wsCat = XL.utils.aoa_to_sheet(CAT45);
+    wsCat['!cols'] = [{wch:10},{wch:45},{wch:55}];
+    XL.utils.book_append_sheet(wb, wsCat, 'Catalogo45001');
 
-    // Dados existentes do SGI
-    if (S.apItems && S.apItems.length) {
-      S.apItems.filter(function(a){ return a.type === 'sst'; }).forEach(function(a) {
-        dataRows.push([
-          a.catCode||'', a.activity||'', a.asp||'',
-          a.imp||'', a.cond||'N',
-          a.prob||'', a.sev||'', a.score||'',
-          {low:'Baixo',med:'Medio',high:'Alto',crit:'Critico'}[a.cls]||'',
-          a.control||'', a.hierarchy||'', a.addControl||'',
-          a.owner||'', a.deadline||'', a.sector||'', a.obs||''
-        ]);
-      });
+    // Hierarquias
+    var HIERARQ = [
+      '1-Eliminação','2-Substituição',
+      '3-Controles de engenharia','4-Controles administrativos','5-EPI'
+    ];
+
+    var HEADER45 = [
+      'Codigo','Atividade / Produto / Serviço','Perigo SST','Risco / Consequência',
+      'Condição [N/A/E]','Probabilidade [1-5]','Severidade [1-5]',
+      'Grau do Risco (P x S)','Nível do Risco',
+      'Controle Existente','Nível Hierarquia','Controle Adicional Necessário',
+      'Responsável','Prazo','Área / Setor','Observações / NR Aplicável'
+    ];
+
+    var dataRows45 = [HEADER45];
+    for (var r = 0; r < 50; r++) {
+      var rowNum = r + 3;
+      var colA = 'A' + rowNum;
+      var colF = 'F' + rowNum;
+      var colG = 'G' + rowNum;
+      var colH = 'H' + rowNum;
+      dataRows45.push([
+        { t:'s', v:'' },  // A: Código
+        { t:'s', v:'' },  // B: Atividade
+        // C: Perigo — PROCV
+        { t:'s', f:'IF('+colA+'="","",IFERROR(VLOOKUP('+colA+',Catalogo45001!$A:$B,2,0),"Código não encontrado"))' },
+        // D: Risco — PROCV
+        { t:'s', f:'IF('+colA+'="","",IFERROR(VLOOKUP('+colA+',Catalogo45001!$A:$C,3,0),""))' },
+        { t:'s', v:'' },  // E: Condição
+        { t:'n', v:null }, // F: Probabilidade
+        { t:'n', v:null }, // G: Severidade
+        // H: Grau = P x S
+        { t:'n', f:'IF(AND(ISNUMBER('+colF+'),ISNUMBER('+colG+')),'+colF+'*'+colG+',"")' },
+        // I: Nível de risco
+        { t:'s', f:'IF('+colH+'="","",IF('+colH+'>=17,"Crítico",IF('+colH+'>=10,"Alto",IF('+colH+'>=5,"Médio","Baixo"))))' },
+        { t:'s', v:'' },  // J: Controle existente
+        { t:'s', v:'' },  // K: Hierarquia
+        { t:'s', v:'' },  // L: Controle adicional
+        { t:'s', v:'' },  // M: Responsável
+        { t:'s', v:'' },  // N: Prazo
+        { t:'s', v:'' },  // O: Área
+        { t:'s', v:'' },  // P: Observações/NR
+      ]);
     }
 
-    // Exemplos se não houver dados
-    if (dataRows.length === 1) {
-      dataRows.push(['S02','Trabalho em telhados','Queda em nivel diferente (>2m)','Fratura grave, TCE, obito','N',2,5,10,'Alto','Linha de vida fixa','3-Eng.','Implementar ancoragem movel','Jose Silva','30/06/2026','Manutencao','NR-35']);
-      dataRows.push(['S07','Operacao de empilhadeira','Colisao com pedestre','Atropelamento com lesao grave','N',3,4,12,'Alto','Sinalizacao de piso','2-Subs.','Implantar barreira fisica','Ana Costa','31/07/2026','Logistica','NR-11']);
-      dataRows.push(['','','','','','','','','','','','','','','','']);
-    }
-
-    var ws45 = XLSX_lib.utils.aoa_to_sheet(dataRows);
-
+    var ws45 = XL.utils.aoa_to_sheet(dataRows45);
     ws45['!cols'] = [
-      {wch:16}, // Codigo
-      {wch:35}, // Atividade
-      {wch:35}, // Perigo
-      {wch:35}, // Risco/Consequencia
-      {wch:14}, // Condicao
-      {wch:16}, // Probabilidade
-      {wch:14}, // Severidade
-      {wch:16}, // Grau do risco
-      {wch:14}, // Nivel
-      {wch:30}, // Controle existente
-      {wch:18}, // Hierarquia
-      {wch:35}, // Controle adicional
-      {wch:20}, // Responsavel
-      {wch:14}, // Prazo
-      {wch:20}, // Area
-      {wch:30}, // Observacoes/NR
+      {wch:12},{wch:32},{wch:40},{wch:40},{wch:14},
+      {wch:16},{wch:14},{wch:16},{wch:14},
+      {wch:30},{wch:24},{wch:35},
+      {wch:20},{wch:14},{wch:20},{wch:30}
     ];
-
     ws45['!freeze'] = {xSplit:0, ySplit:1};
 
-    XLSX_lib.utils.book_append_sheet(wb, ws45, 'Perigos e Riscos');
+    // Dropdowns
+    if (!ws45['!dataValidation']) ws45['!dataValidation'] = [];
+    ws45['!dataValidation'].push({
+      sqref:'E2:E51', type:'list', formula1:'"N,A,E"', showDropDown:false
+    });
+    ws45['!dataValidation'].push({
+      sqref:'K2:K51', type:'list',
+      formula1:'"' + HIERARQ.join(',') + '"', showDropDown:false
+    });
 
-    // Aba instrucoes
-    var instrRows = [
-      ['SGI - ISO 45001 | LEVANTAMENTO DE PERIGOS E RISCOS DE SST'],
-      ['Organizacao: ' + org + '   |   Data: ' + dt],
+    XL.utils.book_append_sheet(wb, ws45, 'Perigos e Riscos');
+
+    // Instruções
+    var instrRows45 = [
+      ['SGI — ISO 45001 | LEVANTAMENTO DE PERIGOS E RISCOS DE SST'],
+      ['Organização: ' + org + '   |   Data: ' + dt],
       [''],
-      ['INSTRUCOES:'],
-      ['1. Preencha a aba "Perigos e Riscos" - nao altere o cabecalho'],
-      ['2. Uma linha por perigo/risco identificado'],
-      ['3. Use o Codigo do catalogo para padronizar (S01, S02...)'],
-      ['4. Grau do Risco = Probabilidade x Severidade'],
-      ['5. Salve e importe de volta no SGI pelo botao IMPORTAR 45001'],
+      ['COMO USAR:'],
+      ['1. Na aba "Perigos e Riscos", preencha a coluna A com o CÓDIGO do catálogo (ex.: S01, S09)'],
+      ['   → O Perigo e o Risco serão preenchidos AUTOMATICAMENTE por fórmula PROCV'],
+      ['2. Se o perigo não estiver no catálogo, deixe o código em branco e preencha manualmente C e D'],
+      ['3. Preencha Probabilidade (F) e Severidade (G) com valores de 1 a 5'],
+      ['   → Grau do Risco (H) e Nível do Risco (I) serão calculados AUTOMATICAMENTE'],
+      ['4. Preencha Controle Existente, Hierarquia (dropdown), Controle Adicional, Responsável etc.'],
+      ['5. Salve e importe de volta no SGI pelo botão IMPORTAR 45001'],
       [''],
-      ['HIERARQUIA DE CONTROLES (ISO 45001 Anexo A):'],
-      ['1-Eliminacao: remover o perigo completamente'],
-      ['2-Substituicao: substituir por algo menos perigoso'],
-      ['3-Controles de engenharia: isolamento, enclausuramento'],
-      ['4-Controles administrativos: procedimentos, treinamento'],
-      ['5-EPI: ultimo recurso, protecao individual'],
+      ['HIERARQUIA DE CONTROLES (ISO 45001):'],
+      ['1-Eliminação: remover o perigo completamente (mais eficaz)'],
+      ['2-Substituição: substituir por algo menos perigoso'],
+      ['3-Controles de engenharia: isolamento, enclausuramento, ventilação'],
+      ['4-Controles administrativos: procedimentos, treinamento, sinalização'],
+      ['5-EPI: proteção individual (último recurso)'],
       [''],
-      ['LEGENDA:'],
-      ['Probabilidade: 1=Muito baixa | 2=Baixa | 3=Media | 4=Alta | 5=Muito alta'],
-      ['Severidade: 1=Insignificante | 2=Menor | 3=Moderada | 4=Maior | 5=Catastrofica'],
-      ['Grau: 1-4 Baixo | 5-9 Medio | 10-16 Alto | 17-25 Critico'],
+      ['GRAU DO RISCO = Probabilidade x Severidade'],
+      ['1-4 = Baixo | 5-9 = Médio | 10-16 = Alto | 17-25 = Crítico'],
     ];
-    var wsInstr = XLSX_lib.utils.aoa_to_sheet(instrRows);
-    wsInstr['!cols'] = [{wch:80}];
-    XLSX_lib.utils.book_append_sheet(wb, wsInstr, 'Instrucoes');
+    var wsInstr45 = XL.utils.aoa_to_sheet(instrRows45);
+    wsInstr45['!cols'] = [{wch:90}];
+    XL.utils.book_append_sheet(wb, wsInstr45, 'Instrucoes');
 
-    XLSX_lib.writeFile(wb, 'SGI_45001_Perigos_Riscos_' + new Date().toISOString().slice(0,10) + '.xlsx');
+    XL.writeFile(wb, 'SGI_45001_Perigos_Riscos_' + new Date().toISOString().slice(0,10) + '.xlsx');
   }
 
   if (!window.XLSX) {
@@ -1481,10 +1582,9 @@ function exportCSV45001() {
     s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
     s.onload = doExport45001;
     document.head.appendChild(s);
-  } else {
-    doExport45001();
-  }
+  } else { doExport45001(); }
 }
+
 
 
 // ===== IMPORTAR ISO 14001 =====
