@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SGI — Formulário de Campo | ISO 14001 + 45001</title>
+<style>
+:root {
+  --green:#1D9E75;--green-d:#0d6b50;--green-l:#e8f5ef;
+  --blue:#185FA5;--blue-d:#0e3d6e;--blue-l:#dbeeff;
+  --red:#A32D2D;--red-l:#ffe4e4;
+  --amber:#BA7517;--amber-l:#fef0d0;
+  --purple:#533AB7;--purple-l:#eeedfe;
+  --gray:#9e9c99;--gray-l:#f7f6f3;--gray-b:#e0deda;
+  --text:#1a1917;--text2:#6b6967;--text3:#9e9c99;
+  --white:#fff;--r:10px;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 12px rgba(0,0,0,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gray-l);color:var(--text);min-height:100vh}
+input,select,textarea{width:100%;padding:9px 12px;border:1.5px solid var(--gray-b);border-radius:6px;font-family:inherit;font-size:13px;color:var(--text);background:var(--white);outline:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--green)}
+label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px}
+.btn{padding:10px 20px;border-radius:8px;border:none;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:var(--green-d)}
+.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:var(--blue-d)}
+.btn-outline{background:none;border:1.5px solid var(--gray-b);color:var(--text2)}.btn-outline:hover{border-color:var(--green);color:var(--green)}
+.btn-red{background:var(--red);color:#fff}
+.btn-sm{padding:6px 14px;font-size:12px;border-radius:6px}
+
+/* Tela inicial */
+.splash{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#0d6b50 0%,#1D9E75 50%,#185FA5 100%)}
+.splash-logo{font-size:48px;margin-bottom:16px}
+.splash-title{font-size:24px;font-weight:700;color:#fff;text-align:center;margin-bottom:8px}
+.splash-sub{font-size:14px;color:rgba(255,255,255,.8);text-align:center;margin-bottom:32px}
+.splash-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;max-width:500px}
+.splash-card{background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);border-radius:var(--r);padding:24px;cursor:pointer;text-align:center;transition:all .2s;backdrop-filter:blur(10px)}
+.splash-card:hover{background:rgba(255,255,255,.25);transform:translateY(-2px)}
+.splash-card-icon{font-size:32px;margin-bottom:10px}
+.splash-card-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:4px}
+.splash-card-sub{font-size:11px;color:rgba(255,255,255,.7)}
+
+/* App principal */
+.app{display:none;flex-direction:column;min-height:100vh}
+.app-header{background:linear-gradient(135deg,var(--green-d) 0%,var(--green) 100%);padding:16px 20px;color:#fff;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.app-header.sst{background:linear-gradient(135deg,var(--blue-d) 0%,var(--blue) 100%)}
+.app-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.app-header-title{font-size:16px;font-weight:700}
+.app-header-sub{font-size:11px;opacity:.8}
+.app-body{flex:1;padding:16px;max-width:900px;margin:0 auto;width:100%}
+
+/* Seções */
+.section{background:var(--white);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+.section-header{padding:14px 18px;background:var(--gray-l);border-bottom:1px solid var(--gray-b);font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+.section-body{padding:16px 18px}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.row-5{grid-template-columns:repeat(5,1fr);gap:12px}
+.row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+.field{margin-bottom:12px}
+
+/* Score widget */
+.score-widget{background:var(--gray-l);border-radius:8px;padding:14px;text-align:center;border:2px solid transparent;transition:all .3s}
+.score-num{font-size:36px;font-weight:800;line-height:1}
+.score-label{font-size:11px;font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.06em}
+.sig-badge{display:inline-block;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;margin-top:8px}
+.sig-s{background:var(--red-l);color:var(--red)}
+.sig-n{background:var(--green-l);color:var(--green-d)}
+
+/* Itens adicionados */
+.items-list{display:flex;flex-direction:column;gap:8px}
+.item-card{background:var(--white);border:1px solid var(--gray-b);border-radius:8px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start}
+.item-card.high{border-left:4px solid var(--red)}
+.item-card.med{border-left:4px solid var(--amber)}
+.item-card.low{border-left:4px solid var(--green)}
+.item-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.item-info{flex:1;min-width:0}
+.item-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.item-meta{font-size:11px;color:var(--text2);display:flex;gap:8px;flex-wrap:wrap}
+.item-actions{display:flex;gap:4px;flex-shrink:0}
+
+/* Chip tags */
+.chip{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;display:inline-block}
+.chip-env{background:var(--green-l);color:var(--green-d)}
+.chip-sst{background:var(--blue-l);color:var(--blue-d)}
+.chip-sig{background:var(--red-l);color:var(--red)}
+.chip-ok{background:var(--green-l);color:var(--green-d)}
+
+/* Footer barra */
+.app-footer{background:var(--white);border-top:1px solid var(--gray-b);padding:12px 20px;position:sticky;bottom:0;display:flex;gap:10px;justify-content:space-between;align-items:center;z-index:100}
+.footer-count{font-size:12px;color:var(--text2)}
+
+/* Auto-save indicator */
+.autosave{font-size:11px;color:var(--green);display:flex;align-items:center;gap:4px;opacity:0;transition:opacity .3s}
+.autosave.show{opacity:1}
+
+/* Ciclo de vida selector */
+.ciclo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px}
+.ciclo-btn{padding:8px 6px;border:1.5px solid var(--gray-b);border-radius:6px;background:var(--white);cursor:pointer;font-size:11px;text-align:center;transition:all .15s;font-family:inherit;line-height:1.3}
+.ciclo-btn:hover{border-color:var(--green);background:var(--green-l)}
+.ciclo-btn.on{border-color:var(--green);background:var(--green);color:#fff;font-weight:600}
+
+/* Hierarquia selector */
+.hier-grid{display:flex;flex-direction:column;gap:5px;margin-top:4px}
+.hier-btn{padding:8px 12px;border:1.5px solid var(--gray-b);border-radius:6px;background:var(--white);cursor:pointer;font-size:12px;text-align:left;transition:all .15s;font-family:inherit;display:flex;align-items:center;gap:8px}
+.hier-btn:hover{border-color:var(--blue);background:var(--blue-l)}
+.hier-btn.on{border-color:var(--blue);background:var(--blue);color:#fff;font-weight:600}
+.hier-num{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+
+/* Modal catálogo */
+.cat-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;overflow-y:auto;padding:16px}
+.cat-modal-bg.open{display:block}
+.cat-modal{background:var(--white);border-radius:var(--r);max-width:600px;margin:0 auto;overflow:hidden}
+.cat-modal-head{padding:16px 20px;background:var(--gray-l);border-bottom:1px solid var(--gray-b);display:flex;align-items:center;justify-content:space-between}
+.cat-modal-body{max-height:70vh;overflow-y:auto}
+.cat-item{padding:12px 16px;border-bottom:1px solid var(--gray-b);cursor:pointer;transition:background .1s;display:flex;gap:10px;align-items:flex-start}
+.cat-item:hover{background:var(--gray-l)}
+.cat-item:last-child{border-bottom:none}
+.cat-code{font-family:monospace;font-weight:700;font-size:11px;padding:3px 7px;border-radius:4px;flex-shrink:0;margin-top:1px}
+.cat-code-env{background:var(--green-l);color:var(--green-d)}
+.cat-code-sst{background:var(--blue-l);color:var(--blue-d)}
+.cat-asp{font-size:13px;font-weight:500;color:var(--text)}
+.cat-imp{font-size:11px;color:var(--text2);margin-top:2px}
+
+/* Responsivo mobile */
+@media(max-width:600px){
+  .row-2,.row-3,.row-5{grid-template-columns:repeat(5,1fr);gap:12px}
+.row-4{grid-template-columns:1fr}
+  .ciclo-grid{grid-template-columns:repeat(2,1fr)}
+  .splash-cards{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ TELA INICIAL ═══ -->
+<div id="splash" class="splash">
+  <div class="splash-logo">🏭</div>
+  <div class="splash-title">SGI — Formulário de Campo</div>
+  <div class="splash-sub">ISO 14001:2015 + ISO 45001:2018<br>Funciona offline • Salva automaticamente</div>
+  <div class="splash-cards">
+    <div class="splash-card" onclick="startApp('env')">
+      <div class="splash-card-icon">🌿</div>
+      <div class="splash-card-title">ISO 14001</div>
+      <div class="splash-card-sub">Aspectos &amp; Impactos Ambientais</div>
+    </div>
+    <div class="splash-card" onclick="startApp('sst')">
+      <div class="splash-card-icon">⛑️</div>
+      <div class="splash-card-title">ISO 45001</div>
+      <div class="splash-card-sub">Perigos &amp; Riscos de SST</div>
+    </div>
+  </div>
+  <div id="splash-restore" style="margin-top:24px;display:none">
+    <button class="btn btn-outline" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.4)" onclick="restoreSession()">
+      📂 Continuar sessão anterior
+    </button>
+  </div>
+</div>
+
+<!-- ═══ APP PRINCIPAL ═══ -->
+<div id="app" class="app">
+
+  <!-- Header -->
+  <div class="app-header" id="app-header">
+    <div class="app-header-top">
+      <div>
+        <div class="app-header-title" id="app-title">Formulário de Campo</div>
+        <div class="app-header-sub" id="app-sub">ISO 14001:2015 · Cláusula 6.1.2</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="autosave" id="autosave-ind">✓ Salvo</div>
+        <button class="btn btn-sm btn-outline" style="color:#fff;border-color:rgba(255,255,255,.4)" onclick="showCatalogo()">📖 Catálogo</button>
+        <button class="btn btn-sm btn-outline" style="color:#fff;border-color:rgba(255,255,255,.4)" onclick="backToSplash()">← Sair</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-body">
+
+    <!-- Dados gerais -->
+    <div class="section">
+      <div class="section-header">📋 Dados Gerais do Levantamento</div>
+      <div class="section-body">
+        <div class="row-3">
+          <div class="field"><label>Organização</label><input type="text" id="f-org" placeholder="Nome da empresa" oninput="autoSave()"></div>
+          <div class="field"><label>Responsável</label><input type="text" id="f-resp" placeholder="Nome do responsável" oninput="autoSave()"></div>
+          <div class="field"><label>Data do levantamento</label><input type="date" id="f-data" oninput="autoSave()"></div>
+        </div>
+        <div class="row-3">
+          <div class="field">
+            <label>Área / Setor</label>
+            <input type="text" id="f-area" placeholder="Ex.: Produção, Manutenção, Logística" oninput="autoSave();updateAreaSelect()">
+          </div>
+          <div class="field">
+            <label>Processo</label>
+            <input type="text" id="f-processo" placeholder="Ex.: Solda, Pintura, Expedição" oninput="autoSave()">
+          </div>
+          <div class="field">
+            <label>Atividade</label>
+            <input type="text" id="f-atividade" placeholder="Ex.: Limpeza de peças, Carregamento" oninput="autoSave()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulário de inclusão -->
+    <div class="section" id="form-14001">
+      <div class="section-header">🌿 Novo Aspecto Ambiental</div>
+      <div class="section-body">
+        <!-- Código + Aspecto + Impacto -->
+        <div class="row-3">
+          <div class="field">
+            <label>Código do catálogo</label>
+            <input type="text" id="f-codigo" placeholder="Ex.: A09" maxlength="4"
+              oninput="onCodeInput14()" style="font-family:monospace;font-weight:700;font-size:16px;text-align:center;text-transform:uppercase">
+            <div style="font-size:10px;color:var(--green-d);margin-top:4px;cursor:pointer" onclick="showCatalogo()">📖 Ver catálogo completo</div>
+          </div>
+          <div class="field" style="grid-column:span 2">
+            <label>Aspecto Ambiental</label>
+            <input type="text" id="f-aspecto" placeholder="Preenchido pelo código ou digite aqui">
+          </div>
+        </div>
+        <div class="field">
+          <label>Impacto Ambiental</label>
+          <input type="text" id="f-impacto" placeholder="Qual é o impacto sobre o meio ambiente?">
+        </div>
+
+        <!-- Etapa do Ciclo de Vida -->
+        <div class="field">
+          <label>Etapa do Ciclo de Vida</label>
+          <div class="ciclo-grid" id="ciclo-grid">
+            <button class="ciclo-btn" onclick="setCiclo(this,'1-Aquisição de matérias-primas')">1. Aquisição<br>de mat.-primas</button>
+            <button class="ciclo-btn" onclick="setCiclo(this,'2-Design/Projeto')">2. Design<br>/ Projeto</button>
+            <button class="ciclo-btn" onclick="setCiclo(this,'3-Produção/Operação')">3. Produção<br>/ Operação</button>
+            <button class="ciclo-btn" onclick="setCiclo(this,'4-Transporte/Entrega')">4. Transporte<br>/ Entrega</button>
+            <button class="ciclo-btn" onclick="setCiclo(this,'5-Utilização pelo cliente')">5. Uso pelo<br>cliente</button>
+            <button class="ciclo-btn" onclick="setCiclo(this,'6-Tratamento fim de vida')">6. Fim de<br>vida</button>
+          </div>
+          <input type="hidden" id="f-ciclo" value="">
+        </div>
+
+        <!-- P × S + Condição -->
+        <div class="row-5" style="align-items:start">
+          <div class="field">
+            <label>Condição</label>
+            <select id="f-cond">
+              <option value="N">N — Normal</option>
+              <option value="A">A — Anormal</option>
+              <option value="E">E — Emergência</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Frequência</label>
+            <select id="f-freq" onchange="calcScore14()">
+              <option value="">—</option>
+              <option value="1">1 — Rara (&lt;1x/ano)</option>
+              <option value="2">2 — Ocasional (1–12x/ano)</option>
+              <option value="3">3 — Frequente (mensal)</option>
+              <option value="4">4 — Muito freq. (semanal)</option>
+              <option value="5">5 — Contínua (diária)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Probabilidade</label>
+            <select id="f-prob" onchange="calcScore14()">
+              <option value="">—</option>
+              <option value="1">1 — Muito improvável</option>
+              <option value="2">2 — Improvável</option>
+              <option value="3">3 — Possível</option>
+              <option value="4">4 — Provável</option>
+              <option value="5">5 — Muito provável</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Severidade</label>
+            <select id="f-sev" onchange="calcScore14()">
+              <option value="">—</option>
+              <option value="1">1 — Insignificante</option>
+              <option value="2">2 — Menor</option>
+              <option value="3">3 — Moderada</option>
+              <option value="4">4 — Maior</option>
+              <option value="5">5 — Catastrófica</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Abrangência</label>
+            <select id="f-abrang" onchange="calcScore14()">
+              <option value="">—</option>
+              <option value="1">1 — Local (instalação)</option>
+              <option value="2">2 — Vizinhança</option>
+              <option value="3">3 — Comunidade / bairro</option>
+              <option value="4">4 — Município</option>
+              <option value="5">5 — Regional</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Score e Significância</label>
+            <div class="score-widget" id="score-widget-14">
+              <div class="score-num" id="score-num-14" style="color:var(--gray)">—</div>
+              <div class="score-label" id="score-nivel-14" style="color:var(--gray)">Aguardando</div>
+              <div id="sig-badge-14"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Observações / Controles existentes</label>
+          <textarea id="f-obs" rows="2" placeholder="Observações, controles já existentes, NR aplicável..."></textarea>
+        </div>
+
+        <button class="btn btn-green" onclick="addItem14001()" style="width:100%;margin-top:4px">
+          + Adicionar aspecto ao levantamento
+        </button>
+      </div>
+    </div>
+
+    <!-- Formulário 45001 -->
+    <div class="section" id="form-45001" style="display:none">
+      <div class="section-header">⛑️ Novo Perigo / Risco SST</div>
+      <div class="section-body">
+        <div class="row-3">
+          <div class="field">
+            <label>Código do catálogo</label>
+            <input type="text" id="f-codigo45" placeholder="Ex.: S09" maxlength="4"
+              oninput="onCodeInput45()" style="font-family:monospace;font-weight:700;font-size:16px;text-align:center;text-transform:uppercase">
+            <div style="font-size:10px;color:var(--blue-d);margin-top:4px;cursor:pointer" onclick="showCatalogo()">📖 Ver catálogo completo</div>
+          </div>
+          <div class="field" style="grid-column:span 2">
+            <label>Perigo SST</label>
+            <input type="text" id="f-perigo" placeholder="Preenchido pelo código ou digite aqui">
+          </div>
+        </div>
+        <div class="field">
+          <label>Risco / Consequência</label>
+          <input type="text" id="f-risco" placeholder="Qual é o risco ou consequência para o trabalhador?">
+        </div>
+
+        <!-- Hierarquia de Controles -->
+        <div class="field">
+          <label>Hierarquia de Controles (ISO 45001 Anexo A)</label>
+          <div class="hier-grid" id="hier-grid">
+            <button class="hier-btn" onclick="setHier(this,'1-Eliminação')"><div class="hier-num">1</div>Eliminação — remover o perigo completamente</button>
+            <button class="hier-btn" onclick="setHier(this,'2-Substituição')"><div class="hier-num">2</div>Substituição — substituir por algo menos perigoso</button>
+            <button class="hier-btn" onclick="setHier(this,'3-Controles de engenharia')"><div class="hier-num">3</div>Controles de engenharia — isolamento, enclausuramento</button>
+            <button class="hier-btn" onclick="setHier(this,'4-Controles administrativos')"><div class="hier-num">4</div>Controles administrativos — procedimentos, treinamento</button>
+            <button class="hier-btn" onclick="setHier(this,'5-EPI')"><div class="hier-num">5</div>EPI — proteção individual (último recurso)</button>
+          </div>
+          <input type="hidden" id="f-hierarquia" value="">
+        </div>
+
+        <div class="row-5" style="align-items:start">
+          <div class="field">
+            <label>Condição</label>
+            <select id="f-cond45">
+              <option value="N">N — Normal</option>
+              <option value="A">A — Anormal</option>
+              <option value="E">E — Emergência</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Frequência</label>
+            <select id="f-freq45" onchange="calcScore45()">
+              <option value="">—</option>
+              <option value="1">1 — Rara (&lt;1x/ano)</option>
+              <option value="2">2 — Ocasional</option>
+              <option value="3">3 — Frequente (mensal)</option>
+              <option value="4">4 — Muito freq. (semanal)</option>
+              <option value="5">5 — Contínua (diária)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Probabilidade</label>
+            <select id="f-prob45" onchange="calcScore45()">
+              <option value="">—</option>
+              <option value="1">1 — Muito improvável</option>
+              <option value="2">2 — Improvável</option>
+              <option value="3">3 — Possível</option>
+              <option value="4">4 — Provável</option>
+              <option value="5">5 — Muito provável</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Severidade</label>
+            <select id="f-sev45" onchange="calcScore45()">
+              <option value="">—</option>
+              <option value="1">1 — Insignificante</option>
+              <option value="2">2 — Menor</option>
+              <option value="3">3 — Moderada</option>
+              <option value="4">4 — Maior</option>
+              <option value="5">5 — Catastrófica</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Abrangência</label>
+            <select id="f-abrang45" onchange="calcScore45()">
+              <option value="">—</option>
+              <option value="1">1 — Local (instalação)</option>
+              <option value="2">2 — Vizinhança</option>
+              <option value="3">3 — Comunidade / bairro</option>
+              <option value="4">4 — Município</option>
+              <option value="5">5 — Regional</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Grau e Nível do Risco</label>
+            <div class="score-widget" id="score-widget-45">
+              <div class="score-num" id="score-num-45" style="color:var(--gray)">—</div>
+              <div class="score-label" id="score-nivel-45" style="color:var(--gray)">Aguardando</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label>Controle existente</label>
+            <input type="text" id="f-ctrl" placeholder="Ex.: Linha de vida, sinalização de piso">
+          </div>
+          <div class="field">
+            <label>Controle adicional necessário</label>
+            <input type="text" id="f-ctrl-add" placeholder="Ex.: Implantar ancoragem móvel">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Observações / NR Aplicável</label>
+          <textarea id="f-obs45" rows="2" placeholder="Observações, NR-35, NR-12, NR-11..."></textarea>
+        </div>
+
+        <button class="btn btn-blue" onclick="addItem45001()" style="width:100%;margin-top:4px">
+          + Adicionar perigo ao levantamento
+        </button>
+      </div>
+    </div>
+
+    <!-- Lista de itens adicionados -->
+    <div class="section">
+      <div class="section-header">
+        📋 Itens do Levantamento
+        <span id="items-count" style="font-size:11px;font-weight:400;color:var(--text2);margin-left:8px">0 itens</span>
+      </div>
+      <div class="section-body">
+        <div id="items-list" class="items-list">
+          <div style="text-align:center;padding:24px;color:var(--text3);font-size:13px">
+            Nenhum item adicionado ainda.<br>Preencha o formulário acima e clique em "+ Adicionar".
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /app-body -->
+
+  <!-- Footer -->
+  <div class="app-footer">
+    <div class="footer-count" id="footer-count">0 itens no levantamento</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sm btn-outline" onclick="clearAll()" style="color:var(--red);border-color:var(--red)">🗑️ Limpar</button>
+      <button class="btn btn-sm" style="background:var(--purple);color:#fff;border-radius:6px;font-weight:600" onclick="exportJSON()">⬇️ Exportar JSON</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- Modal Catálogo -->
+<div class="cat-modal-bg" id="cat-modal">
+  <div class="cat-modal">
+    <div class="cat-modal-head">
+      <div style="font-size:14px;font-weight:700" id="cat-modal-title">Catálogo</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="cat-search" placeholder="🔍 Pesquisar..." style="width:180px;font-size:12px;padding:6px 10px" oninput="renderCatalogo()">
+        <button onclick="closeCatalogo()" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--text2)">×</button>
+      </div>
+    </div>
+    <div class="cat-modal-body" id="cat-list"></div>
+  </div>
+</div>
+
+<script>
+// ═══ CATÁLOGOS ═══════════════════════════════════════════════════
+var CAT14 = [
+  ['A01','Geração de resíduo sólido não perigoso','Comprometimento da capacidade de disposição de resíduos sólidos'],
+  ['A02','Geração de resíduo perigoso (Classe I)','Potencial alteração da qualidade do solo e dos recursos hídricos subterrâneos'],
+  ['A03','Consumo de energia elétrica','Esgotamento de recursos energéticos não renováveis / contribuição ao efeito estufa'],
+  ['A04','Consumo de água','Comprometimento da disponibilidade dos recursos hídricos'],
+  ['A05','Lançamento de efluente líquido','Potencial alteração da qualidade dos corpos d\'água superficiais'],
+  ['A06','Emissão atmosférica (COVs / fumos / poeiras)','Alteração da qualidade do ar / comprometimento da saúde humana'],
+  ['A07','Consumo de matéria-prima / insumos','Esgotamento de recursos naturais renováveis e não renováveis'],
+  ['A08','Geração de ruído e vibração','Alteração da qualidade sonora / incômodo à comunidade e fauna'],
+  ['A09','Potencial vazamento ou derramamento de óleo / produto químico','Potencial alteração da qualidade do solo e dos recursos hídricos'],
+  ['A10','Emissão de CO₂ e gases de efeito estufa (GEE)','Contribuição ao aquecimento global / alteração climática'],
+  ['A11','Consumo excessivo de combustível','Esgotamento de recursos não renováveis / emissão de GEE'],
+  ['A12','Geração de efluente sanitário','Potencial alteração da qualidade dos recursos hídricos superficiais e subterrâneos'],
+  ['A13','Geração de embalagens e resíduos de papel','Comprometimento da capacidade de disposição de resíduos sólidos'],
+  ['A14','Potencial vazamento de óleo lubrificante','Potencial alteração da qualidade do solo e dos recursos hídricos subterrâneos'],
+  ['A15','Armazenamento inadequado de produtos químicos','Risco de alteração da qualidade do solo e dos recursos hídricos'],
+  ['A16','Uso de substâncias perigosas','Risco de alteração da qualidade ambiental e comprometimento da saúde humana'],
+  ['A17','Emissão de material particulado','Alteração da qualidade do ar / comprometimento da visibilidade e saúde'],
+  ['A18','Geração de resíduo de construção civil (RCC)','Comprometimento da qualidade do solo / alteração da drenagem local'],
+  ['A19','Descarte inadequado de lâmpadas fluorescentes','Risco de alteração da qualidade do solo por substâncias tóxicas'],
+  ['A20','Descarte inadequado de pilhas e baterias','Risco de alteração da qualidade do solo por metais pesados'],
+  ['A21','Consumo de papel e materiais de escritório','Esgotamento de recursos florestais / geração de resíduos sólidos'],
+  ['A22','Uso de refrigerantes (CFC/HFC)','Comprometimento da camada de ozônio / contribuição ao efeito estufa'],
+  ['A23','Disposição inadequada de resíduos sólidos','Alteração da qualidade do solo / comprometimento da drenagem e paisagem'],
+  ['A24','Supressão de vegetação / impermeabilização','Redução da biodiversidade / alteração do ciclo hidrológico local'],
+  ['A25','Geração de odores','Alteração da qualidade do ar / incômodo à comunidade do entorno'],
+];
+
+var CAT45 = [
+  ['S01','Trabalho em altura (>2m)','Queda com fraturas graves, TCE ou óbito'],
+  ['S02','Operação de máquinas com partes móveis','Esmagamento, amputação, cortes graves'],
+  ['S03','Manuseio de produtos químicos perigosos','Intoxicação, queimadura química, doenças ocupacionais'],
+  ['S04','Exposição ao ruído acima do limite (NR-15)','Perda auditiva induzida por ruído (PAIR)'],
+  ['S05','Exposição ao calor excessivo','Exaustão térmica, insolação, queimaduras'],
+  ['S06','Atividades com esforço repetitivo / posturas inadequadas','LER/DORT, tendinite, lombalgia'],
+  ['S07','Operação de empilhadeira / veículos internos','Atropelamento, colisão, queda de carga'],
+  ['S08','Trabalho em espaço confinado','Asfixia, intoxicação, soterramento'],
+  ['S09','Instalações elétricas / trabalho com energia','Choque elétrico, arco elétrico, queimadura, óbito'],
+  ['S10','Manuseio e levantamento de cargas pesadas','Lombalgia, hérnia de disco, distensão muscular'],
+  ['S11','Exposição a agentes biológicos','Infecções, doenças transmissíveis'],
+  ['S12','Atividades com ferramentas manuais cortantes','Cortes, perfurações, abrasões'],
+  ['S13','Exposição a vibrações (mãos-braços ou corpo inteiro)','SDBB, lombalgias, neuropatias'],
+  ['S14','Trabalho em superfícies escorregadias','Queda no mesmo nível com contusões ou fraturas'],
+  ['S15','Exposição a poeiras / fibras (sílica, amianto)','Silicose, asbestose, cânceres ocupacionais'],
+  ['S16','Trabalho noturno / turnos prolongados','Fadiga, distúrbios do sono, erros operacionais'],
+  ['S17','Incêndio / explosão','Queimaduras graves, intoxicação por fumaça, óbito'],
+  ['S18','Uso de EPI inadequado ou sem uso','Agravamento de todos os outros riscos'],
+  ['S19','Pressão psicológica / assédio moral','Burnout, ansiedade, depressão, afastamentos'],
+  ['S20','Exposição a radiações ionizantes','Cânceres, leucemia, danos genéticos'],
+  ['S21','Iluminação inadequada no posto de trabalho','Fadiga visual, acidentes por falta de visibilidade'],
+  ['S22','Contato com superfícies quentes / frias extremas','Queimaduras térmicas / criogênicas'],
+  ['S23','Uso de equipamentos de pressão (vasos, caldeiras)','Explosão, liberação de vapor, queimadura'],
+  ['S24','Armazenagem de materiais inflamáveis','Incêndio, explosão, intoxicação'],
+  ['S25','Trabalho próximo a linhas de alta tensão','Arco elétrico, eletrocussão'],
+  ['S26','Atividades com animais peçonhentos / vetores','Acidentes ofídicos, escorpiônicos, doenças'],
+  ['S27','Trabalho sob chuva / intempéries','Queda, choque elétrico, hipotermia'],
+  ['S28','Operação de caldeiras e vasos de pressão','Explosão, queimadura por vapor'],
+  ['S29','Falta de sinalização de segurança','Acidentes por desconhecimento de riscos'],
+  ['S30','Trabalho isolado / sem supervisão','Agravamento de acidentes por falta de socorro'],
+];
+
+// ═══ ESTADO ══════════════════════════════════════════════════════
+var APP = { mode: null, items: [], ciclo: '', hierarquia: '' };
+var AUTOSAVE_TIMER = null;
+
+// ═══ NAVEGAÇÃO ═══════════════════════════════════════════════════
+function startApp(mode) {
+  APP.mode = mode;
+  APP.items = [];
+  APP.ciclo = '';
+  APP.hierarquia = '';
+
+  document.getElementById('splash').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+
+  var header = document.getElementById('app-header');
+  var title  = document.getElementById('app-title');
+  var sub    = document.getElementById('app-sub');
+
+  if (mode === 'env') {
+    header.className = 'app-header';
+    title.textContent = '🌿 Levantamento de Aspectos e Impactos';
+    sub.textContent   = 'ISO 14001:2015 · Cláusula 6.1.2 · Perspectiva de ciclo de vida';
+    document.getElementById('form-14001').style.display = 'block';
+    document.getElementById('form-45001').style.display = 'none';
+  } else {
+    header.className = 'app-header sst';
+    title.textContent = '⛑️ Levantamento de Perigos e Riscos SST';
+    sub.textContent   = 'ISO 45001:2018 · Cláusula 6.1.2 · Hierarquia de controles';
+    document.getElementById('form-14001').style.display = 'none';
+    document.getElementById('form-45001').style.display = 'block';
+  }
+
+  // Data atual
+  document.getElementById('f-data').value = new Date().toISOString().slice(0,10);
+  renderItems();
+  checkRestore();
+}
+
+function backToSplash() {
+  if (APP.items.length > 0 && !confirm('Tem ' + APP.items.length + ' item(ns) não exportado(s). Deseja sair mesmo assim?')) return;
+  document.getElementById('splash').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+// ═══ CATÁLOGO ════════════════════════════════════════════════════
+function showCatalogo() {
+  document.getElementById('cat-modal-title').textContent =
+    APP.mode === 'env' ? '📖 Catálogo — Aspectos Ambientais (A01–A25)' : '📖 Catálogo — Perigos SST (S01–S30)';
+  document.getElementById('cat-search').value = '';
+  renderCatalogo();
+  document.getElementById('cat-modal').classList.add('open');
+}
+
+function closeCatalogo() {
+  document.getElementById('cat-modal').classList.remove('open');
+}
+
+function renderCatalogo() {
+  var q   = document.getElementById('cat-search').value.toLowerCase();
+  var cat = APP.mode === 'env' ? CAT14 : CAT45;
+  var el  = document.getElementById('cat-list');
+  var items = q ? cat.filter(function(c){
+    return c[0].toLowerCase().includes(q) || c[1].toLowerCase().includes(q) || c[2].toLowerCase().includes(q);
+  }) : cat;
+
+  el.innerHTML = items.map(function(c) {
+    var css = APP.mode === 'env' ? 'cat-code-env' : 'cat-code-sst';
+    return '<div class="cat-item" onclick="selectFromCatalog(\'' + c[0] + '\')">'
+      + '<span class="cat-code ' + css + '">' + c[0] + '</span>'
+      + '<div><div class="cat-asp">' + c[1] + '</div>'
+      + '<div class="cat-imp">' + c[2] + '</div></div>'
+      + '</div>';
+  }).join('') || '<div style="padding:24px;text-align:center;color:var(--text3)">Nenhum resultado encontrado.</div>';
+}
+
+function selectFromCatalog(code) {
+  if (APP.mode === 'env') {
+    document.getElementById('f-codigo').value = code;
+    onCodeInput14();
+  } else {
+    document.getElementById('f-codigo45').value = code;
+    onCodeInput45();
+  }
+  closeCatalogo();
+}
+
+// ═══ PREENCHIMENTO AUTOMÁTICO ════════════════════════════════════
+function onCodeInput14() {
+  var code = document.getElementById('f-codigo').value.toUpperCase().trim();
+  document.getElementById('f-codigo').value = code;
+  var cat = CAT14.find(function(c){ return c[0] === code; });
+  if (cat) {
+    if (!document.getElementById('f-aspecto').value) document.getElementById('f-aspecto').value = cat[1];
+    if (!document.getElementById('f-impacto').value) document.getElementById('f-impacto').value = cat[2];
+    document.getElementById('f-aspecto').style.borderColor = 'var(--green)';
+    document.getElementById('f-impacto').style.borderColor = 'var(--green)';
+    setTimeout(function(){
+      document.getElementById('f-aspecto').style.borderColor = '';
+      document.getElementById('f-impacto').style.borderColor = '';
+    }, 2000);
+  }
+}
+
+function onCodeInput45() {
+  var code = document.getElementById('f-codigo45').value.toUpperCase().trim();
+  document.getElementById('f-codigo45').value = code;
+  var cat = CAT45.find(function(c){ return c[0] === code; });
+  if (cat) {
+    if (!document.getElementById('f-perigo').value) document.getElementById('f-perigo').value = cat[1];
+    if (!document.getElementById('f-risco').value)  document.getElementById('f-risco').value  = cat[2];
+    document.getElementById('f-perigo').style.borderColor = 'var(--blue)';
+    document.getElementById('f-risco').style.borderColor  = 'var(--blue)';
+    setTimeout(function(){
+      document.getElementById('f-perigo').style.borderColor = '';
+      document.getElementById('f-risco').style.borderColor  = '';
+    }, 2000);
+  }
+}
+
+// ═══ CICLO DE VIDA ════════════════════════════════════════════════
+function setCiclo(btn, val) {
+  document.querySelectorAll('#ciclo-grid .ciclo-btn').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  APP.ciclo = val;
+  document.getElementById('f-ciclo').value = val;
+}
+
+// ═══ HIERARQUIA ══════════════════════════════════════════════════
+function setHier(btn, val) {
+  document.querySelectorAll('#hier-grid .hier-btn').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  APP.hierarquia = val;
+  document.getElementById('f-hierarquia').value = val;
+}
+
+// ═══ CÁLCULO DE SCORE ════════════════════════════════════════════
+function scoreInfo(score) {
+  // Nova matriz F×P×S×A — escala 1–625
+  if (!score) return {color:'var(--gray)', nivel:'Aguardando'};
+  if (score >= 250) return {color:'var(--red)',   nivel:'CRÍTICO'};
+  if (score >= 100) return {color:'#E85D24',      nivel:'ALTO'};
+  if (score >= 25)  return {color:'var(--amber)', nivel:'MÉDIO'};
+  return               {color:'var(--green)',      nivel:'BAIXO'};
+}
+
+function calcScore14() {
+  var f = parseInt(document.getElementById('f-freq').value)   || 0;
+  var p = parseInt(document.getElementById('f-prob').value)   || 0;
+  var s = parseInt(document.getElementById('f-sev').value)    || 0;
+  var a = parseInt(document.getElementById('f-abrang').value) || 0;
+  var score = f && p && s && a ? f * p * s * a : 0;
+  var info  = scoreInfo(score);
+  var numEl = document.getElementById('score-num-14');
+  var nivEl = document.getElementById('score-nivel-14');
+  var sigEl = document.getElementById('sig-badge-14');
+  var widEl = document.getElementById('score-widget-14');
+
+  numEl.textContent = score || '—';
+  numEl.style.color = info.color;
+  nivEl.textContent = info.nivel;
+  nivEl.style.color = info.color;
+  widEl.style.borderColor = score ? info.color : 'transparent';
+  widEl.style.background  = score ? info.color + '10' : 'var(--gray-l)';
+
+  if (score) {
+    var sig = score >= 50 ? 'S' : 'N';
+    sigEl.innerHTML = '<span class="sig-badge ' + (sig==='S'?'sig-s':'sig-n') + '">'
+      + (sig==='S' ? '⚠️ Significativo' : '✅ Não significativo') + '</span>';
+  } else {
+    sigEl.innerHTML = '';
+  }
+}
+
+function calcScore45() {
+  var f = parseInt(document.getElementById('f-freq45').value)   || 0;
+  var p = parseInt(document.getElementById('f-prob45').value)   || 0;
+  var s = parseInt(document.getElementById('f-sev45').value)    || 0;
+  var a = parseInt(document.getElementById('f-abrang45').value) || 0;
+  var score = f && p && s && a ? f * p * s * a : 0;
+  var info  = scoreInfo(score);
+  var numEl = document.getElementById('score-num-45');
+  var nivEl = document.getElementById('score-nivel-45');
+  var widEl = document.getElementById('score-widget-45');
+
+  numEl.textContent = score || '—';
+  numEl.style.color = info.color;
+  nivEl.textContent = info.nivel;
+  nivEl.style.color = info.color;
+  widEl.style.borderColor = score ? info.color : 'transparent';
+  widEl.style.background  = score ? info.color + '10' : 'var(--gray-l)';
+}
+
+// ═══ ADICIONAR ITENS ════════════════════════════════════════════
+function addItem14001() {
+  var asp  = document.getElementById('f-aspecto').value.trim();
+  var imp  = document.getElementById('f-impacto').value.trim();
+  var prob = parseInt(document.getElementById('f-prob').value) || 0;
+  var sev  = parseInt(document.getElementById('f-sev').value)  || 0;
+
+  var freq  = parseInt(document.getElementById('f-freq').value)   || 0;
+  var abrang= parseInt(document.getElementById('f-abrang').value) || 0;
+  if (!asp)  { alert('Informe o Aspecto Ambiental.'); document.getElementById('f-aspecto').focus(); return; }
+  if (!imp)  { alert('Informe o Impacto Ambiental.'); document.getElementById('f-impacto').focus(); return; }
+  if (!freq || !prob || !sev || !abrang) { alert('Preencha Frequência, Probabilidade, Severidade e Abrangência.'); return; }
+  if (!APP.ciclo) { alert('Selecione a Etapa do Ciclo de Vida.'); return; }
+
+  var score = freq * prob * sev * abrang;
+  APP.items.push({
+    type:      'env',
+    codigo:    document.getElementById('f-codigo').value.trim(),
+    asp:       asp, imp: imp,
+    ciclo:     APP.ciclo,
+    cond:      document.getElementById('f-cond').value,
+    freq:      freq, prob: prob, sev: sev, abrang: abrang, score: score,
+    cls:       score>=250?'crit':score>=100?'high':score>=25?'med':'low',
+    sig:       score >= 50 ? 'S' : 'N',
+    sigTexto:  score >= 50 ? 'Significativo (score '+score+' ≥ 50)' : 'Não significativo (score '+score+' < 50)',
+    obs:       document.getElementById('f-obs').value.trim(),
+    area:      document.getElementById('f-area').value.trim(),
+    processo:  document.getElementById('f-processo').value.trim(),
+    atividade: document.getElementById('f-atividade').value.trim(),
+    responsavel: document.getElementById('f-resp').value.trim(),
+    data:      document.getElementById('f-data').value,
+    org:       document.getElementById('f-org').value.trim(),
+  });
+
+  clearForm14();
+  renderItems();
+  autoSave();
+  // Scroll para a lista
+  document.getElementById('items-list').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function addItem45001() {
+  var per  = document.getElementById('f-perigo').value.trim();
+  var ris  = document.getElementById('f-risco').value.trim();
+  var prob = parseInt(document.getElementById('f-prob45').value) || 0;
+  var sev  = parseInt(document.getElementById('f-sev45').value)  || 0;
+
+  if (!per)  { alert('Informe o Perigo SST.'); document.getElementById('f-perigo').focus(); return; }
+  if (!prob || !sev) { alert('Informe Probabilidade e Severidade.'); return; }
+  if (!APP.hierarquia) { alert('Selecione o Nível de Hierarquia de Controles.'); return; }
+
+  var score = freq45 * prob * sev * abrang45;
+  APP.items.push({
+    type:       'sst',
+    codigo:     document.getElementById('f-codigo45').value.trim(),
+    asp:        per, imp: ris,
+    hierarquia: APP.hierarquia,
+    cond:       document.getElementById('f-cond45').value,
+    freq:       freq45, prob: prob, sev: sev, abrang: abrang45, score: score,
+    cls:        score>=250?'crit':score>=100?'high':score>=25?'med':'low',
+    nivel:      score>=250?'Crítico':score>=100?'Alto':score>=25?'Médio':'Baixo',
+    controle:   document.getElementById('f-ctrl').value.trim(),
+    addControl: document.getElementById('f-ctrl-add').value.trim(),
+    obs:        document.getElementById('f-obs45').value.trim(),
+    area:       document.getElementById('f-area').value.trim(),
+    processo:   document.getElementById('f-processo').value.trim(),
+    atividade:  document.getElementById('f-atividade').value.trim(),
+    responsavel: document.getElementById('f-resp').value.trim(),
+    data:       document.getElementById('f-data').value,
+    org:        document.getElementById('f-org').value.trim(),
+  });
+
+  clearForm45();
+  renderItems();
+  autoSave();
+  document.getElementById('items-list').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function clearForm14() {
+  ['f-codigo','f-aspecto','f-impacto','f-obs'].forEach(function(id){
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('f-prob').value = '';
+  document.getElementById('f-sev').value  = '';
+  document.getElementById('f-cond').value = 'N';
+  document.querySelectorAll('#ciclo-grid .ciclo-btn').forEach(function(b){ b.classList.remove('on'); });
+  APP.ciclo = '';
+  document.getElementById('f-ciclo').value = '';
+  document.getElementById('score-num-14').textContent = '—';
+  document.getElementById('score-num-14').style.color = 'var(--gray)';
+  document.getElementById('score-nivel-14').textContent = 'Aguardando';
+  document.getElementById('score-nivel-14').style.color = 'var(--gray)';
+  document.getElementById('sig-badge-14').innerHTML = '';
+  document.getElementById('score-widget-14').style.borderColor = 'transparent';
+  document.getElementById('score-widget-14').style.background = 'var(--gray-l)';
+  document.getElementById('f-codigo').focus();
+}
+
+function clearForm45() {
+  ['f-codigo45','f-perigo','f-risco','f-obs45','f-ctrl','f-ctrl-add'].forEach(function(id){
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('f-prob45').value = '';
+  document.getElementById('f-sev45').value  = '';
+  document.getElementById('f-cond45').value = 'N';
+  document.querySelectorAll('#hier-grid .hier-btn').forEach(function(b){ b.classList.remove('on'); });
+  APP.hierarquia = '';
+  document.getElementById('f-hierarquia').value = '';
+  document.getElementById('score-num-45').textContent = '—';
+  document.getElementById('score-num-45').style.color = 'var(--gray)';
+  document.getElementById('score-nivel-45').textContent = 'Aguardando';
+  document.getElementById('score-nivel-45').style.color = 'var(--gray)';
+  document.getElementById('score-widget-45').style.borderColor = 'transparent';
+  document.getElementById('score-widget-45').style.background = 'var(--gray-l)';
+  document.getElementById('f-codigo45').focus();
+}
+
+// ═══ RENDERIZA LISTA ════════════════════════════════════════════
+function renderItems() {
+  var el = document.getElementById('items-list');
+  var count = APP.items.length;
+  document.getElementById('items-count').textContent = count + ' item(ns)';
+  document.getElementById('footer-count').textContent = count + ' item(ns) no levantamento';
+
+  if (!count) {
+    el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px">Nenhum item adicionado ainda.</div>';
+    return;
+  }
+
+  var colors = {crit:'var(--red)',high:'#E85D24',med:'var(--amber)',low:'var(--green)'};
+
+  el.innerHTML = APP.items.map(function(item, i) {
+    var color = colors[item.cls] || 'var(--gray)';
+    var isEnv = item.type === 'env';
+    return '<div class="item-card ' + item.cls + '">'
+      + '<div class="item-num" style="background:' + color + '">' + (i+1) + '</div>'
+      + '<div class="item-info">'
+      + '<div style="display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap">'
+      + '<span class="chip ' + (isEnv?'chip-env':'chip-sst') + '">' + (isEnv?'🌿 14001':'⛑️ 45001') + '</span>'
+      + (item.codigo ? '<span class="chip" style="background:var(--gray-l);color:var(--text2);font-family:monospace">' + item.codigo + '</span>' : '')
+      + '<span class="chip" style="background:' + color + '22;color:' + color + '">Score ' + item.score + ' — ' + (isEnv?(item.sig==='S'?'Significativo':'Não significativo'):item.nivel) + '</span>'
+      + (isEnv && item.sig==='S' ? '<span class="chip chip-sig">⚠️ Significativo</span>' : '')
+      + '</div>'
+      + '<div class="item-title">' + item.asp + '</div>'
+      + '<div class="item-meta">'
+      + (item.imp ? '<span>→ ' + item.imp + '</span>' : '')
+      + (isEnv && item.ciclo ? '<span>🔄 ' + item.ciclo + '</span>' : '')
+      + (!isEnv && item.hierarquia ? '<span>🎯 ' + item.hierarquia + '</span>' : '')
+      + '<span>P:' + item.prob + ' × S:' + item.sev + ' = ' + item.score + '</span>'
+      + (item.area ? '<span>📍 ' + item.area + '</span>' : '')
+      + '</div>'
+      + (item.obs ? '<div style="font-size:11px;color:var(--text2);margin-top:4px;font-style:italic">📝 ' + item.obs + '</div>' : '')
+      + '</div>'
+      + '<div class="item-actions">'
+      + '<button onclick="removeItem(' + i + ')" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--text3)" title="Remover">×</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function removeItem(i) {
+  if (!confirm('Remover este item?')) return;
+  APP.items.splice(i, 1);
+  renderItems();
+  autoSave();
+}
+
+// ═══ AUTOSAVE / LOCALSTORAGE ═════════════════════════════════════
+function autoSave() {
+  clearTimeout(AUTOSAVE_TIMER);
+  AUTOSAVE_TIMER = setTimeout(function() {
+    var session = {
+      mode:  APP.mode,
+      items: APP.items,
+      org:   document.getElementById('f-org').value,
+      resp:  document.getElementById('f-resp').value,
+      data:  document.getElementById('f-data').value,
+      area:  document.getElementById('f-area').value,
+      proc:  document.getElementById('f-processo').value,
+      atv:   document.getElementById('f-atividade').value,
+      savedAt: new Date().toISOString()
+    };
+    try {
+      localStorage.setItem('sgi_campo_session', JSON.stringify(session));
+      var ind = document.getElementById('autosave-ind');
+      ind.classList.add('show');
+      setTimeout(function(){ ind.classList.remove('show'); }, 2000);
+    } catch(e) {}
+  }, 800);
+}
+
+function checkRestore() {
+  try {
+    var saved = localStorage.getItem('sgi_campo_session');
+    if (saved) {
+      var s = JSON.parse(saved);
+      if (s.mode === APP.mode && s.items && s.items.length > 0) {
+        if (confirm('Encontrei uma sessão anterior com ' + s.items.length + ' item(ns) salvo(s).\n\nDeseja restaurar?')) {
+          restoreFromData(s);
+        }
+      }
+    }
+  } catch(e) {}
+}
+
+function restoreSession() {
+  try {
+    var saved = localStorage.getItem('sgi_campo_session');
+    if (!saved) { alert('Nenhuma sessão encontrada.'); return; }
+    var s = JSON.parse(saved);
+    startApp(s.mode);
+    restoreFromData(s);
+  } catch(e) { alert('Erro ao restaurar sessão.'); }
+}
+
+function restoreFromData(s) {
+  APP.items = s.items || [];
+  if (s.org)  document.getElementById('f-org').value        = s.org;
+  if (s.resp) document.getElementById('f-resp').value       = s.resp;
+  if (s.data) document.getElementById('f-data').value       = s.data;
+  if (s.area) document.getElementById('f-area').value       = s.area;
+  if (s.proc) document.getElementById('f-processo').value   = s.proc;
+  if (s.atv)  document.getElementById('f-atividade').value  = s.atv;
+  renderItems();
+}
+
+// ═══ EXPORTAR JSON ════════════════════════════════════════════════
+function exportJSON() {
+  if (!APP.items.length) { alert('Nenhum item para exportar.'); return; }
+  var org  = document.getElementById('f-org').value || 'organizacao';
+  var mode = APP.mode === 'env' ? 'aspectos_14001' : 'perigos_45001';
+  var data = {
+    tipo:         APP.mode === 'env' ? 'ISO14001_AspectosImpactos' : 'ISO45001_PerigosRiscos',
+    norma:        APP.mode === 'env' ? 'ISO 14001:2015' : 'ISO 45001:2018',
+    clausula:     '6.1.2',
+    organizacao:  document.getElementById('f-org').value,
+    responsavel:  document.getElementById('f-resp').value,
+    data:         document.getElementById('f-data').value,
+    geradoEm:     new Date().toISOString(),
+    totalItens:   APP.items.length,
+    itens:        APP.items
+  };
+  var json = JSON.stringify(data, null, 2);
+  var blob = new Blob([json], {type:'application/json;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'SGI_' + mode + '_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+
+  // Limpa localStorage após exportar
+  try { localStorage.removeItem('sgi_campo_session'); } catch(e) {}
+  alert('✅ ' + APP.items.length + ' item(ns) exportado(s) com sucesso!\n\nImporte o arquivo JSON no SGI pelo botão "Importar" na aba Aspectos & Perigos.');
+}
+
+function clearAll() {
+  if (!APP.items.length) return;
+  if (!confirm('Remover todos os ' + APP.items.length + ' item(ns)?')) return;
+  APP.items = [];
+  try { localStorage.removeItem('sgi_campo_session'); } catch(e) {}
+  renderItems();
+}
+
+// Verifica sessão salva na tela inicial
+(function(){
+  try {
+    var saved = localStorage.getItem('sgi_campo_session');
+    if (saved) {
+      var s = JSON.parse(saved);
+      if (s.items && s.items.length > 0) {
+        document.getElementById('splash-restore').style.display = 'block';
+      }
+    }
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
