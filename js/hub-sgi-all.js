@@ -1,3 +1,4 @@
+
 // Hub SGI — Módulo completo SGI
 
 
@@ -141,7 +142,10 @@ function renderPI(){
       +'<div class="pi-nr">📌 '+p.needs.length+' necessidade(s) · 💬 '+p.exps.length+' expectativa(s)</div>'
       +'<div class="pi-tags mt">'
       +'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--gray-l);color:'+clr[p.norm||'both']+'">'+nlb[p.norm||'both']+'</span>'
-      +(p.obrig==='sim'?'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:#e8f5ef;color:var(--green-d)">Obrigação conf.</span>':p.obrig==='parcial'?'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--amber-l);color:var(--amber-d)">Parcial</span>':'')
+      +(p.obrig==='sim'?'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:#e8f5ef;color:var(--green-d)">⚖️ Obrigação conf.</span>':p.obrig==='parcial'?'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--amber-l);color:var(--amber-d)">🔶 Parcial</span>':'')
+      +(p.relevante&&p.relevante==='nao'?'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--gray-l);color:var(--text2)">📋 Monitorar</span>':'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--green-l);color:var(--green-d)">✅ Relevante SGA</span>')
+      +(p.condAmb&&p.condAmb.length?'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:#e8f4ff;color:var(--blue-d)">🌍 '+p.condAmb.join(', ')+'</span>':'')
+      +(p.tratSGA&&p.tratSGA.length?'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--purple-l);color:var(--purple)">⚙️ '+p.tratSGA.join(' · ')+'</span>':'')
       +(gd?'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:'+gd.bbg+';color:'+gd.bc+';font-weight:600">'+gd.badge+'</span>':'')
       +'</div></div>';
   }
@@ -237,6 +241,25 @@ function savePI(){
   var needs=tempNeeds.filter(function(n){return n.trim();});
   var exps=tempExps.filter(function(e){return e.trim();});
   var grpEl=document.getElementById('pi-group');
+
+  // ISO 14001:2026 §4.2 — coleta condições ambientais
+  var condAmb=[];
+  ['pol','rec','clim','bio','eco'].forEach(function(c){
+    var el=document.getElementById('pi-cond-'+c);
+    if(el&&el.checked) condAmb.push({'pol':'Níveis de poluição','rec':'Recursos naturais','clim':'Alterações climáticas','bio':'Biodiversidade','eco':'Saúde dos ecossistemas'}[c]);
+  });
+
+  // Coleta tratamentos no SGA
+  var tratSGA=[];
+  [['ro','6.1.1 R&O'],['ap','6.1.2 Aspectos'],['obj','6.2 Objetivos'],['op','8.1 Controles'],['com','7.4 Comunicação']].forEach(function(t){
+    var el=document.getElementById('pi-trat-'+t[0]);
+    if(el&&el.checked) tratSGA.push(t[1]);
+  });
+
+  var relevante    = (document.getElementById('pi-relevante')||{}).value || 'sim';
+  var obrigOrigem  = (document.getElementById('pi-obrig-origem')||{}).value || 'legal';
+  var obrigVal     = document.getElementById('pi-obrig').value;
+
   S.pi.push({
     id:'c'+Date.now(), name:nm,
     needs:needs.length?needs:['(não especificado)'],
@@ -244,10 +267,30 @@ function savePI(){
     norm:document.getElementById('pi-norm').value,
     inf:parseInt(document.getElementById('pi-inf').value),
     int:parseInt(document.getElementById('pi-int').value),
-    obrig:document.getElementById('pi-obrig').value,
+    obrig:obrigVal,
     group: grpEl&&grpEl.value?grpEl.value:undefined,
+    // ISO 14001:2026
+    relevante:   relevante,
+    obrigOrigem: obrigOrigem,
+    condAmb:     condAmb,
+    tratSGA:     tratSGA,
     sel:true
   });
+
+  // Auto-gera R&O se relevante e marcou 6.1.1
+  if(relevante==='sim' && tratSGA.indexOf('6.1.1 R&O')!==-1){
+    if(!S.ros) S.ros=[];
+    S.ros.push({
+      id:'pi-ro-'+Date.now(),
+      orig:'pi', origLabel:'PI: '+nm,
+      type: obrigVal==='sim'?'risk':'opp',
+      desc: 'Necessidade de "'+nm+'" requer tratamento no SGA',
+      impact: needs.length?needs[0]:'(ver necessidades)',
+      priority: obrigVal==='sim'?'high':'med',
+      autoGen:true, condAmb:condAmb
+    });
+  }
+
   closeMod('pi-modal'); renderPI();
 }
 
@@ -2876,6 +2919,379 @@ function getAPScoreData() {
     sigCrit: r.score >= SIG_LIMITE ? 'Score '+r.score+' ≥ '+SIG_LIMITE+' (significativo)' : 'Score '+r.score+' < '+SIG_LIMITE+' (não significativo)',
     nivel:  scoreInfoFPSA(r.score).nivel
   };
+}
+
+
+
+// ═══════════════════════════════════════════════════════════════════
+// MUDANÇAS CLIMÁTICAS — 4.1 ISO 14001 + ISO 45001 (Anexo SL/HLS)
+// ═══════════════════════════════════════════════════════════════════
+
+// Estado do módulo de clima
+if (!S.clima) S.clima = {
+  riscos:     [],   // riscos físicos (clima → organização)
+  esc1:       '',   // emissões Escopo 1
+  esc2:       '',   // emissões Escopo 2
+  esc3:       '',   // emissões Escopo 3
+  mitig:      '',   // mitigações em andamento
+  afeta:      '',   // afeta objetivos do SGI?
+  norma:      'both',
+  conclusao:  '',
+  resp:       '',
+  data:       '',
+  revisao:    '',
+  analisado:  false
+};
+
+// Riscos climáticos pré-definidos como sugestões
+var CLIMA_RISCOS_SUGEST = [
+  { tipo:'Físico agudo',   desc:'Eventos extremos de chuva / enchentes',         impacto:'Interrupção das operações, danos à infraestrutura, risco de afogamento',    norma:'both' },
+  { tipo:'Físico agudo',   desc:'Estiagem prolongada / seca',                    impacto:'Restrição de água para processo produtivo e consumo humano',                norma:'both' },
+  { tipo:'Físico agudo',   desc:'Ondas de calor extremo',                        impacto:'Risco de doenças ocupacionais por calor (NR-15), queda de produtividade',   norma:'sst'  },
+  { tipo:'Físico agudo',   desc:'Tempestades / ventos fortes / raios',           impacto:'Danos à estrutura, interrupção de energia, risco a trabalhadores externos', norma:'both' },
+  { tipo:'Físico crônico', desc:'Aumento de temperatura média regional',         impacto:'Maior consumo de energia para climatização, stress térmico ocupacional',   norma:'both' },
+  { tipo:'Físico crônico', desc:'Alteração no regime hídrico (chuvas irregulares)', impacto:'Impacto na disponibilidade de água e na geração de efluentes',          norma:'env'  },
+  { tipo:'Físico crônico', desc:'Aumento de incêndios em áreas naturais',        impacto:'Qualidade do ar, risco de propagação, plano de emergência ambiental',      norma:'both' },
+  { tipo:'Transição',      desc:'Novas regulamentações de emissão de GEE',       impacto:'Obrigações de conformidade, custos de adequação, oportunidade de crédito', norma:'env'  },
+  { tipo:'Transição',      desc:'Exigência de relatório de carbono por clientes','impacto':'Obrigação contratual de inventário de GEE, pressão ESG',                 norma:'env'  },
+  { tipo:'Oportunidade',   desc:'Eficiência energética e energias renováveis',   impacto:'Redução de custos, melhoria da imagem, objetivo ambiental',                norma:'env'  },
+];
+
+var climaTabAtual = 1;
+
+function switchClimaTab(n) {
+  climaTabAtual = n;
+  [1,2,3].forEach(function(i) {
+    var tab = document.getElementById('clima-tab-'+i);
+    var cont = document.getElementById('clima-tab-content-'+i);
+    if (!tab || !cont) return;
+    var isActive = i === n;
+    tab.style.borderBottomColor = isActive ? '#1a6b9e' : 'transparent';
+    tab.style.color = isActive ? '#1a6b9e' : 'var(--text2)';
+    cont.style.display = isActive ? 'block' : 'none';
+  });
+}
+
+function addClimaRisco(sugest) {
+  var risco = sugest || {
+    tipo:'Físico agudo', desc:'', impacto:'', norma:'both',
+    relevancia:'media', acao:''
+  };
+  var id = 'cr-' + Date.now();
+  var tipoOpts = ['Físico agudo','Físico crônico','Transição','Oportunidade'].map(function(t){
+    return '<option value="'+t+'"'+(risco.tipo===t?' selected':'')+'>'+t+'</option>';
+  }).join('');
+  var normaOpts = [['both','🌿+⛑️ Ambas'],['env','🌿 14001'],['sst','⛑️ 45001']].map(function(n){
+    return '<option value="'+n[0]+'"'+(risco.norma===n[0]?' selected':'')+'>'+n[1]+'</option>';
+  }).join('');
+  var relOpts = [['alta','🔴 Alta'],['media','🟡 Média'],['baixa','🟢 Baixa']].map(function(r){
+    return '<option value="'+r[0]+'"'+(( risco.relevancia||'media')===r[0]?' selected':'')+'>'+r[1]+'</option>';
+  }).join('');
+
+  var html = '<div id="'+id+'" style="background:var(--gray-l);border:1px solid var(--gray-b);border-radius:8px;padding:12px;display:grid;grid-template-columns:130px 1fr 1fr 100px 36px;gap:8px;align-items:start">'
+    + '<div><label style="font-size:10px">Tipo</label><select style="font-size:11px" onchange="saveClimaData()">'+tipoOpts+'</select></div>'
+    + '<div><label style="font-size:10px">Risco / Oportunidade climática</label><input type="text" value="'+esc(risco.desc)+'" placeholder="Ex.: Ondas de calor extremo" style="font-size:12px" oninput="saveClimaData()"></div>'
+    + '<div><label style="font-size:10px">Impacto nos objetivos do SGI</label><input type="text" value="'+esc(risco.impacto)+'" placeholder="Ex.: Stress térmico, risco NR-15" style="font-size:12px" oninput="saveClimaData()"></div>'
+    + '<div><label style="font-size:10px">Relevância</label><select style="font-size:11px" onchange="saveClimaData()">'+relOpts+'</select>'
+    + '<label style="font-size:10px;margin-top:4px">Norma</label><select style="font-size:11px" onchange="saveClimaData()">'+normaOpts+'</select></div>'
+    + '<div style="padding-top:20px"><button onclick="removeClimaRisco(\''+id+'\')" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--text3)">×</button></div>'
+    + '</div>';
+
+  var list = document.getElementById('clima-riscos-list');
+  if (list) list.insertAdjacentHTML('beforeend', html);
+  updateClimaStatus();
+}
+
+function removeClimaRisco(id) {
+  var el = document.getElementById(id);
+  if (el) { el.remove(); updateClimaStatus(); }
+}
+
+function saveClimaData() {
+  updateClimaStatus();
+}
+
+function updateClimaStatus() {
+  var conclusao = (document.getElementById('clima-conclusao')||{}).value || '';
+  var afeta     = (document.getElementById('clima-afeta')||{}).value || '';
+  var resp      = (document.getElementById('clima-resp')||{}).value || '';
+  var data      = (document.getElementById('clima-data')||{}).value || '';
+  var riscos    = document.querySelectorAll('#clima-riscos-list > div') || [];
+  var esc1      = (document.getElementById('clima-esc1')||{}).value || '';
+
+  var analisado = conclusao.length > 20 && afeta && resp && data;
+  var badge     = document.getElementById('clima-status-badge');
+
+  if (badge) {
+    if (analisado) {
+      badge.style.background = 'var(--green-l)';
+      badge.style.color = 'var(--green-d)';
+      badge.textContent = '✅ Análise registrada';
+    } else if (conclusao.length > 0 || riscos.length > 0 || esc1.length > 0) {
+      badge.style.background = 'var(--amber-l)';
+      badge.style.color = 'var(--amber-d)';
+      badge.textContent = '🔶 Em preenchimento';
+    } else {
+      badge.style.background = 'var(--red-l)';
+      badge.style.color = 'var(--red)';
+      badge.textContent = '⚠️ Não analisado';
+    }
+  }
+
+  // Salva no estado S
+  if (!S.clima) S.clima = {};
+  S.clima.conclusao = conclusao;
+  S.clima.afeta     = afeta;
+  S.clima.resp      = resp;
+  S.clima.data      = data;
+  S.clima.revisao   = (document.getElementById('clima-revisao')||{}).value || '';
+  S.clima.esc1      = esc1;
+  S.clima.esc2      = (document.getElementById('clima-esc2')||{}).value || '';
+  S.clima.esc3      = (document.getElementById('clima-esc3')||{}).value || '';
+  S.clima.mitig     = (document.getElementById('clima-mitig')||{}).value || '';
+  S.clima.norma     = (document.getElementById('clima-norma')||{}).value || 'both';
+  S.clima.analisado = analisado;
+
+  // Atualiza resumo de evidência
+  var resumo = document.getElementById('clima-evidencia-resumo');
+  if (resumo && analisado) {
+    resumo.style.display = 'block';
+    var afetaLabel = {
+      'sim-relevante':'Sim — afeta de forma relevante',
+      'sim-baixo':'Sim — afeta de forma baixa (monitorar)',
+      'nao':'Não afeta os objetivos do SGI'
+    }[afeta] || afeta;
+    resumo.innerHTML = '<div style="font-weight:700;color:#1a6b9e;margin-bottom:8px">📋 Evidência de Análise — Pronta para auditoria</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:11px">'
+      + '<div><strong>Responsável:</strong> '+esc(resp)+'</div>'
+      + '<div><strong>Data:</strong> '+(data ? new Date(data+'T12:00:00').toLocaleDateString('pt-BR') : '—')+'</div>'
+      + '<div><strong>Próx. revisão:</strong> '+(S.clima.revisao ? new Date(S.clima.revisao+'T12:00:00').toLocaleDateString('pt-BR') : '—')+'</div>'
+      + '</div>'
+      + '<div style="margin-top:8px;font-size:11px"><strong>Conclusão:</strong> '+esc(conclusao.substring(0,200))+(conclusao.length>200?'...':'')+'</div>'
+      + '<div style="margin-top:6px;font-size:11px"><strong>Afeta objetivos SGI:</strong> '+afetaLabel+'</div>'
+      + '<div style="margin-top:6px;font-size:11px"><strong>Riscos climáticos identificados:</strong> '+(riscos.length)+' item(ns)</div>';
+  } else if (resumo) {
+    resumo.style.display = 'none';
+  }
+}
+
+// Gera Riscos & Oportunidades a partir da análise climática
+function gerarROClima() {
+  if (!S.clima || !S.clima.conclusao) {
+    alert('Preencha a conclusão da análise climática antes de gerar R&O.');
+    switchClimaTab(3);
+    return;
+  }
+  var added = 0;
+  if (!S.ros) S.ros = [];
+
+  // Gera a partir dos riscos identificados
+  var riscoEls = document.querySelectorAll('#clima-riscos-list > div');
+  riscoEls.forEach(function(el) {
+    var inputs = el.querySelectorAll('input,select');
+    if (inputs.length < 3) return;
+    var tipo   = inputs[0].value;
+    var desc   = inputs[1].value;
+    var impact = inputs[2].value;
+    var relEl  = inputs[3];
+    var rel    = relEl ? relEl.value : 'media';
+    if (!desc) return;
+
+    S.ros.push({
+      id:        'clima-ro-'+Date.now()+'-'+added,
+      orig:      'clima',
+      origLabel: '🌡️ Mudanças Climáticas (4.1)',
+      type:      tipo === 'Oportunidade' ? 'opp' : 'risk',
+      desc:      desc,
+      impact:    impact || 'Ver análise climática',
+      priority:  rel === 'alta' ? 'high' : rel === 'baixa' ? 'low' : 'med',
+      autoGen:   true,
+      condAmb:   ['Alterações climáticas']
+    });
+    added++;
+  });
+
+  // Gera um R&O geral a partir da conclusão
+  if (S.clima.afeta && S.clima.afeta !== 'nao') {
+    S.ros.push({
+      id:        'clima-geral-'+Date.now(),
+      orig:      'clima',
+      origLabel: '🌡️ Mudanças Climáticas (4.1)',
+      type:      'risk',
+      desc:      'Mudanças climáticas identificadas como fator de contexto relevante para o SGI',
+      impact:    S.clima.conclusao.substring(0,150),
+      priority:  S.clima.afeta === 'sim-relevante' ? 'high' : 'med',
+      autoGen:   true,
+      condAmb:   ['Alterações climáticas']
+    });
+    added++;
+  }
+
+  if (added > 0) {
+    if (typeof renderRO === 'function') renderRO();
+    alert('✅ '+added+' Risco(s) & Oportunidade(s) gerado(s) a partir da análise climática!\n\nAcesse a cláusula 6.1.1 para visualizar.');
+  } else {
+    alert('Adicione ao menos um risco climático na Aba 1 antes de gerar R&O.');
+    switchClimaTab(1);
+  }
+}
+
+// Imprime evidência para auditoria
+function printClimaEvidencia() {
+  if (!S.clima || !S.clima.conclusao) {
+    alert('Preencha a análise climática antes de imprimir a evidência.');
+    switchClimaTab(3);
+    return;
+  }
+  var org  = document.getElementById('org-name') ? document.getElementById('org-name').value : '—';
+  var data = S.clima.data ? new Date(S.clima.data+'T12:00:00').toLocaleDateString('pt-BR') : '—';
+  var afetaLabel = {
+    'sim-relevante':'Sim — afeta de forma relevante os objetivos do SGI',
+    'sim-baixo':'Sim — afeta de forma baixa (monitorar no próximo ciclo)',
+    'nao':'Não — a análise concluiu que mudanças climáticas não afetam materialmente os objetivos do SGI neste ciclo'
+  }[S.clima.afeta] || '—';
+
+  var riscoEls = document.querySelectorAll('#clima-riscos-list > div');
+  var riscosHtml = '';
+  riscoEls.forEach(function(el, i) {
+    var inputs = el.querySelectorAll('input,select');
+    if (inputs.length < 3) return;
+    riscosHtml += '<tr>'
+      + '<td style="padding:5px 8px;border:1px solid #ccc">'+(i+1)+'</td>'
+      + '<td style="padding:5px 8px;border:1px solid #ccc">'+esc(inputs[0].value)+'</td>'
+      + '<td style="padding:5px 8px;border:1px solid #ccc">'+esc(inputs[1].value)+'</td>'
+      + '<td style="padding:5px 8px;border:1px solid #ccc">'+esc(inputs[2].value)+'</td>'
+      + '<td style="padding:5px 8px;border:1px solid #ccc;text-align:center">'+esc((inputs[3]||{}).value||'—')+'</td>'
+      + '</tr>';
+  });
+
+  var win = window.open('','_blank');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    + '<title>Evidência Mudanças Climáticas — '+esc(org)+'</title>'
+    + '<style>body{font-family:Arial,sans-serif;font-size:12px;padding:30px;color:#111}'
+    + 'h1{font-size:16px;margin-bottom:4px}h2{font-size:13px;color:#1a6b9e;margin:16px 0 8px}'
+    + 'table{width:100%;border-collapse:collapse;margin:8px 0}'
+    + 'th{background:#e8f4ff;padding:6px 8px;border:1px solid #ccc;text-align:left;font-size:11px}'
+    + 'td{padding:6px 8px;border:1px solid #ccc;vertical-align:top}'
+    + '.box{background:#f5f5f5;border-left:4px solid #1a6b9e;padding:10px 14px;margin:8px 0;border-radius:4px}'
+    + '.sig{margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:30px}'
+    + '.sig-line{border-top:1px solid #999;padding-top:4px;margin-top:24px;font-size:11px}'
+    + '@media print{button{display:none}}'
+    + '</style></head><body>'
+    + '<button onclick="window.print()" style="margin-bottom:20px;padding:8px 18px;background:#1a6b9e;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px">🖨️ Imprimir / Salvar PDF</button>'
+    + '<h1>EVIDÊNCIA DE ANÁLISE — MUDANÇAS CLIMÁTICAS NO CONTEXTO ORGANIZACIONAL</h1>'
+    + '<div style="font-size:11px;color:#666;margin-bottom:16px">ISO 14001:2015/2026 §4.1 + ISO 45001:2018 §4.1 · Anexo SL (HLS)</div>'
+    + '<table><tr>'
+    + '<td style="width:25%;background:#f5f5f5;font-weight:600;padding:6px 8px;border:1px solid #ccc">Organização</td>'
+    + '<td style="padding:6px 8px;border:1px solid #ccc">'+esc(org)+'</td>'
+    + '<td style="width:20%;background:#f5f5f5;font-weight:600;padding:6px 8px;border:1px solid #ccc">Responsável</td>'
+    + '<td style="padding:6px 8px;border:1px solid #ccc">'+esc(S.clima.resp)+'</td>'
+    + '</tr><tr>'
+    + '<td style="background:#f5f5f5;font-weight:600;padding:6px 8px;border:1px solid #ccc">Data da análise</td>'
+    + '<td style="padding:6px 8px;border:1px solid #ccc">'+data+'</td>'
+    + '<td style="background:#f5f5f5;font-weight:600;padding:6px 8px;border:1px solid #ccc">Próx. revisão</td>'
+    + '<td style="padding:6px 8px;border:1px solid #ccc">'+(S.clima.revisao ? new Date(S.clima.revisao+'T12:00:00').toLocaleDateString('pt-BR') : '—')+'</td>'
+    + '</tr><tr>'
+    + '<td style="background:#f5f5f5;font-weight:600;padding:6px 8px;border:1px solid #ccc">Norma(s)</td>'
+    + '<td style="padding:6px 8px;border:1px solid #ccc">'+({'both':'ISO 14001:2015/2026 + ISO 45001:2018','env':'ISO 14001:2015/2026','sst':'ISO 45001:2018'}[S.clima.norma]||'—')+'</td>'
+    + '<td style="background:#f5f5f5;font-weight:600;padding:6px 8px;border:1px solid #ccc">Afeta objetivos SGI?</td>'
+    + '<td style="padding:6px 8px;border:1px solid #ccc">'+afetaLabel+'</td>'
+    + '</tr></table>'
+    + '<h2>1. Conclusão da Análise</h2>'
+    + '<div class="box">'+esc(S.clima.conclusao).replace(/\n/g,'<br>')+'</div>'
+    + '<h2>2. Riscos e Oportunidades Climáticos Identificados</h2>'
+    + (riscosHtml ? '<table><thead><tr><th>#</th><th>Tipo</th><th>Risco / Oportunidade</th><th>Impacto nos objetivos do SGI</th><th>Relevância</th></tr></thead><tbody>'+riscosHtml+'</tbody></table>' : '<p style="color:#666;font-size:11px">Nenhum risco climático específico identificado.</p>')
+    + '<h2>3. Emissões de GEE Identificadas</h2>'
+    + '<table><tr><th style="width:20%">Escopo</th><th>Fontes identificadas</th></tr>'
+    + '<tr><td>🔴 Escopo 1 (diretas)</td><td>'+(S.clima.esc1||'Não identificado')+'</td></tr>'
+    + '<tr><td>🟡 Escopo 2 (energia)</td><td>'+(S.clima.esc2||'Não identificado')+'</td></tr>'
+    + '<tr><td>🔵 Escopo 3 (cadeia)</td><td>'+(S.clima.esc3||'Não identificado')+'</td></tr>'
+    + '<tr><td>✅ Mitigações</td><td>'+(S.clima.mitig||'Nenhuma em andamento')+'</td></tr>'
+    + '</table>'
+    + '<div class="sig">'
+    + '<div><div class="sig-line">Responsável pelo levantamento e análise</div></div>'
+    + '<div><div class="sig-line">Representante da Alta Direção / Aprovação</div></div>'
+    + '</div>'
+    + '</body></html>');
+  win.document.close();
+}
+
+// Modal de ajuda sobre como analisar clima
+function openClimaHelp() {
+  alert('📋 COMO FAZER A ANÁLISE DE MUDANÇAS CLIMÁTICAS\n\n'
+    + '1. ABA "Clima → Organização":\n'
+    + '   • Identifique riscos físicos (enchentes, secas, calor extremo)\n'
+    + '   • Avalie o impacto em cada objetivo do SGI\n'
+    + '   • Use as sugestões clicando em "+ Adicionar risco"\n\n'
+    + '2. ABA "Organização → Clima":\n'
+    + '   • Identifique as fontes de GEE por Escopo (1, 2 e 3)\n'
+    + '   • Liste iniciativas de mitigação já em andamento\n\n'
+    + '3. ABA "Conclusão & Evidência":\n'
+    + '   • Registre a conclusão (mesmo que seja "não afeta")\n'
+    + '   • Preencha responsável, data e próxima revisão\n'
+    + '   • Clique "Imprimir evidência" para gerar o registro para auditoria\n\n'
+    + '⚠️ ATENÇÃO: Se o clima NÃO afeta, você precisa provar que ANALISOU.\n'
+    + 'A ausência de análise é não conformidade — a conclusão pode ser "não afeta",\n'
+    + 'mas a análise precisa estar documentada.');
+}
+
+// Inicializa os campos de clima se já houver dados salvos
+function initClimaFromState() {
+  if (!S.clima) return;
+  var fields = {
+    'clima-esc1':      S.clima.esc1,
+    'clima-esc2':      S.clima.esc2,
+    'clima-esc3':      S.clima.esc3,
+    'clima-mitig':     S.clima.mitig,
+    'clima-conclusao': S.clima.conclusao,
+    'clima-resp':      S.clima.resp,
+    'clima-data':      S.clima.data,
+    'clima-revisao':   S.clima.revisao,
+  };
+  Object.keys(fields).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && fields[id]) el.value = fields[id];
+  });
+  if (S.clima.afeta) {
+    var el = document.getElementById('clima-afeta');
+    if (el) el.value = S.clima.afeta;
+  }
+  if (S.clima.norma) {
+    var el = document.getElementById('clima-norma');
+    if (el) el.value = S.clima.norma;
+  }
+  if (S.clima.riscos && S.clima.riscos.length) {
+    S.clima.riscos.forEach(function(r) { addClimaRisco(r); });
+  }
+  updateClimaStatus();
+}
+
+// Inicializa botões de sugestão rápida de riscos climáticos
+function initClimaSugestBtns() {
+  var container = document.getElementById('clima-sugest-btns');
+  if (!container) return;
+  var SUGEST = [
+    'Ondas de calor extremo','Enchentes / eventos extremos de chuva',
+    'Estiagem / seca prolongada','Novas regulamentações de GEE','Eficiência energética'
+  ];
+  SUGEST.forEach(function(s) {
+    var btn = document.createElement('button');
+    btn.className = 'btn btn-sm';
+    btn.style.cssText = 'font-size:10px;padding:3px 10px;border-color:var(--blue-d);color:var(--blue-d)';
+    btn.textContent = s;
+    btn.onclick = function() {
+      var found = CLIMA_RISCOS_SUGEST.find(function(r){ return r.desc.indexOf(s.split(' ')[0]) !== -1; });
+      addClimaRisco(found || {tipo:'Físico agudo',desc:s,impacto:'',norma:'both',relevancia:'media'});
+    };
+    container.appendChild(btn);
+  });
+}
+
+// Chama init quando a página carrega
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initClimaFromState);
+} else {
+  setTimeout(function(){ initClimaFromState(); initClimaSugestBtns(); }, 300);
 }
 
 
