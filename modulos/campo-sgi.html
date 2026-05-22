@@ -286,7 +286,7 @@ label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase
           </div>
           <div class="field">
             <label>Frequência</label>
-            <select id="f-freq" onchange="calcScore14()">
+            <select id="f-freq" onchange="calcScore14()" oninput="calcScore14()">
               <option value="">—</option>
               <option value="1">1 — Rara (&lt;1x/ano)</option>
               <option value="2">2 — Ocasional (1–12x/ano)</option>
@@ -297,7 +297,7 @@ label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase
           </div>
           <div class="field">
             <label>Probabilidade</label>
-            <select id="f-prob" onchange="calcScore14()">
+            <select id="f-prob" onchange="calcScore14()" oninput="calcScore14()">
               <option value="">—</option>
               <option value="1">1 — Muito improvável</option>
               <option value="2">2 — Improvável</option>
@@ -308,7 +308,7 @@ label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase
           </div>
           <div class="field">
             <label>Severidade</label>
-            <select id="f-sev" onchange="calcScore14()">
+            <select id="f-sev" onchange="calcScore14()" oninput="calcScore14()">
               <option value="">—</option>
               <option value="1">1 — Insignificante</option>
               <option value="2">2 — Menor</option>
@@ -319,7 +319,7 @@ label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase
           </div>
           <div class="field">
             <label>Abrangência</label>
-            <select id="f-abrang" onchange="calcScore14()">
+            <select id="f-abrang" onchange="calcScore14()" oninput="calcScore14()">
               <option value="">—</option>
               <option value="1">1 — Local (instalação)</option>
               <option value="2">2 — Vizinhança</option>
@@ -395,7 +395,7 @@ label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase
           </div>
           <div class="field">
             <label>Frequência</label>
-            <select id="f-freq45" onchange="calcScore45()">
+            <select id="f-freq45" onchange="calcScore45()" oninput="calcScore45()">
               <option value="">—</option>
               <option value="1">1 — Rara (&lt;1x/ano)</option>
               <option value="2">2 — Ocasional</option>
@@ -406,7 +406,7 @@ label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase
           </div>
           <div class="field">
             <label>Probabilidade</label>
-            <select id="f-prob45" onchange="calcScore45()">
+            <select id="f-prob45" onchange="calcScore45()" oninput="calcScore45()">
               <option value="">—</option>
               <option value="1">1 — Muito improvável</option>
               <option value="2">2 — Improvável</option>
@@ -417,7 +417,7 @@ label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase
           </div>
           <div class="field">
             <label>Severidade</label>
-            <select id="f-sev45" onchange="calcScore45()">
+            <select id="f-sev45" onchange="calcScore45()" oninput="calcScore45()">
               <option value="">—</option>
               <option value="1">1 — Insignificante</option>
               <option value="2">2 — Menor</option>
@@ -428,7 +428,7 @@ label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase
           </div>
           <div class="field">
             <label>Abrangência</label>
-            <select id="f-abrang45" onchange="calcScore45()">
+            <select id="f-abrang45" onchange="calcScore45()" oninput="calcScore45()">
               <option value="">—</option>
               <option value="1">1 — Local (instalação)</option>
               <option value="2">2 — Vizinhança</option>
@@ -610,6 +610,23 @@ function startApp(mode) {
   document.getElementById('f-data').value = new Date().toISOString().slice(0,10);
   renderItems();
   checkRestore();
+
+  // Garante que os selects disparem o cálculo ao clicar
+  ['f-freq','f-prob','f-sev','f-abrang','f-freq45','f-prob45','f-sev45','f-abrang45'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('change', function() {
+        if (APP.mode === 'env') calcScore14();
+        else calcScore45();
+      });
+      el.addEventListener('click', function() {
+        setTimeout(function() {
+          if (APP.mode === 'env') calcScore14();
+          else calcScore45();
+        }, 50);
+      });
+    }
+  });
 }
 
 function backToSplash() {
@@ -720,6 +737,12 @@ function scoreInfo(score) {
 }
 
 function calcScore14() {
+  // Força leitura do valor atual de todos os selects
+  var selIds = ['f-freq','f-prob','f-sev','f-abrang'];
+  selIds.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.setAttribute('data-val', el.value);
+  });
   var f = parseInt(document.getElementById('f-freq').value)   || 0;
   var p = parseInt(document.getElementById('f-prob').value)   || 0;
   var s = parseInt(document.getElementById('f-sev').value)    || 0;
@@ -928,7 +951,7 @@ function renderItems() {
       + (item.imp ? '<span>→ ' + item.imp + '</span>' : '')
       + (isEnv && item.ciclo ? '<span>🔄 ' + item.ciclo + '</span>' : '')
       + (!isEnv && item.hierarquia ? '<span>🎯 ' + item.hierarquia + '</span>' : '')
-      + '<span>P:' + item.prob + ' × S:' + item.sev + ' = ' + item.score + '</span>'
+      + '<span>F:'+(item.freq||'?')+' × P:'+item.prob+' × S:'+item.sev+' × A:'+(item.abrang||'?')+' = '+item.score+'</span>'
       + (item.area ? '<span>📍 ' + item.area + '</span>' : '')
       + '</div>'
       + (item.obs ? '<div style="font-size:11px;color:var(--text2);margin-top:4px;font-style:italic">📝 ' + item.obs + '</div>' : '')
@@ -1054,6 +1077,12 @@ function clearAll() {
     }
   } catch(e) {}
 
+
+
+})();
+</script>
+<script>
+// Funções globais dos modais
 // ═══ MODAL DE AJUDA / CRITÉRIOS ═══════════════════════════════════
 function showHelp() {
   document.getElementById('help-modal').classList.add('open');
@@ -1194,8 +1223,6 @@ function showPrintChecklist() {
 function closePrintChecklist() {
   document.getElementById('print-modal').classList.remove('open');
 }
-
-})();
 </script>
 
 <!-- ═══ MODAL: CRITÉRIOS E AJUDA ═══ -->
