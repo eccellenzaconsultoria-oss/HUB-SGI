@@ -2923,6 +2923,307 @@ function getAPScoreData() {
 
 
 // ═══════════════════════════════════════════════════════════════════
+// SUGESTÕES PRÉ-DEFINIDAS DE RISCOS E OPORTUNIDADES CLIMÁTICAS
+// ═══════════════════════════════════════════════════════════════════
+
+var CLIMA_SUGEST_COMPLETO = [
+
+  // ── RISCOS FÍSICOS AGUDOS ──────────────────────────────────────
+  {
+    cat:'⚡ Risco Físico — Agudo',
+    tipo:'Físico agudo',
+    norma:'both',
+    relevancia:'alta',
+    desc:'Eventos extremos de chuva e enchentes',
+    impacto:'Interrupção das operações, danos à infraestrutura, alagamento de áreas de armazenagem, risco de afogamento e acidentes com trabalhadores externos',
+    acao:'Mapear áreas de risco de alagamento; revisar plano de emergência; elevar altura de armazenagem crítica'
+  },
+  {
+    cat:'⚡ Risco Físico — Agudo',
+    tipo:'Físico agudo',
+    norma:'both',
+    relevancia:'alta',
+    desc:'Ondas de calor extremo e temperaturas elevadas',
+    impacto:'Stress térmico ocupacional (NR-15), risco de doenças relacionadas ao calor, queda de produtividade, aumento do consumo de energia para climatização',
+    acao:'Implantar pausas térmicas; avaliar exposição por setor; revisar PPRA/PGR com fator climático'
+  },
+  {
+    cat:'⚡ Risco Físico — Agudo',
+    tipo:'Físico agudo',
+    norma:'both',
+    relevancia:'media',
+    desc:'Tempestades, ventos fortes e raios',
+    impacto:'Danos a estruturas e equipamentos externos, queda de energia, risco a trabalhadores em campo e operações externas',
+    acao:'Revisar SPDA (para-raios); protocolo de suspensão de atividades externas; seguro patrimonial climático'
+  },
+  {
+    cat:'⚡ Risco Físico — Agudo',
+    tipo:'Físico agudo',
+    norma:'env',
+    relevancia:'alta',
+    desc:'Risco de incêndios em áreas naturais no entorno',
+    impacto:'Qualidade do ar comprometida, risco de propagação para a planta, obrigação de comunicação a órgãos ambientais',
+    acao:'Manter aceiros; revisar plano de atendimento a emergências ambientais; monitorar índice de queimadas'
+  },
+
+  // ── RISCOS FÍSICOS CRÔNICOS ────────────────────────────────────
+  {
+    cat:'📉 Risco Físico — Crônico',
+    tipo:'Físico crônico',
+    norma:'both',
+    relevancia:'alta',
+    desc:'Estiagem prolongada e escassez hídrica',
+    impacto:'Restrição de água para processo produtivo e consumo humano, risco de desabastecimento, impacto em processos que dependem de água (resfriamento, lavagem, geração de vapor)',
+    acao:'Inventário de consumo hídrico; programa de reúso e reaproveitamento; outorga de uso da água'
+  },
+  {
+    cat:'📉 Risco Físico — Crônico',
+    tipo:'Físico crônico',
+    norma:'both',
+    relevancia:'media',
+    desc:'Aumento da temperatura média regional',
+    impacto:'Maior consumo de energia para climatização, stress térmico crônico em postos de trabalho externos, alteração da produtividade agrícola e de fornecedores',
+    acao:'Avaliar conforto térmico por setor; programa de eficiência em climatização; mapeamento de fornecedores vulneráveis'
+  },
+  {
+    cat:'📉 Risco Físico — Crônico',
+    tipo:'Físico crônico',
+    norma:'env',
+    relevancia:'media',
+    desc:'Irregularidade no regime de chuvas e impacto hídrico',
+    impacto:'Variação na disponibilidade de recursos hídricos superficiais e subterrâneos, impacto em efluentes e outorgas',
+    acao:'Monitorar indicador de consumo hídrico; participar de comitê de bacia hidrográfica'
+  },
+
+  // ── RISCOS DE TRANSIÇÃO ────────────────────────────────────────
+  {
+    cat:'⚖️ Risco de Transição',
+    tipo:'Transição',
+    norma:'env',
+    relevancia:'alta',
+    desc:'Novas regulamentações de precificação de carbono (mercado de carbono brasileiro)',
+    impacto:'Custo adicional de conformidade, necessidade de inventário de GEE, possível impacto na competitividade se não houver preparação',
+    acao:'Elaborar inventário de GEE (Escopos 1, 2 e 3); monitorar legislação; avaliar participação em mercado voluntário'
+  },
+  {
+    cat:'⚖️ Risco de Transição',
+    tipo:'Transição',
+    norma:'env',
+    relevancia:'alta',
+    desc:'Mecanismo de Ajuste de Carbono nas Fronteiras da UE (CBAM)',
+    impacto:'Para exportadores ou fornecedores de empresas que exportam para a Europa: custo de carbono embutido no produto pode inviabilizar operações sem redução de emissões',
+    acao:'Avaliar exposição ao CBAM; mapear clientes exportadores; elaborar estratégia de descarbonização do produto'
+  },
+  {
+    cat:'⚖️ Risco de Transição',
+    tipo:'Transição',
+    norma:'env',
+    relevancia:'media',
+    desc:'Exigência de relatório de carbono e ESG por clientes e investidores',
+    impacto:'Perda de contratos com grandes clientes que exigem inventário de GEE de fornecedores; dificuldade de acesso a crédito ESG',
+    acao:'Elaborar e publicar inventário de GEE; aderir ao GHG Protocol; comunicar iniciativas de sustentabilidade'
+  },
+
+  // ── OPORTUNIDADES ──────────────────────────────────────────────
+  {
+    cat:'🌱 Oportunidade',
+    tipo:'Oportunidade',
+    norma:'env',
+    relevancia:'alta',
+    desc:'Eficiência energética e redução de custos operacionais',
+    impacto:'Redução de custos com energia, menor pegada de carbono, melhoria de indicadores ESG e elegibilidade a linhas de crédito verdes',
+    acao:'Auditoria energética; substituição de equipamentos ineficientes; programa de eficiência energética como objetivo do SGA'
+  },
+  {
+    cat:'🌱 Oportunidade',
+    tipo:'Oportunidade',
+    norma:'env',
+    relevancia:'alta',
+    desc:'Geração própria de energia renovável (solar, eólica, biomassa)',
+    impacto:'Redução de emissões de Escopo 2, diminuição de custos de energia, resiliência a interrupções da rede elétrica',
+    acao:'Estudo de viabilidade para instalação de painéis solares; avaliação de PPAs (contratos de energia renovável)'
+  },
+  {
+    cat:'🌱 Oportunidade',
+    tipo:'Oportunidade',
+    norma:'env',
+    relevancia:'alta',
+    desc:'Descarbonização como diferencial competitivo e acesso a novos mercados',
+    impacto:'Acesso a clientes e mercados que exigem produtos de baixo carbono; premium de preço para produto "verde"; elegibilidade a editais e licitações com critérios ESG',
+    acao:'Desenvolver estratégia de descarbonização; certificar inventário de GEE; comunicar posicionamento de baixo carbono'
+  },
+  {
+    cat:'🌱 Oportunidade',
+    tipo:'Oportunidade',
+    norma:'env',
+    relevancia:'media',
+    desc:'Créditos de carbono e mercado voluntário de carbono',
+    impacto:'Geração de receita adicional pela comercialização de créditos de carbono de projetos de eficiência, reflorestamento ou energia renovável',
+    acao:'Avaliar projetos elegíveis; contratar assessoria especializada em mercado de carbono; monitorar regulamentação do mercado regulado brasileiro'
+  },
+  {
+    cat:'🌱 Oportunidade',
+    tipo:'Oportunidade',
+    norma:'env',
+    relevancia:'media',
+    desc:'Economia circular e valorização de resíduos',
+    impacto:'Redução de emissões de Escopo 3, geração de receita com subprodutos, redução de custos de destinação de resíduos',
+    acao:'Mapear resíduos com potencial de valorização; buscar parceiros para simbiose industrial; desenvolver logística reversa'
+  },
+
+  // ── INDÚSTRIAS DE PROCESSO INTENSIVO (siderurgia, cimento, papel) ──
+  {
+    cat:'🏭 Indústria de Processo Intensivo',
+    tipo:'Transição',
+    norma:'env',
+    relevancia:'alta',
+    desc:'Pressão de descarbonização do processo produtivo (alto-forno, forno rotativo, caldeiras)',
+    impacto:'Emissões de processo são difíceis de eliminar no curto prazo; risco regulatório crescente; pressão de clientes internacionais por aço/cimento/papel de baixo carbono',
+    acao:'Elaborar roadmap de descarbonização de processo; avaliar tecnologias de captura de carbono (CCUS); investigar uso de hidrogênio verde no longo prazo'
+  },
+  {
+    cat:'🏭 Indústria de Processo Intensivo',
+    tipo:'Oportunidade',
+    norma:'env',
+    relevancia:'alta',
+    desc:'Uso de sucata e matéria-prima reciclada para redução de Escopo 1',
+    impacto:'Substituição de matéria-prima virgem por sucata reduz drasticamente emissões diretas (forno elétrico a arco vs alto-forno a coque); diferencial de mercado',
+    acao:'Avaliar viabilidade de aumento da proporção de sucata; estruturar cadeia de coleta e qualificação de sucata'
+  },
+  {
+    cat:'🏭 Indústria de Processo Intensivo',
+    tipo:'Oportunidade',
+    norma:'env',
+    relevancia:'alta',
+    desc:'Cogeração e aproveitamento de gases de processo',
+    impacto:'Gases residuais do processo (gás de alto-forno, gás de coqueria) podem ser aproveitados para geração de energia elétrica e térmica, reduzindo emissões e custos',
+    acao:'Auditar aproveitamento atual de gases; avaliar projetos de cogeração; calcular potencial de redução de Escopo 1 e 2'
+  },
+  {
+    cat:'🏭 Indústria de Processo Intensivo',
+    tipo:'Físico crônico',
+    norma:'both',
+    relevancia:'alta',
+    desc:'Escassez hídrica impacto crítico em processos de resfriamento e geração de vapor',
+    impacto:'Processos siderúrgicos, de cimento e celulose consomem grandes volumes de água; restrições hídricas podem paralisar operações',
+    acao:'Implementar sistema de reúso de água de resfriamento; construir reservatório de contingência; monitorar outorga e disponibilidade hídrica'
+  },
+];
+
+// Agrupa por categoria
+function getClimaCategories() {
+  var cats = {};
+  CLIMA_SUGEST_COMPLETO.forEach(function(s) {
+    if (!cats[s.cat]) cats[s.cat] = [];
+    cats[s.cat].push(s);
+  });
+  return cats;
+}
+
+// Renderiza as sugestões pré-definidas na aba 1
+function filterClimaSugest(tipo) {
+  // Atualiza botões de filtro
+  ['all','env','sst','opp'].forEach(function(f) {
+    var btn = document.getElementById('csfilt-'+f);
+    if (!btn) return;
+    var isActive = f === tipo;
+    btn.style.background = isActive ? 'var(--green)' : '';
+    btn.style.color      = isActive ? '#fff' : '';
+    btn.style.borderColor = isActive ? 'var(--green)' : '';
+  });
+
+  var cards = document.querySelectorAll('.clima-sugest-card');
+  cards.forEach(function(card) {
+    var cardNorma = card.getAttribute('data-norma') || 'both';
+    var cardTipo  = card.getAttribute('data-tipo') || '';
+    var show = tipo === 'all'
+      || (tipo === 'env' && (cardNorma === 'env' || cardNorma === 'both'))
+      || (tipo === 'sst' && (cardNorma === 'sst' || cardNorma === 'both'))
+      || (tipo === 'opp' && cardTipo === 'Oportunidade');
+    card.style.display = show ? 'flex' : 'none';
+  });
+}
+
+function renderClimaSugestoes() {
+  var container = document.getElementById('clima-sugest-cards');
+  if (!container) return;
+
+  var cats = getClimaCategories();
+  var html = '';
+
+  Object.keys(cats).forEach(function(cat) {
+    html += '<div style="margin-bottom:14px">'
+      + '<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;'
+      + 'letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--gray-b)">'
+      + cat + '</div>'
+      + '<div style="display:flex;flex-direction:column;gap:6px">';
+
+    cats[cat].forEach(function(s, i) {
+      var relColor = s.relevancia==='alta' ? 'var(--red)' : s.relevancia==='media' ? 'var(--amber)' : 'var(--green)';
+      var relLabel = s.relevancia==='alta' ? '🔴 Alta' : s.relevancia==='media' ? '🟡 Média' : '🟢 Baixa';
+      var tipoColor = s.tipo==='Oportunidade' ? 'var(--green-d)' : s.tipo==='Transição' ? '#1a6b9e' : 'var(--red)';
+      var isAdded = isClimaRiscoAdded(s.desc);
+
+      html += '<div class="clima-sugest-card" id="csc-'+cat.replace(/[^a-z0-9]/gi,'')+i+'"'
+        + ' data-norma="'+s.norma+'" data-tipo="'+s.tipo+'"'
+        + ' style="background:var(--white);border:1px solid var(--gray-b);border-radius:8px;padding:10px 14px;'
+        + 'display:flex;gap:12px;align-items:flex-start;transition:all .2s;'
+        + (isAdded ? 'opacity:.5;' : '') + '">'
+        + '<div style="flex:1">'
+        + '<div style="display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap;align-items:center">'
+        + '<span style="font-size:11px;font-weight:700;color:'+tipoColor+'">'+s.tipo+'</span>'
+        + '<span style="font-size:10px;padding:1px 8px;border-radius:20px;background:'+relColor+'22;color:'+relColor+';font-weight:600">'+relLabel+'</span>'
+        + '<span style="font-size:10px;padding:1px 8px;border-radius:20px;background:var(--gray-l);color:var(--text2)">'
+        + (s.norma==='both'?'🌿+⛑️':s.norma==='env'?'🌿 14001':'⛑️ 45001')+'</span>'
+        + '</div>'
+        + '<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">'+s.desc+'</div>'
+        + '<div style="font-size:11px;color:var(--text2);line-height:1.5">'+s.impacto+'</div>'
+        + '</div>'
+        + '<button onclick="addClimaSugestao('+JSON.stringify(s).replace(/"/g,"'")+',this)" '
+        + 'style="flex-shrink:0;padding:6px 14px;background:'+(isAdded?'var(--gray-l)':'var(--green)')+';'
+        + 'color:'+(isAdded?'var(--text2)':'#fff')+';border:none;border-radius:6px;font-size:11px;'
+        + 'font-weight:600;cursor:pointer;white-space:nowrap">'
+        + (isAdded ? '✓ Adicionado' : '+ Incluir') + '</button>'
+        + '</div>';
+    });
+
+    html += '</div></div>';
+  });
+
+  container.innerHTML = html;
+}
+
+function isClimaRiscoAdded(desc) {
+  var list = document.getElementById('clima-riscos-list');
+  if (!list) return false;
+  var inputs = list.querySelectorAll('input[type="text"]');
+  for (var i = 0; i < inputs.length; i++) {
+    if (inputs[i].value === desc) return true;
+  }
+  return false;
+}
+
+function addClimaSugestao(s, btn) {
+  addClimaRisco(s);
+  if (btn) {
+    btn.textContent = '✓ Adicionado';
+    btn.style.background = 'var(--gray-l)';
+    btn.style.color = 'var(--text2)';
+    btn.parentElement.style.opacity = '.5';
+  }
+  // Scroll para a lista de riscos adicionados
+  var list = document.getElementById('clima-riscos-list');
+  if (list) list.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// Sobrescreve initClimaSugestBtns para usar o novo sistema
+function initClimaSugestBtns() {
+  renderClimaSugestoes();
+}
+
+
+
+// ═══════════════════════════════════════════════════════════════════
 // MUDANÇAS CLIMÁTICAS — 4.1 ISO 14001 + ISO 45001 (Anexo SL/HLS)
 // ═══════════════════════════════════════════════════════════════════
 
