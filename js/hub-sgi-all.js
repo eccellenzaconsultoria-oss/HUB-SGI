@@ -3270,6 +3270,17 @@ function switchClimaTab(n) {
     tab.style.color = isActive ? '#1a6b9e' : 'var(--text2)';
     cont.style.display = isActive ? 'block' : 'none';
   });
+  // Renderiza sugestões ao abrir aba 1
+  if (n === 1) {
+    setTimeout(function(){
+      renderClimaSugestoes();
+      // Se ainda vazio, tenta novamente
+      var el = document.getElementById('clima-sugest-cards');
+      if (el && el.innerHTML.trim() === '') {
+        setTimeout(renderClimaSugestoes, 300);
+      }
+    }, 100);
+  }
 }
 
 function addClimaRisco(sugest) {
@@ -3311,11 +3322,23 @@ function saveClimaData() {
   updateClimaStatus();
 }
 
+function appendClimaEsc(fieldId, text) {
+  var el = document.getElementById(fieldId);
+  if (!el) return;
+  el.value = el.value ? el.value + '\n' + text : text;
+  updateClimaStatus();
+  el.focus();
+}
+
 function updateClimaStatus() {
-  var conclusao = (document.getElementById('clima-conclusao')||{}).value || '';
-  var afeta     = (document.getElementById('clima-afeta')||{}).value || '';
-  var resp      = (document.getElementById('clima-resp')||{}).value || '';
-  var data      = (document.getElementById('clima-data')||{}).value || '';
+  var conclusao   = (document.getElementById('clima-conclusao')||{}).value || '';
+  var conclusao14 = (document.getElementById('clima-conclusao-14001')||{}).value || '';
+  var conclusao45 = (document.getElementById('clima-conclusao-45001')||{}).value || '';
+  var afeta       = (document.getElementById('clima-afeta-14001')||{}).value || (document.getElementById('clima-afeta')||{}).value || '';
+  var afeta45     = (document.getElementById('clima-afeta-45001')||{}).value || '';
+  var resp        = (document.getElementById('clima-resp')||{}).value || '';
+  var cargo       = (document.getElementById('clima-cargo')||{}).value || '';
+  var data        = (document.getElementById('clima-data')||{}).value || '';
   var riscos    = document.querySelectorAll('#clima-riscos-list > div') || [];
   var esc1      = (document.getElementById('clima-esc1')||{}).value || '';
 
@@ -3566,32 +3589,27 @@ function initClimaFromState() {
   updateClimaStatus();
 }
 
-// Inicializa botões de sugestão rápida de riscos climáticos
-function initClimaSugestBtns() {
-  var container = document.getElementById('clima-sugest-btns');
-  if (!container) return;
-  var SUGEST = [
-    'Ondas de calor extremo','Enchentes / eventos extremos de chuva',
-    'Estiagem / seca prolongada','Novas regulamentações de GEE','Eficiência energética'
-  ];
-  SUGEST.forEach(function(s) {
-    var btn = document.createElement('button');
-    btn.className = 'btn btn-sm';
-    btn.style.cssText = 'font-size:10px;padding:3px 10px;border-color:var(--blue-d);color:var(--blue-d)';
-    btn.textContent = s;
-    btn.onclick = function() {
-      var found = CLIMA_RISCOS_SUGEST.find(function(r){ return r.desc.indexOf(s.split(' ')[0]) !== -1; });
-      addClimaRisco(found || {tipo:'Físico agudo',desc:s,impacto:'',norma:'both',relevancia:'media'});
-    };
-    container.appendChild(btn);
-  });
-}
+// initClimaSugestBtns — substituída pela versão com renderClimaSugestoes()
 
 // Chama init quando a página carrega
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initClimaFromState);
 } else {
-  setTimeout(function(){ initClimaFromState(); initClimaSugestBtns(); }, 300);
+  setTimeout(function(){
+    initClimaFromState();
+    // Tenta renderizar sugestões - retenta se elemento não existir ainda
+    var tentativas = 0;
+    var tryRender = function() {
+      var el = document.getElementById('clima-sugest-cards');
+      if (el) {
+        renderClimaSugestoes();
+      } else if (tentativas < 10) {
+        tentativas++;
+        setTimeout(tryRender, 300);
+      }
+    };
+    tryRender();
+  }, 500);
 }
 
 
