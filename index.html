@@ -501,15 +501,20 @@ body {
 </style>
 
 <script>
+// Dark mode — inicializa antes do render
 (function() {
-  var KEY = 'sgi-theme';
-  var root = document.documentElement;
-  function applyTheme(t) { root.setAttribute('data-theme', t); localStorage.setItem(KEY, t); }
-  var saved = localStorage.getItem(KEY);
-  var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  applyTheme(saved || (sysDark ? 'dark' : 'light'));
-  window.toggleDarkMode = function() { applyTheme(root.getAttribute('data-theme')==='dark'?'light':'dark'); };
+  try {
+    var s = localStorage.getItem('sgi-theme');
+    var d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', s || (d ? 'dark' : 'light'));
+  } catch(e) {}
 })();
+window.toggleDarkMode = function() {
+  var r = document.documentElement;
+  var t = r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  r.setAttribute('data-theme', t);
+  try { localStorage.setItem('sgi-theme', t); } catch(e) {}
+};
 </script>
 </head>
 <body>
