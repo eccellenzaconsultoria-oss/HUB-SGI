@@ -7,9 +7,7 @@
 <link rel="stylesheet" href="../css/hub.css">
 </head>
 <body>
-
 <header>
-
   <div class="hdr">
     <div class="logo">
       <div class="logo-ico">S</div>
@@ -23,12 +21,9 @@
       <span class="nb nb-sst">ISO 45001:2018</span>
     </div>
   </div>
-
 </header>
-
 <div class="layout">
 <aside>
-
   <div class="nav-lbl">Cláusula 4.1</div>
   <button class="nav-item on" onclick="goTo('s0')"><span class="nav-dot"></span>Contexto da Org.<span class="nav-cl">4.1</span></button>
   <div class="nav-lbl">Cláusula 4.2</div>
@@ -46,10 +41,8 @@
   <button class="nav-item" onclick="goTo('s5')"><span class="nav-dot"></span>Gestão de Ações<span class="nav-cl" id="action-nav-badge" style="background:#ffe4e4;color:var(--red)">0</span></button>
   <button class="nav-item" onclick="goTo('s6')" style="border-left:3px solid var(--purple)!important"><span class="nav-dot" style="background:var(--purple)"></span><span style="color:var(--purple);font-weight:600">Análise Crítica IA</span><span class="nav-cl" style="background:var(--purple-l);color:var(--purple)">9.3</span></button>
   <button class="nav-item" onclick="goTo('s4')"><span class="nav-dot"></span>Resumo & Exportar<span class="nav-cl">SGI</span></button>
-
 </aside>
 <main>
-
 
 <!-- ===== S0: CONTEXTO 4.1 ===== -->
 <div class="sec on" id="s0">
@@ -265,9 +258,9 @@
 
     <!-- Sugestões pré-definidas -->
     <div style="background:var(--gray-l);border-radius:8px;padding:14px;margin-bottom:14px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
         <div style="font-size:12px;font-weight:700;color:var(--text)">💡 Sugestões de riscos e oportunidades climáticas</div>
-        <div style="display:flex;gap:6px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
           <button class="btn btn-sm" onclick="filterClimaSugest('all')" id="csfilt-all"
             style="font-size:10px;background:var(--green);color:#fff;border-color:var(--green)">Todos</button>
           <button class="btn btn-sm" onclick="filterClimaSugest('env')" id="csfilt-env"
@@ -276,16 +269,24 @@
             style="font-size:10px">⛑️ 45001</button>
           <button class="btn btn-sm" onclick="filterClimaSugest('opp')" id="csfilt-opp"
             style="font-size:10px">🌱 Oportunidades</button>
+          <button class="btn btn-sm" onclick="filterClimaSugest('ind')" id="csfilt-ind"
+            style="font-size:10px">🏭 Processo Intensivo</button>
         </div>
       </div>
-      <div id="clima-sugest-cards" style="max-height:380px;overflow-y:auto;padding-right:4px"></div>
+      <div id="clima-sugest-cards" style="max-height:420px;overflow-y:auto;padding-right:4px">
+        <div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">
+          ⏳ Carregando sugestões...
+        </div>
+      </div>
     </div>
 
     <!-- Riscos já adicionados -->
     <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px">
       ✅ Riscos e oportunidades incluídos nesta análise
     </div>
-    <div id="clima-riscos-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div id="clima-riscos-list" style="display:flex;flex-direction:column;gap:8px">
+      <div style="color:var(--text3);font-size:12px;padding:8px">Nenhum item incluído ainda — use as sugestões acima ou clique em "+ Adicionar risco climático"</div>
+    </div>
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
     <button class="btn btn-sm btn-g" onclick="addClimaRisco()">+ Adicionar risco climático</button>
     <span style="font-size:11px;color:var(--text2)">ou escolha uma sugestão:</span>
@@ -297,62 +298,158 @@
   <div id="clima-tab-content-2" style="display:none">
     <div style="font-size:12px;color:var(--text2);margin-bottom:12px">
       Como as atividades da organização contribuem para as mudanças climáticas?
-      Identifique as principais <strong>fontes de emissão de GEE</strong> por escopo.
+      Identifique as principais <strong>fontes de emissão de GEE</strong> por escopo (GHG Protocol).
     </div>
+
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+      <!-- Escopo 1 -->
       <div style="background:#fff3f3;border:1px solid #fcc;border-radius:8px;padding:12px">
-        <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:8px">🔴 Escopo 1 — Emissões diretas</div>
-        <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Fontes próprias: combustão, processos, veículos da frota, refrigerantes</div>
-        <textarea id="clima-esc1" rows="3" placeholder="Ex.: Frota de veículos diesel (combustão), caldeiras a gás, refrigerantes CFC nos sistemas de climatização..." style="font-size:11px" oninput="updateClimaStatus()"></textarea>
+        <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:4px">🔴 Escopo 1 — Emissões diretas</div>
+        <div style="font-size:10px;color:var(--text2);margin-bottom:8px">Fontes próprias: combustão, processos industriais, veículos da frota, refrigerantes</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+          <button onclick="appendClimaEsc('clima-esc1','Queima de combustíveis fósseis (caldeiras, fornos, geradores)')" class="btn btn-sm" style="font-size:10px;padding:2px 8px;color:var(--red);border-color:#fcc">+ Caldeiras/Fornos</button>
+          <button onclick="appendClimaEsc('clima-esc1','Frota de veículos próprios (diesel/gasolina)')" class="btn btn-sm" style="font-size:10px;padding:2px 8px;color:var(--red);border-color:#fcc">+ Frota</button>
+          <button onclick="appendClimaEsc('clima-esc1','Processo industrial (alto-forno, coqueria, forno rotativo)')" class="btn btn-sm" style="font-size:10px;padding:2px 8px;color:var(--red);border-color:#fcc">+ Processo</button>
+          <button onclick="appendClimaEsc('clima-esc1','Sistemas de refrigeração (CFC/HFC)')" class="btn btn-sm" style="font-size:10px;padding:2px 8px;color:var(--red);border-color:#fcc">+ Refrigeração</button>
+          <button onclick="appendClimaEsc('clima-esc1','Geração de energia própria (grupo gerador)')" class="btn btn-sm" style="font-size:10px;padding:2px 8px;color:var(--red);border-color:#fcc">+ Gerador</button>
+        </div>
+        <textarea id="clima-esc1" rows="4" placeholder="Descreva as fontes de emissão direta da organização..." style="font-size:11px" oninput="updateClimaStatus()"></textarea>
       </div>
+
+      <!-- Escopo 2 -->
       <div style="background:#fff8f0;border:1px solid #fda;border-radius:8px;padding:12px">
-        <div style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:8px">🟡 Escopo 2 — Emissões indiretas</div>
-        <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Energia comprada: eletricidade, calor, vapor, frio adquiridos de terceiros</div>
-        <textarea id="clima-esc2" rows="3" placeholder="Ex.: Consumo de energia elétrica da rede (depende da matriz energética do estado), vapor adquirido..." style="font-size:11px" oninput="updateClimaStatus()"></textarea>
+        <div style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:4px">🟡 Escopo 2 — Emissões indiretas de energia</div>
+        <div style="font-size:10px;color:var(--text2);margin-bottom:8px">Energia comprada: eletricidade, calor, vapor ou frio adquiridos de terceiros</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+          <button onclick="appendClimaEsc('clima-esc2','Energia elétrica da rede (concessionária)')" class="btn btn-sm" style="font-size:10px;padding:2px 8px;color:var(--amber);border-color:#fda">+ Energia elétrica</button>
+          <button onclick="appendClimaEsc('clima-esc2','Vapor adquirido de terceiros')" class="btn btn-sm" style="font-size:10px;padding:2px 8px;color:var(--amber);border-color:#fda">+ Vapor</button>
+          <button onclick="appendClimaEsc('clima-esc2','Energia de fonte renovável (GD solar/eólica)')" class="btn btn-sm" style="font-size:10px;padding:2px 8px;color:var(--amber);border-color:#fda">+ Renovável</button>
+        </div>
+        <textarea id="clima-esc2" rows="4" placeholder="Descreva o consumo de energia adquirida de terceiros..." style="font-size:11px" oninput="updateClimaStatus()"></textarea>
       </div>
+
+      <!-- Escopo 3 -->
       <div style="background:#f0f4ff;border:1px solid #bcd;border-radius:8px;padding:12px">
-        <div style="font-size:11px;font-weight:700;color:#1a6b9e;margin-bottom:8px">🔵 Escopo 3 — Outras emissões indiretas</div>
-        <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Cadeia de valor: fornecedores, transporte, resíduos, uso do produto</div>
-        <textarea id="clima-esc3" rows="3" placeholder="Ex.: Transporte de matéria-prima por fornecedores, destinação de resíduos, deslocamento de funcionários..." style="font-size:11px" oninput="updateClimaStatus()"></textarea>
+        <div style="font-size:11px;font-weight:700;color:#1a6b9e;margin-bottom:4px">🔵 Escopo 3 — Outras emissões indiretas</div>
+        <div style="font-size:10px;color:var(--text2);margin-bottom:8px">Cadeia de valor: fornecedores, transporte, resíduos, uso e fim de vida do produto</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+          <button onclick="appendClimaEsc('clima-esc3','Transporte de matérias-primas por fornecedores')" class="btn btn-sm" style="font-size:10px;padding:2px 8px;color:#1a6b9e;border-color:#bcd">+ Fornecedores</button>
+          <button onclick="appendClimaEsc('clima-esc3','Transporte e distribuição de produtos acabados')" class="btn btn-sm" style="font-size:10px;padding:2px 8px;color:#1a6b9e;border-color:#bcd">+ Logística</button>
+          <button onclick="appendClimaEsc('clima-esc3','Destinação de resíduos (aterro, incineração)')" class="btn btn-sm" style="font-size:10px;padding:2px 8px;color:#1a6b9e;border-color:#bcd">+ Resíduos</button>
+          <button onclick="appendClimaEsc('clima-esc3','Deslocamento de funcionários (home-to-work)')" class="btn btn-sm" style="font-size:10px;padding:2px 8px;color:#1a6b9e;border-color:#bcd">+ Funcionários</button>
+          <button onclick="appendClimaEsc('clima-esc3','Uso do produto pelo cliente')" class="btn btn-sm" style="font-size:10px;padding:2px 8px;color:#1a6b9e;border-color:#bcd">+ Uso produto</button>
+        </div>
+        <textarea id="clima-esc3" rows="4" placeholder="Descreva as emissões indiretas da cadeia de valor..." style="font-size:11px" oninput="updateClimaStatus()"></textarea>
       </div>
     </div>
-    <div class="field">
-      <label>Iniciativas de mitigação / redução de GEE já em andamento</label>
-      <textarea id="clima-mitig" rows="2" placeholder="Ex.: Programa de eficiência energética, substituição de frota por veículos elétricos, energia solar..." oninput="updateClimaStatus()"></textarea>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="field">
+        <label>✅ Iniciativas de mitigação / redução de GEE já em andamento</label>
+        <textarea id="clima-mitig" rows="3" placeholder="Ex.: Programa de eficiência energética, energia solar instalada, substituição de frota, metas de redução de GEE..." oninput="updateClimaStatus()"></textarea>
+      </div>
+      <div class="field">
+        <label>📊 Possui inventário de GEE formalizado?</label>
+        <select id="clima-inventario" onchange="updateClimaStatus()" style="margin-bottom:8px">
+          <option value="">— Selecione —</option>
+          <option value="sim-pub">✅ Sim — publicado (relatório de sustentabilidade)</option>
+          <option value="sim-int">🔶 Sim — interno (não publicado)</option>
+          <option value="parcial">📋 Parcial — apenas Escopo 1 e 2</option>
+          <option value="nao-plan">🔜 Não — mas planejamos elaborar</option>
+          <option value="nao">❌ Não</option>
+        </select>
+        <label>Referência / metodologia utilizada</label>
+        <input type="text" id="clima-inventario-ref" placeholder="Ex.: GHG Protocol, ISO 14064, SBTI..." oninput="updateClimaStatus()">
+      </div>
     </div>
   </div>
 
   <!-- ABA 3: Conclusão e Evidência -->
   <div id="clima-tab-content-3" style="display:none">
+
+    <!-- Checklist de verificação -->
+    <div style="background:var(--gray-l);border-radius:8px;padding:14px;margin-bottom:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">
+        ✅ Checklist de análise — o auditor vai verificar estes pontos
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-weight:400">
+          <input type="checkbox" id="ck-riscos-fisicos" style="margin-top:2px;flex-shrink:0">
+          <span>Riscos físicos agudos identificados (enchentes, calor extremo, tempestades)</span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-weight:400">
+          <input type="checkbox" id="ck-riscos-cronicos" style="margin-top:2px;flex-shrink:0">
+          <span>Riscos físicos crônicos avaliados (estiagem, aumento de temperatura)</span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-weight:400">
+          <input type="checkbox" id="ck-transicao" style="margin-top:2px;flex-shrink:0">
+          <span>Riscos de transição considerados (regulamentação carbono, CBAM, ESG)</span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-weight:400">
+          <input type="checkbox" id="ck-oportunidades" style="margin-top:2px;flex-shrink:0">
+          <span>Oportunidades climáticas identificadas (eficiência, renováveis, carbono)</span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-weight:400">
+          <input type="checkbox" id="ck-gee" style="margin-top:2px;flex-shrink:0">
+          <span>Fontes de emissão de GEE identificadas (Escopos 1, 2 e 3)</span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-weight:400">
+          <input type="checkbox" id="ck-sst" style="margin-top:2px;flex-shrink:0">
+          <span>Impacto climático na saúde e segurança dos trabalhadores avaliado (ISO 45001)</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Conclusão separada por norma -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-      <div class="field">
-        <label>As mudanças climáticas afetam os objetivos do SGI desta organização?</label>
-        <select id="clima-afeta" onchange="updateClimaStatus()">
+      <div style="background:var(--green-l);border:1px solid #a8dfc8;border-radius:8px;padding:12px">
+        <div style="font-size:11px;font-weight:700;color:var(--green-d);margin-bottom:8px">🌿 ISO 14001 — Impacto ambiental</div>
+        <label style="font-size:11px">As mudanças climáticas afetam os objetivos do SGA?</label>
+        <select id="clima-afeta-14001" onchange="updateClimaStatus()" style="margin-bottom:8px">
           <option value="">— Selecione —</option>
-          <option value="sim-relevante">✅ Sim — de forma relevante (registrar no contexto)</option>
+          <option value="sim-relevante">✅ Sim — de forma relevante</option>
           <option value="sim-baixo">🔶 Sim — de forma baixa (monitorar)</option>
-          <option value="nao">❌ Não afeta — justificativa abaixo</option>
+          <option value="nao">❌ Não afeta neste ciclo</option>
         </select>
+        <label style="font-size:11px">Conclusão para o SGA (14001)</label>
+        <textarea id="clima-conclusao-14001" rows="3" oninput="updateClimaStatus()"
+          placeholder="Ex.: Risco de estiagem afeta disponibilidade hídrica para o processo. Oportunidade de eficiência energética incorporada como objetivo ambiental. Emissões de GEE predominantemente de Escopo 2."
+          style="font-size:11px"></textarea>
       </div>
-      <div class="field">
-        <label>Aplicável para qual(is) norma(s)?</label>
-        <select id="clima-norma" onchange="updateClimaStatus()">
-          <option value="both">🌿+⛑️ Ambas (14001 + 45001)</option>
-          <option value="env">🌿 Apenas ISO 14001</option>
-          <option value="sst">⛑️ Apenas ISO 45001</option>
+      <div style="background:var(--blue-l);border:1px solid #a8cef0;border-radius:8px;padding:12px">
+        <div style="font-size:11px;font-weight:700;color:var(--blue-d);margin-bottom:8px">⛑️ ISO 45001 — Saúde e segurança</div>
+        <label style="font-size:11px">As mudanças climáticas afetam os objetivos do SGSST?</label>
+        <select id="clima-afeta-45001" onchange="updateClimaStatus()" style="margin-bottom:8px">
+          <option value="">— Selecione —</option>
+          <option value="sim-relevante">✅ Sim — de forma relevante</option>
+          <option value="sim-baixo">🔶 Sim — de forma baixa (monitorar)</option>
+          <option value="nao">❌ Não afeta neste ciclo</option>
         </select>
+        <label style="font-size:11px">Conclusão para o SGSST (45001)</label>
+        <textarea id="clima-conclusao-45001" rows="3" oninput="updateClimaStatus()"
+          placeholder="Ex.: Ondas de calor representam risco de stress térmico para trabalhadores externos e em áreas sem climatização. Revisão do PPRA/PGR considerará fator climático. Não há outros impactos relevantes identificados."
+          style="font-size:11px"></textarea>
       </div>
     </div>
+
+    <!-- Campo de conclusão unificada (para quem tem apenas uma norma) -->
     <div class="field">
-      <label>Justificativa / Conclusão da análise <span style="color:var(--red)">*</span></label>
-      <textarea id="clima-conclusao" rows="3"
-        placeholder="Ex.: A organização está localizada em região com risco crescente de estiagens prolongadas, o que pode afetar a disponibilidade de água para os processos produtivos e aumentar o risco de incêndios nas áreas externas. As emissões de GEE são predominantemente de Escopo 2 (energia elétrica). Foram identificadas oportunidades de eficiência energética como objetivos SGA. Não há risco imediato de alteração do SGI de SST por fatores climáticos neste ciclo."
-        oninput="updateClimaStatus()" style="min-height:80px"></textarea>
+      <label>Conclusão geral da análise <span style="color:var(--red)">*</span>
+        <span style="font-size:10px;font-weight:400;color:var(--text2)"> — síntese para o registro do contexto</span>
+      </label>
+      <textarea id="clima-conclusao" rows="3" oninput="updateClimaStatus()"
+        placeholder="Síntese da análise de mudanças climáticas para registro no contexto organizacional. Mesmo que o impacto seja baixo ou nulo, registre a conclusão da análise como evidência."
+        style="min-height:70px"></textarea>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px">
       <div class="field">
         <label>Responsável pela análise</label>
-        <input type="text" id="clima-resp" placeholder="Nome do responsável" oninput="updateClimaStatus()">
+        <input type="text" id="clima-resp" placeholder="Nome" oninput="updateClimaStatus()">
+      </div>
+      <div class="field">
+        <label>Cargo / função</label>
+        <input type="text" id="clima-cargo" placeholder="Ex.: Técnico Ambiental" oninput="updateClimaStatus()">
       </div>
       <div class="field">
         <label>Data da análise</label>
@@ -364,21 +461,18 @@
       </div>
     </div>
 
-    <!-- Ações geradas -->
-    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
       <button class="btn btn-sm" onclick="gerarROClima()"
         style="background:var(--green);color:#fff;border-color:var(--green);font-weight:600">
         ⚡ Gerar R&O a partir desta análise →
       </button>
       <button class="btn btn-sm" onclick="printClimaEvidencia()"
-        style="border-color:#1a6b9e;color:#1a6b9e">
+        style="border-color:#1a6b9e;color:#1a6b9e;font-weight:600">
         🖨️ Imprimir evidência para auditoria
       </button>
     </div>
 
-    <!-- Resumo evidência -->
-    <div id="clima-evidencia-resumo" style="display:none;margin-top:12px;background:#e8f4ff;border-radius:8px;padding:12px;font-size:12px">
-    </div>
+    <div id="clima-evidencia-resumo" style="display:none;margin-top:8px;background:#e8f4ff;border-radius:8px;padding:12px;font-size:12px"></div>
   </div>
 </div>
 
@@ -964,792 +1058,18 @@
   </div>
 </div>
 
-
 </main>
 </div>
 
-</div>
-
-<!-- MODAL: Aspecto/Perigo -->
-<div class="modal-bg" id="ap-modal">
-  <div class="modal" style="width:680px">
-    <h3>➕ Novo Aspecto Ambiental / Perigo SST</h3>
-
-    <!-- CATÁLOGO -->
-    <div style="background:#f4fbf8;border:1px solid #a8dfc8;border-radius:8px;padding:12px 14px;margin-bottom:14px">
-      <div style="font-size:12px;font-weight:700;color:var(--green-d);margin-bottom:8px">📚 Catálogo Padronizado — digite o código ou pesquise</div>
-      <div style="display:flex;gap:8px;margin-bottom:8px">
-        <div style="display:flex;align-items:center;gap:6px;background:var(--white);border:1px solid var(--gray-b);border-radius:6px;padding:4px 10px;flex:0 0 140px">
-          <span style="font-size:12px;color:var(--text2);white-space:nowrap">Cód.</span>
-          <input type="text" id="cat-code" placeholder="ex: A01" style="border:none;padding:0;font-size:13px;font-family:'DM Mono',monospace;font-weight:600;width:60px;outline:none" oninput="applyCatalogCode(this.value)" autocomplete="off">
-        </div>
-        <input type="text" id="cat-search" placeholder="🔍  Pesquisar no catálogo (ex: óleo, queda, ruído...)" style="flex:1;font-size:13px" oninput="searchCatalog(this.value)" autocomplete="off">
-        <select id="cat-filter" onchange="searchCatalog(document.getElementById('cat-search').value)" style="width:130px;font-size:12px">
-          <option value="all">Todos</option>
-          <option value="env">🌿 Ambientais</option>
-          <option value="sst">⛑️ SST</option>
-        </select>
-      </div>
-      <!-- Resultados do catálogo -->
-      <div id="cat-results" style="max-height:200px;overflow-y:auto;border:1px solid var(--gray-b);border-radius:6px;background:var(--white)"></div>
-      <div style="font-size:11px;color:var(--green-d);margin-top:6px;opacity:.8">💡 Clique em um item para preencher automaticamente · O catálogo pode ser editado pelo botão "Gerenciar catálogo"
-        <button onclick="openCatalogManager()" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--blue-d);text-decoration:underline;padding:0;margin-left:6px">Gerenciar catálogo ›</button>
-      </div>
-    </div>
-
-    <!-- FORMULÁRIO -->
-    <div class="row">
-      <div style="max-width:180px"><label>Tipo</label><select id="ap-type"><option value="env">🌿 Ambiental</option><option value="sst">⛑️ SST</option></select></div>
-      <div><label>Processo / Atividade</label><input type="text" id="ap-proc" placeholder="Ex.: Manutenção de máquinas"></div>
-    </div>
-    <div class="row">
-      <div>
-        <label>Aspecto / Perigo <span id="ap-asp-code" style="font-size:10px;font-family:'DM Mono',monospace;background:var(--green-l);color:var(--green-d);padding:1px 6px;border-radius:4px;display:none"></span></label>
-        <input type="text" id="ap-asp" placeholder="Selecione do catálogo ou escreva livremente">
-      </div>
-      <div>
-        <label>Impacto / Consequência</label>
-        <input type="text" id="ap-imp" placeholder="Preenchido automaticamente pelo catálogo">
-      </div>
-    </div>
-    <div class="row">
-      <div><label>Condição</label><select id="ap-cond"><option value="N">Normal</option><option value="A">Anormal</option><option value="E">Emergência</option></select></div>
-      <div><label>Frequência</label><select id="ap-freq" onchange="calcAPScore()"><option value="">—</option><option value="1">1 — Rara (&lt;1x/ano)</option><option value="2">2 — Ocasional (1–12x/ano)</option><option value="3" selected>3 — Frequente (mensal)</option><option value="4">4 — M. frequente (semanal)</option><option value="5">5 — Contínua (diária)</option></select></div>
-      <div><label>Probabilidade</label><select id="ap-prob" onchange="calcAPScore()"><option value="">—</option><option value="1">1 — Muito improvável</option><option value="2">2 — Improvável</option><option value="3" selected>3 — Possível</option><option value="4">4 — Provável</option><option value="5">5 — Muito provável</option></select></div>
-    </div>
-    <div class="row">
-      <div><label>Severidade do impacto</label><select id="ap-sev" onchange="calcAPScore()"><option value="">—</option><option value="1">1 — Insignificante</option><option value="2">2 — Menor</option><option value="3" selected>3 — Moderada</option><option value="4">4 — Maior</option><option value="5">5 — Catastrófica</option></select></div>
-      <div><label>Abrangência do impacto</label><select id="ap-abrang" onchange="calcAPScore()"><option value="">—</option><option value="1">1 — Local (instalação)</option><option value="2" selected>2 — Vizinhança</option><option value="3">3 — Comunidade / bairro</option><option value="4">4 — Município</option><option value="5">5 — Regional / transfronteirico</option></select></div>
-    </div>
-    <div style="background:var(--gray-l);border:1.5px solid var(--gray-b);border-radius:8px;padding:10px 14px;text-align:center;margin-bottom:6px" id="ap-score-display">
-      <div style="font-size:13px;color:var(--text2)">Score F × P × S × A aparece aqui</div>
-    </div>
-    <div id="ap-sig-display" style="text-align:center;margin-bottom:6px"></div>
-    <div style="font-size:10px;color:var(--text2);text-align:center;margin-bottom:6px">Score ≥ 50 = Significativo · Escala 1–625</div>
-    <div>
-    <div class="flex fend mt2" style="gap:8px">
-      <button class="btn" onclick="closeMod('ap-modal')">Cancelar</button>
-      <button class="btn btn-g" onclick="saveAP()">Salvar item</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Formulário de Campo ISO 14001 -->
-<div class="campo-modal-bg" id="campo14001-modal">
-  <div class="campo-modal">
-    <div class="campo-header">
-      <div>
-        <div class="campo-header-title">📋 Formulário de Campo — Levantamento de Aspectos e Impactos</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:2px">ISO 14001:2015 · Cláusula 6.1.2 · Selecione o código e preencha os dados</div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button class="btn btn-sm" onclick="openCatalogoModal('env')" style="color:var(--green-d);border-color:var(--green)">📖 Ver catálogo A01–A25</button>
-        <button class="btn btn-sm btn-g" onclick="addCampo14001Row()">+ Adicionar linha</button>
-        <button class="btn btn-sm" style="background:var(--green);color:#fff;border-color:var(--green);font-weight:500" onclick="saveCampo14001()">💾 Salvar no SGI</button>
-        <button onclick="closeCampo14001()" style="background:none;border:none;cursor:pointer;font-size:22px;color:var(--text2);padding:0 4px">×</button>
-      </div>
-    </div>
-    <div class="campo-body">
-      <!-- Cabeçalho das colunas -->
-      <div style="display:grid;grid-template-columns:36px 130px 1fr 1fr 100px 70px 70px 90px 90px 36px;gap:8px;padding:6px 10px;background:var(--gray-l);border-radius:6px;margin-bottom:8px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em">
-        <div>#</div>
-        <div>Código</div>
-        <div>Aspecto Ambiental</div>
-        <div>Impacto Ambiental</div>
-        <div>Etapa C.V.</div>
-        <div>Prob.</div>
-        <div>Sev.</div>
-        <div>Score</div>
-        <div>Signif.</div>
-        <div></div>
-      </div>
-      <!-- Linhas do formulário -->
-      <div id="campo14001-rows"></div>
-      <!-- Atividade global -->
-      <div style="margin-top:12px;padding:12px 14px;background:var(--gray-l);border-radius:8px">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-          <div><label style="font-size:11px">Atividade / Produto / Serviço</label><input type="text" id="c14-activity" placeholder="Ex.: Manutenção de máquinas" style="font-size:12px"></div>
-          <div><label style="font-size:11px">Responsável</label><input type="text" id="c14-owner" placeholder="Ex.: Técnico Ambiental" style="font-size:12px"></div>
-          <div><label style="font-size:11px">Área / Setor</label><input type="text" id="c14-sector" placeholder="Ex.: Produção" style="font-size:12px"></div>
-        </div>
-      </div>
-    </div>
-    <div class="campo-footer">
-      <div style="font-size:12px;color:var(--text2)" id="c14-count">0 aspecto(s) adicionado(s)</div>
-      <div style="display:flex;gap:8px">
-        <button class="btn" onclick="closeCampo14001()">Cancelar</button>
-        <button class="btn" style="background:var(--green);color:#fff;border-color:var(--green);font-weight:600" onclick="saveCampo14001()">💾 Salvar todos no SGI</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Formulário de Campo ISO 45001 -->
-<div class="campo-modal-bg" id="campo45001-modal">
-  <div class="campo-modal">
-    <div class="campo-header">
-      <div>
-        <div class="campo-header-title">📋 Formulário de Campo — Levantamento de Perigos e Riscos SST</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:2px">ISO 45001:2018 · Cláusula 6.1.2 · Selecione o código e preencha os dados</div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button class="btn btn-sm" onclick="openCatalogoModal('sst')" style="color:var(--blue-d);border-color:var(--blue)">📖 Ver catálogo S01–S30</button>
-        <button class="btn btn-sm btn-g" onclick="addCampo45001Row()">+ Adicionar linha</button>
-        <button class="btn btn-sm" style="background:var(--blue);color:#fff;border-color:var(--blue);font-weight:500" onclick="saveCampo45001()">💾 Salvar no SGI</button>
-        <button onclick="closeCampo45001()" style="background:none;border:none;cursor:pointer;font-size:22px;color:var(--text2);padding:0 4px">×</button>
-      </div>
-    </div>
-    <div class="campo-body">
-      <!-- Cabeçalho -->
-      <div style="display:grid;grid-template-columns:36px 130px 1fr 1fr 70px 70px 90px 120px 36px;gap:8px;padding:6px 10px;background:var(--gray-l);border-radius:6px;margin-bottom:8px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em">
-        <div>#</div>
-        <div>Código</div>
-        <div>Perigo SST</div>
-        <div>Risco / Consequência</div>
-        <div>Prob.</div>
-        <div>Sev.</div>
-        <div>Grau</div>
-        <div>Nível</div>
-        <div></div>
-      </div>
-      <!-- Linhas -->
-      <div id="campo45001-rows"></div>
-      <!-- Dados globais -->
-      <div style="margin-top:12px;padding:12px 14px;background:var(--gray-l);border-radius:8px">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px">
-          <div><label style="font-size:11px">Atividade / Processo</label><input type="text" id="c45-activity" placeholder="Ex.: Operação de empilhadeira" style="font-size:12px"></div>
-          <div><label style="font-size:11px">Responsável</label><input type="text" id="c45-owner" placeholder="Ex.: Técnico de Segurança" style="font-size:12px"></div>
-          <div><label style="font-size:11px">Área / Setor</label><input type="text" id="c45-sector" placeholder="Ex.: Logística" style="font-size:12px"></div>
-          <div><label style="font-size:11px">NR Aplicável</label><input type="text" id="c45-nr" placeholder="Ex.: NR-11, NR-12" style="font-size:12px"></div>
-        </div>
-      </div>
-    </div>
-    <div class="campo-footer">
-      <div style="font-size:12px;color:var(--text2)" id="c45-count">0 perigo(s) adicionado(s)</div>
-      <div style="display:flex;gap:8px">
-        <button class="btn" onclick="closeCampo45001()">Cancelar</button>
-        <button class="btn" style="background:var(--blue);color:#fff;border-color:var(--blue);font-weight:600" onclick="saveCampo45001()">💾 Salvar todos no SGI</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Catálogo de KPIs -->
-<div class="modal-bg" id="kpi-catalog-modal">
-  <div class="modal" style="width:780px;max-height:88vh;display:flex;flex-direction:column">
-    <div class="flex fbet" style="margin-bottom:12px;flex-shrink:0">
-      <h3 style="margin:0">📚 Catálogo Padronizado de Indicadores</h3>
-      <button onclick="closeMod('kpi-catalog-modal')" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--text2)">×</button>
-    </div>
-    <div class="flex" style="gap:8px;margin-bottom:10px;flex-shrink:0">
-      <input type="text" id="cat-kpi-search" placeholder="🔍 Pesquisar indicador..." style="flex:1;font-size:13px" oninput="renderKPICatalogList()">
-      <select id="cat-kpi-filter" onchange="renderKPICatalogList()" style="font-size:13px;width:140px">
-        <option value="all">Todos</option>
-        <option value="env">🌿 Ambientais</option>
-        <option value="sst">⛑️ SST</option>
-      </select>
-    </div>
-    <div style="flex:1;overflow-y:auto;border:1px solid var(--gray-b);border-radius:8px" id="kpi-catalog-list"></div>
-    <div style="font-size:11px;color:var(--text2);margin-top:8px;flex-shrink:0">Clique em um indicador para adicioná-lo ao painel. Você poderá configurar metas e inserir dados históricos após adicionar.</div>
-    <div class="flex fend" style="margin-top:10px;flex-shrink:0">
-      <button class="btn" onclick="closeMod('kpi-catalog-modal')">Fechar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Novo / Editar KPI -->
-<div class="modal-bg" id="kpi-modal">
-  <div class="modal" style="width:640px;max-height:90vh;overflow-y:auto">
-    <h3 id="kpi-modal-title">➕ Novo Indicador de Desempenho</h3>
-    <div class="row">
-      <div style="flex:2">
-        <label>Nome do indicador</label>
-        <input type="text" id="kpi-name" placeholder="Ex.: Taxa de Frequência de Acidentes">
-      </div>
-      <div style="max-width:130px">
-        <label>Tipo</label>
-        <select id="kpi-type">
-          <option value="sst">⛑️ SST</option>
-          <option value="env">🌿 Ambiental</option>
-        </select>
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label>Unidade de medida</label>
-        <input type="text" id="kpi-unit" placeholder="Ex.: acidentes/milhão HH">
-      </div>
-      <div>
-        <label>Fórmula de cálculo</label>
-        <input type="text" id="kpi-formula" placeholder="Ex.: (Nº acid. x 1.000.000) / HH trabalhadas">
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label>Meta (valor desejado)</label>
-        <input type="number" id="kpi-target" placeholder="Ex.: 0" step="any" style="width:100%">
-      </div>
-      <div>
-        <label>Direção da meta</label>
-        <select id="kpi-direction">
-          <option value="lte">⬇️ Menor ou igual (reduzir)</option>
-          <option value="gte">⬆️ Maior ou igual (aumentar)</option>
-          <option value="eq">🎯 Igual (manter)</option>
-        </select>
-      </div>
-      <div>
-        <label>Tolerância (%)</label>
-        <input type="number" id="kpi-tolerance" value="10" min="0" max="50" style="width:100%">
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label>Responsável pelo monitoramento</label>
-        <input type="text" id="kpi-owner" placeholder="Ex.: Técnico de Segurança">
-      </div>
-      <div>
-        <label>Frequência de coleta</label>
-        <select id="kpi-freq">
-          <option value="mensal">Mensal</option>
-          <option value="bimestral">Bimestral</option>
-          <option value="trimestral">Trimestral</option>
-          <option value="semestral">Semestral</option>
-          <option value="anual">Anual</option>
-        </select>
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label>Referência normativa</label>
-        <input type="text" id="kpi-norm-ref" placeholder="Ex.: ISO 45001 §9.1 / NR-4">
-      </div>
-      <div>
-        <label>Objetivo vinculado (6.2)</label>
-        <select id="kpi-obj-link">
-          <option value="">— Sem vínculo —</option>
-        </select>
-      </div>
-    </div>
-    <label>Fonte dos dados</label>
-    <input type="text" id="kpi-source" placeholder="Ex.: CAT registradas no eSocial / Medidor de consumo de água">
-    <label>Observações</label>
-    <textarea id="kpi-obs" style="min-height:50px" placeholder="Observações sobre o indicador..."></textarea>
-
-    <!-- Inserção de dados históricos no próprio modal -->
-    <div style="border-top:1px dashed var(--gray-b);margin-top:14px;padding-top:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px">📊 Dados históricos (opcional — pode inserir depois)</div>
-      <div style="overflow-x:auto" id="kpi-hist-inputs"></div>
-    </div>
-
-    <div class="flex fend mt2" style="gap:8px">
-      <button class="btn" onclick="closeMod('kpi-modal')">Cancelar</button>
-      <button class="btn btn-g" onclick="saveKPI()">Salvar indicador</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Importar histórico CSV -->
-<div class="modal-bg" id="kpi-import-modal">
-  <div class="modal" style="width:600px">
-    <h3>📂 Importar Histórico de Indicadores</h3>
-    <div class="info" style="margin-bottom:14px">
-      💡 Exporte primeiro o modelo, preencha com os dados históricos e reimporte. O sistema atualiza automaticamente os valores de cada indicador por período.
-    </div>
-    <div style="display:flex;gap:10px;margin-bottom:16px">
-      <button class="btn btn-sm btn-g" onclick="exportKPITemplate()">⬇️ Baixar modelo .csv</button>
-      <label class="btn btn-sm" style="cursor:pointer;background:var(--blue);color:#fff;border-color:var(--blue);font-weight:500">
-        📂 Importar .csv preenchido
-        <input type="file" id="kpi-import-file" accept=".csv" style="display:none" onchange="importKPICSV(this)">
-      </label>
-    </div>
-    <div id="kpi-import-status"></div>
-    <div class="flex fend mt2">
-      <button class="btn" onclick="closeMod('kpi-import-modal')">Fechar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Inserir valor do mês -->
-<div class="modal-bg" id="kpi-entry-modal">
-  <div class="modal" style="width:440px">
-    <h3 id="kpi-entry-title">Inserir valor</h3>
-    <div id="kpi-entry-context" style="font-size:12px;color:var(--text2);margin-bottom:12px"></div>
-    <label>Valor medido</label>
-    <input type="number" id="kpi-entry-val" step="any" placeholder="Digite o valor" style="font-size:18px;font-weight:600">
-    <label>Observação (opcional)</label>
-    <input type="text" id="kpi-entry-obs" placeholder="Ex.: Inclui acidente ocorrido em 15/03">
-    <!-- Análise de causa quando fora da meta -->
-    <div id="kpi-entry-analysis" style="display:none;background:var(--red-l);border-left:3px solid var(--red);border-radius:6px;padding:10px 14px;margin-top:8px">
-      <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:6px">⚠️ Valor fora da meta — justificativa obrigatória</div>
-      <label style="font-size:11px;color:var(--red)">Causa / Justificativa</label>
-      <textarea id="kpi-entry-causa" placeholder="Ex.: Aumento do volume de produção em 40% no mês — resíduo proporcional ao processo" style="min-height:56px;border-color:var(--red);font-size:12px"></textarea>
-      <label style="font-size:11px;color:var(--red);margin-top:6px">Ação prevista para correção</label>
-      <input type="text" id="kpi-entry-acao" placeholder="Ex.: Renegociar contrato de coleta seletiva para aumentar frequência" style="border-color:var(--red);font-size:12px">
-    </div>
-    <!-- Campo de justificativa padrão (sempre visível) -->
-    <label style="margin-top:10px">Observação / Justificativa do valor</label>
-    <textarea id="kpi-entry-obs" placeholder="Ex.: Valor inclui consumo do turno extra de produção — meta será revisada no próximo trimestre" style="min-height:50px"></textarea>
-    <div class="flex fend mt2" style="gap:8px">
-      <button class="btn" onclick="closeMod('kpi-entry-modal')">Cancelar</button>
-      <button class="btn btn-g" onclick="saveKPIEntry()">Salvar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Competência — Função/Requisito/Colaborador -->
-<div class="modal-bg" id="comp-modal">
-  <div class="modal" style="width:560px">
-    <h3 id="comp-modal-title">Nova Entrada</h3>
-    <div id="comp-modal-body"></div>
-    <div class="flex fend mt2" style="gap:8px">
-      <button class="btn" onclick="closeMod('comp-modal')">Cancelar</button>
-      <button class="btn btn-g" onclick="saveCompEntry()">Salvar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Novo Treinamento -->
-<div class="modal-bg" id="train-modal">
-  <div class="modal" style="width:640px;max-height:90vh;overflow-y:auto">
-    <h3 id="train-modal-title">📚 Novo Treinamento / Comunicação</h3>
-    <div class="row">
-      <div style="flex:2">
-        <label>Título do treinamento</label>
-        <input type="text" id="tr-title" placeholder="Ex.: NR-35 — Trabalho em Altura">
-      </div>
-      <div style="max-width:130px">
-        <label>Tipo</label>
-        <select id="tr-type">
-          <option value="sst">⛑️ SST</option>
-          <option value="env">🌿 Ambiental</option>
-          <option value="both">🌿+⛑️ Ambos</option>
-          <option value="int">🔧 Integração</option>
-        </select>
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label>Carga horária (horas)</label>
-        <input type="number" id="tr-hours" placeholder="Ex.: 8" min="1" style="width:100%">
-      </div>
-      <div>
-        <label>Modalidade</label>
-        <select id="tr-mode">
-          <option value="presencial">Presencial</option>
-          <option value="ead">EAD / Online</option>
-          <option value="hibrido">Híbrido</option>
-          <option value="pratico">Prático / OJT</option>
-        </select>
-      </div>
-      <div>
-        <label>Periodicidade</label>
-        <select id="tr-period">
-          <option value="unico">Único</option>
-          <option value="anual">Anual</option>
-          <option value="bianual">Bianual</option>
-          <option value="trienal">Trienal</option>
-        </select>
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label>Data planejada</label>
-        <input type="date" id="tr-date-plan">
-      </div>
-      <div>
-        <label>Data realizada</label>
-        <input type="date" id="tr-date-done">
-      </div>
-      <div>
-        <label>Status</label>
-        <select id="tr-status">
-          <option value="planejado">📅 Planejado</option>
-          <option value="realizado">✅ Realizado</option>
-          <option value="atrasado">🔴 Atrasado</option>
-          <option value="cancelado">❌ Cancelado</option>
-        </select>
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label>Instrutor / Entidade</label>
-        <input type="text" id="tr-instructor" placeholder="Ex.: SENAI / Consultor Externo">
-      </div>
-      <div>
-        <label>NR / Requisito normativo</label>
-        <input type="text" id="tr-norm-req" placeholder="Ex.: NR-35 / ISO 45001 §7.2">
-      </div>
-    </div>
-    <label>Público-alvo / Funções</label>
-    <input type="text" id="tr-audience" placeholder="Ex.: Todos os colaboradores da manutenção">
-    <div class="row">
-      <div>
-        <label>Nº de participantes</label>
-        <input type="number" id="tr-npart" placeholder="0" min="0" style="width:100%">
-      </div>
-      <div>
-        <label>Evidência (registro)</label>
-        <input type="text" id="tr-evid" placeholder="Ex.: Lista de presença assinada arquivada no SGI">
-      </div>
-    </div>
-    <label>Observações</label>
-    <textarea id="tr-obs" placeholder="Observações adicionais..." style="min-height:50px"></textarea>
-    <div class="flex fend mt2" style="gap:8px">
-      <button class="btn" onclick="closeMod('train-modal')">Cancelar</button>
-      <button class="btn btn-g" onclick="saveTrain()">Salvar treinamento</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Novo Documento 7.5 -->
-<div class="modal-bg" id="doc-modal">
-  <div class="modal" style="width:600px">
-    <h3 id="doc-modal-title">📁 Novo Documento</h3>
-    <div class="row">
-      <div style="max-width:140px">
-        <label>Código</label>
-        <input type="text" id="doc-code" placeholder="Ex.: PRC-001" style="font-family:monospace;font-weight:600">
-      </div>
-      <div style="flex:2">
-        <label>Título do documento</label>
-        <input type="text" id="doc-title" placeholder="Ex.: Procedimento de Identificação de Aspectos Ambientais">
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label>Tipo</label>
-        <select id="doc-type">
-          <option value="proc">Procedimento</option>
-          <option value="inst">Instrução de Trabalho</option>
-          <option value="form">Formulário / Registro</option>
-          <option value="pol">Política</option>
-          <option value="man">Manual</option>
-          <option value="plan">Plano</option>
-          <option value="prog">Programa</option>
-          <option value="ext">Documento externo</option>
-        </select>
-      </div>
-      <div style="max-width:100px">
-        <label>Revisão</label>
-        <input type="text" id="doc-rev" placeholder="Ex.: 02">
-      </div>
-      <div>
-        <label>Norma</label>
-        <select id="doc-norm">
-          <option value="both">Ambas</option>
-          <option value="env">ISO 14001</option>
-          <option value="sst">ISO 45001</option>
-        </select>
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label>Data desta revisão</label>
-        <input type="date" id="doc-date">
-      </div>
-      <div>
-        <label>Próxima revisão</label>
-        <input type="date" id="doc-next">
-      </div>
-      <div>
-        <label>Status</label>
-        <select id="doc-status">
-          <option value="vigente">✅ Vigente</option>
-          <option value="revisao">⚠️ Em revisão</option>
-          <option value="obsoleto">🔴 Obsoleto</option>
-        </select>
-      </div>
-    </div>
-    <div class="row">
-      <div>
-        <label>Elaborado por</label>
-        <input type="text" id="doc-author" placeholder="Nome do elaborador">
-      </div>
-      <div>
-        <label>Aprovado por</label>
-        <input type="text" id="doc-approver" placeholder="Nome do aprovador">
-      </div>
-    </div>
-    <label>Localização / Sistema</label>
-    <input type="text" id="doc-location" placeholder="Ex.: SharePoint > SGI > Procedimentos ou Pasta física: Armário A3">
-    <label>Cláusula(s) da norma atendida(s)</label>
-    <input type="text" id="doc-clause" placeholder="Ex.: ISO 14001 §6.1.2 / ISO 45001 §6.1.2">
-    <div class="flex fend mt2" style="gap:8px">
-      <button class="btn" onclick="closeMod('doc-modal')">Cancelar</button>
-      <button class="btn btn-g" onclick="saveDoc()">Salvar documento</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Novo / Editar Objetivo 6.2 -->
-<div class="modal-bg" id="obj-modal">
-  <div class="modal" style="width:680px;max-height:90vh;overflow-y:auto">
-    <h3 id="obj-modal-title">➕ Novo Objetivo e Meta</h3>
-
-    <div class="info green" style="margin-bottom:14px">
-      💡 <strong>ISO 14001 §6.2.1 + ISO 45001 §6.2.1:</strong> Objetivos devem ser mensuráveis, monitorados, comunicados e atualizados. Considere riscos, oportunidades, requisitos legais e partes interessadas.
-    </div>
-
-    <div class="row">
-      <div style="flex:2">
-        <label>Descrição do objetivo</label>
-        <input type="text" id="obj-desc" placeholder="Ex.: Reduzir a geração de resíduos perigosos em 30% até dezembro">
-      </div>
-      <div style="max-width:140px">
-        <label>Norma</label>
-        <select id="obj-norm">
-          <option value="both">Ambas</option>
-          <option value="env">ISO 14001</option>
-          <option value="sst">ISO 45001</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Vínculo com R&O -->
-    <label>Origem / Vínculo com Risco ou Oportunidade (6.1.1)</label>
-    <select id="obj-ro-link">
-      <option value="">— Sem vínculo direto —</option>
-    </select>
-    <div id="obj-ro-context" style="font-size:11px;color:var(--text2);margin-top:4px"></div>
-
-    <div class="row">
-      <div>
-        <label>Indicador de desempenho (KPI)</label>
-        <input type="text" id="obj-kpi" placeholder="Ex.: Kg de resíduo perigoso gerado por mês">
-      </div>
-      <div style="max-width:160px">
-        <label>Unidade de medida</label>
-        <input type="text" id="obj-unit" placeholder="Ex.: kg, %, nº, R$">
-      </div>
-    </div>
-
-    <div class="row">
-      <div>
-        <label>Linha de base (valor atual)</label>
-        <input type="text" id="obj-baseline" placeholder="Ex.: 450 kg/mês">
-      </div>
-      <div>
-        <label>Meta (valor a alcançar)</label>
-        <input type="text" id="obj-target" placeholder="Ex.: 315 kg/mês (redução de 30%)">
-      </div>
-      <div>
-        <label>Prazo final</label>
-        <input type="date" id="obj-deadline">
-      </div>
-    </div>
-
-    <div class="row">
-      <div>
-        <label>Responsável pelo objetivo</label>
-        <input type="text" id="obj-owner" placeholder="Ex.: Gerente de Meio Ambiente">
-      </div>
-      <div>
-        <label>Recursos necessários</label>
-        <input type="text" id="obj-resources" placeholder="Ex.: R$ 15.000 + 2h/semana técnico">
-      </div>
-      <div style="max-width:140px">
-        <label>Prioridade</label>
-        <select id="obj-priority">
-          <option value="critica">🔴 Crítica</option>
-          <option value="alta">🟡 Alta</option>
-          <option value="media" selected>🔵 Média</option>
-          <option value="baixa">⚪ Baixa</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Plano de ação SMART -->
-    <div style="border-top:1px dashed var(--gray-b);margin-top:14px;padding-top:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px">📋 Plano de Ação (etapas para atingir o objetivo)</div>
-      <div id="obj-pa-list"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px">
-        <div><label style="font-size:11px">Atividade / Etapa</label><input type="text" id="pa-new-desc" placeholder="O que será feito?"></div>
-        <div><label style="font-size:11px">Responsável</label><input type="text" id="pa-new-resp" placeholder="Quem?"></div>
-        <div><label style="font-size:11px">Prazo</label><input type="date" id="pa-new-prazo"></div>
-      </div>
-      <button class="btn btn-sm mt" onclick="addPAItem()">+ Adicionar etapa</button>
-    </div>
-
-    <div class="flex fend mt2" style="gap:8px">
-      <button class="btn" onclick="closeMod('obj-modal')">Cancelar</button>
-      <button class="btn btn-g" onclick="saveObj()">Salvar objetivo</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Orientações -->
-<div class="help-modal-bg" id="help-modal">
-  <div class="help-modal">
-    <div class="help-modal-head">
-      <h3 id="help-title">Orientações</h3>
-      <button onclick="closeMod('help-modal')" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--text2)">×</button>
-    </div>
-    <div class="help-modal-body" id="help-body"></div>
-    <div class="help-modal-foot"><button class="btn btn-sm btn-g" onclick="closeMod('help-modal')">Entendido</button></div>
-  </div>
-</div>
-
-<!-- MODAL: Gerenciador do Catálogo -->
-<div class="modal-bg" id="catalog-modal">
-  <div class="modal" style="width:780px;max-height:88vh;display:flex;flex-direction:column">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-shrink:0">
-      <h3 style="margin:0">📚 Gerenciador do Catálogo Padronizado</h3>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-sm" onclick="exportCatalog()">⬇️ Exportar catálogo</button>
-        <label class="btn btn-sm" style="cursor:pointer">📂 Importar catálogo<input type="file" id="import-cat-file" accept=".csv" style="display:none" onchange="importCatalog(this)"></label>
-        <button class="btn btn-sm btn-g" onclick="openAddCatalogItem()">+ Novo item</button>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;margin-bottom:10px;flex-shrink:0">
-      <input type="text" id="cat-mgr-search" placeholder="🔍 Filtrar catálogo..." style="flex:1;font-size:13px" oninput="renderCatalogManager()">
-      <select id="cat-mgr-filter" onchange="renderCatalogManager()" style="width:130px;font-size:12px">
-        <option value="all">Todos</option>
-        <option value="env">🌿 Ambientais</option>
-        <option value="sst">⛑️ SST</option>
-      </select>
-    </div>
-    <div style="overflow-y:auto;flex:1;border:1px solid var(--gray-b);border-radius:8px">
-      <table class="tbl" style="font-size:12px">
-        <thead style="position:sticky;top:0;z-index:1">
-          <tr>
-            <th style="width:60px">Código</th>
-            <th style="width:70px">Tipo</th>
-            <th>Aspecto / Perigo</th>
-            <th>Impacto / Consequência</th>
-            <th style="width:80px">P suger.</th>
-            <th style="width:80px">S suger.</th>
-            <th style="width:50px"></th>
-          </tr>
-        </thead>
-        <tbody id="cat-mgr-body"></tbody>
-      </table>
-    </div>
-    <div style="font-size:11px;color:var(--text2);margin-top:10px;flex-shrink:0">
-      <span id="cat-count"></span> · P e S sugeridos são referências — o avaliador pode ajustar no levantamento.
-    </div>
-    <div style="margin-top:12px;flex-shrink:0" id="cat-add-form" style="display:none">
-      <div style="border-top:1px solid var(--gray-b);padding-top:12px">
-        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px" id="cat-form-title">Novo item no catálogo</div>
-        <div class="row">
-          <div style="max-width:100px"><label>Código</label><input type="text" id="cat-new-code" placeholder="ex: A25" style="font-family:'DM Mono',monospace;font-weight:600"></div>
-          <div style="max-width:150px"><label>Tipo</label><select id="cat-new-type"><option value="env">🌿 Ambiental</option><option value="sst">⛑️ SST</option></select></div>
-          <div><label>Aspecto / Perigo</label><input type="text" id="cat-new-asp" placeholder="Nome padronizado do aspecto ou perigo"></div>
-        </div>
-        <div class="row">
-          <div><label>Impacto / Consequência</label><input type="text" id="cat-new-imp" placeholder="Impacto ou consequência associada"></div>
-          <div style="max-width:110px"><label>P sugerido</label><select id="cat-new-prob"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select></div>
-          <div style="max-width:110px"><label>S sugerido</label><select id="cat-new-sev"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select></div>
-        </div>
-        <div class="flex fend mt" style="gap:8px">
-          <button class="btn btn-sm" onclick="cancelCatForm()">Cancelar</button>
-          <button class="btn btn-sm btn-g" onclick="saveCatalogItem()">Salvar no catálogo</button>
-        </div>
-      </div>
-    </div>
-    <div class="flex fend" style="margin-top:12px;flex-shrink:0">
-      <button class="btn" onclick="closeMod('catalog-modal')">Fechar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Nova PI -->
-<div class="modal-bg" id="pi-modal">
-  <div class="modal">
-    <h3>➕ Nova Parte Interessada</h3>
-    <div class="row">
-      <div><label>Nome da parte interessada</label><input type="text" id="pi-nm" placeholder="Ex.: Sindicato dos trabalhadores"></div>
-      <div style="max-width:150px"><label>Norma</label><select id="pi-norm"><option value="both">Ambas</option><option value="env">14001</option><option value="sst">45001</option></select></div>
-    </div>
-
-    <div class="ne-section mt">
-      <div class="ne-title">📌 Necessidades (formais, explícitas, obrigatórias)</div>
-      <div id="needs-list"></div>
-      <button class="ne-add" onclick="addNE('need')">+ Adicionar necessidade</button>
-    </div>
-
-    <div class="ne-section mt">
-      <div class="ne-title">💬 Expectativas (implícitas, desejadas, não formalizadas)</div>
-      <div id="exps-list"></div>
-      <button class="ne-add" onclick="addNE('exp')">+ Adicionar expectativa</button>
-    </div>
-
-    <div class="row mt">
-      <div>
-<div class="row mt">
-      <div>
-        <label>Influência no SGI (1–5)</label>
-        <select id="pi-inf"><option value="1">1 – Muito baixa</option><option value="2">2 – Baixa</option><option value="3">3 – Média</option><option value="4" selected>4 – Alta</option><option value="5">5 – Muito alta</option></select>
-      </div>
-      <div>
-        <label>Interesse no SGI (1–5)</label>
-        <select id="pi-int"><option value="1">1 – Muito baixo</option><option value="2">2 – Baixo</option><option value="3">3 – Médio</option><option value="4" selected>4 – Alto</option><option value="5">5 – Muito alto</option></select>
-      </div>
-      <div>
-        <label>Gera obrigação conformidade?</label>
-        <select id="pi-obrig"><option value="sim">✅ Sim</option><option value="parcial">🔶 Parcial</option><option value="nao">❌ Não</option></select>
-      </div>
-      <div>
-        <label>Categoria</label>
-        <select id="pi-group">
-          <option value="">Geral</option>
-          <option value="reg">⚖️ Órgão Regulador / Anuente</option>
-          <option value="soc">🤝 Sociedade / ONG / Parceiro</option>
-          <option value="cfc">🎓 Conselho de Classe Profissional</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- ISO 14001:2026 §4.2 — Relevância e condições ambientais -->
-    <div style="background:var(--green-l);border:1px solid #a8dfc8;border-radius:8px;padding:14px;margin-top:12px">
-      <div style="font-size:11px;font-weight:700;color:var(--green-d);margin-bottom:10px">🆕 ISO 14001:2026 §4.2 — Relevância para o SGA</div>
-      <div class="row">
-        <div>
-          <label>É relevante para o SGA?</label>
-          <select id="pi-relevante">
-            <option value="sim">✅ Sim — inclui no SGA</option>
-            <option value="nao">❌ Não — apenas monitorar</option>
-          </select>
-        </div>
-        <div>
-          <label>Origem da obrigação</label>
-          <select id="pi-obrig-origem">
-            <option value="legal">⚖️ Legal / Regulatória</option>
-            <option value="voluntaria">🤝 Voluntária</option>
-            <option value="contratual">📄 Contratual</option>
-            <option value="normativa">📋 Normativa (ISO/ABNT)</option>
-            <option value="nao">— Não gera obrigação</option>
-          </select>
-        </div>
-      </div>
-      <div style="margin-top:10px">
-        <label style="margin-bottom:6px">🌍 Relacionada a condições ambientais (nota §4.2)</label>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px">
-          <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:400;cursor:pointer"><input type="checkbox" id="pi-cond-pol"> Níveis de poluição</label>
-          <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:400;cursor:pointer"><input type="checkbox" id="pi-cond-rec"> Recursos naturais</label>
-          <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:400;cursor:pointer"><input type="checkbox" id="pi-cond-clim"> Alterações climáticas</label>
-          <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:400;cursor:pointer"><input type="checkbox" id="pi-cond-bio"> Biodiversidade</label>
-          <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:400;cursor:pointer"><input type="checkbox" id="pi-cond-eco"> Saúde dos ecossistemas</label>
-        </div>
-      </div>
-      <div style="margin-top:10px">
-        <label style="margin-bottom:6px">⚙️ Como será tratada no SGA?</label>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px">
-          <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:400;cursor:pointer"><input type="checkbox" id="pi-trat-ro"> 6.1.1 Riscos & Oportunidades</label>
-          <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:400;cursor:pointer"><input type="checkbox" id="pi-trat-ap"> 6.1.2 Aspectos & Impactos</label>
-          <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:400;cursor:pointer"><input type="checkbox" id="pi-trat-obj"> 6.2 Objetivos e Metas</label>
-          <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:400;cursor:pointer"><input type="checkbox" id="pi-trat-op"> 8.1 Controles Operacionais</label>
-          <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:400;cursor:pointer"><input type="checkbox" id="pi-trat-com"> 7.4 Comunicação</label>
-        </div>
-      </div>
-    </div>
-    <div class="flex fend mt2" style="gap:8px">
-      <button class="btn" onclick="closeMod('pi-modal')">Cancelar</button>
-      <button class="btn btn-g" onclick="savePI()">Adicionar</button>
-    </div>
-  </div>
-</div>
-
 <script src="../js/hub-sgi-all.js"></script>
-
+<script>
+(function waitRender(){
+  if(typeof renderClimaSugestoes==='function'){
+    var el=document.getElementById('clima-sugest-cards');
+    if(el){renderClimaSugestoes();return;}
+  }
+  setTimeout(waitRender,200);
+})();
+</script>
 </body>
 </html>
