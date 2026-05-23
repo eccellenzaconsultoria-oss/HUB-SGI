@@ -3071,6 +3071,62 @@ var CLIMA_SUGEST_COMPLETO = [
     acao:'Mapear resíduos com potencial de valorização; buscar parceiros para simbiose industrial; desenvolver logística reversa'
   },
 
+  // ── RISCOS CLIMÁTICOS ESPECÍFICOS PARA SST (ISO 45001) ──────────
+  {
+    cat:'⛑️ SST — Saúde e Segurança no Trabalho',
+    tipo:'Físico agudo',
+    norma:'sst',
+    relevancia:'alta',
+    desc:'Stress térmico por ondas de calor em postos de trabalho externos ou sem climatização',
+    impacto:'Doenças ocupacionais por calor (exaustão, insolação, câibras), queda de produtividade, risco de acidente por fadiga — obrigação NR-15 e NR-9',
+    acao:'Avaliar exposição por setor; implementar pausas térmicas; fornecer água e sombra; atualizar o PGR com o fator climático'
+  },
+  {
+    cat:'⛑️ SST — Saúde e Segurança no Trabalho',
+    tipo:'Físico agudo',
+    norma:'sst',
+    relevancia:'alta',
+    desc:'Impedimento de acesso ao trabalho por enchentes ou eventos climáticos extremos',
+    impacto:'Risco de afogamento no deslocamento, acidentes no trajeto, impossibilidade de evacuar a planta em emergência, impacto psicossocial',
+    acao:'Mapear rotas de acesso vulneráveis; criar protocolo de suspensão de atividades; revisar plano de evacuação e emergência'
+  },
+  {
+    cat:'⛑️ SST — Saúde e Segurança no Trabalho',
+    tipo:'Físico agudo',
+    norma:'sst',
+    relevancia:'media',
+    desc:'Raios e tempestades durante atividades externas ou em altura',
+    impacto:'Risco de eletrocussão, queda de estruturas, acidentes com trabalhadores em campo aberto ou em andaimes',
+    acao:'Protocolo de suspensão de atividades externas; sistema de alerta meteorológico; revisão do SPDA (para-raios)'
+  },
+  {
+    cat:'⛑️ SST — Saúde e Segurança no Trabalho',
+    tipo:'Físico crônico',
+    norma:'sst',
+    relevancia:'media',
+    desc:'Aumento crônico de temperatura e qualidade do ar (poeira, fumaça de queimadas)',
+    impacto:'Doenças respiratórias ocupacionais agravadas, redução da capacidade aeróbica dos trabalhadores, piora de condições alérgicas',
+    acao:'Monitorar qualidade do ar nas estações de trabalho; disponibilizar EPI respiratório em períodos críticos; considerar no PCMSO'
+  },
+  {
+    cat:'⛑️ SST — Saúde e Segurança no Trabalho',
+    tipo:'Físico agudo',
+    norma:'sst',
+    relevancia:'media',
+    desc:'Surtos de doenças vetoriais favorecidos pelo clima (dengue, leptospirose, hantavirose)',
+    impacto:'Absenteísmo por doenças relacionadas a vetores amplificados pelo clima, obrigações do PCMSO e SESMT',
+    acao:'Programa de controle de vetores; campanhas de vacinação; identificar áreas de risco no entorno da planta'
+  },
+  {
+    cat:'⛑️ SST — Saúde e Segurança no Trabalho',
+    tipo:'Oportunidade',
+    norma:'sst',
+    relevancia:'media',
+    desc:'Melhoria das condições de trabalho como resposta ao clima (climatização, EPI aprimorado)',
+    impacto:'Redução de acidentes e doenças ocupacionais, melhoria do engajamento e produtividade, diferencial para atração de talentos',
+    acao:'Avaliar climatização de postos críticos; atualizar EPIs para condições de calor extremo; comunicar melhorias aos trabalhadores'
+  },
+
   // ── INDÚSTRIAS DE PROCESSO INTENSIVO (siderurgia, cimento, papel) ──
   {
     cat:'🏭 Indústria de Processo Intensivo',
@@ -3610,6 +3666,132 @@ if (document.readyState === 'loading') {
     };
     tryRender();
   }, 500);
+}
+
+
+
+// ═══════════════════════════════════════════════════════════════════
+// PARAMETRIZAÇÃO GLOBAL DE NORMAS
+// Controla quais normas estão ativas e adapta todo o sistema
+// ═══════════════════════════════════════════════════════════════════
+
+// Estado global de normas — lido dos checkboxes de identificação
+var SGI_NORMAS = {
+  iso14001: true,
+  iso45001: true,
+  iso9001:  false, // Em breve — aguardando ISO 9001:2026
+};
+
+// Aplica a parametrização em todo o sistema
+function applyNormasConfig() {
+  var has14 = document.getElementById('cb14') ? document.getElementById('cb14').checked : true;
+  var has45 = document.getElementById('cb45') ? document.getElementById('cb45').checked : true;
+  var has90 = document.getElementById('cb90') ? document.getElementById('cb90').checked : false;
+
+  SGI_NORMAS.iso14001 = has14;
+  SGI_NORMAS.iso45001 = has45;
+  SGI_NORMAS.iso9001  = has90;
+
+  // Salva no estado S
+  S.normas = { iso14001: has14, iso45001: has45, iso9001: has90 };
+
+  // ── Atualiza badges do header ──────────────────────────────────
+  var badge14 = document.getElementById('header-badge-14001');
+  var badge45 = document.getElementById('header-badge-45001');
+  var badge90 = document.getElementById('header-badge-9001');
+  if (badge14) badge14.style.display = has14 ? 'inline-flex' : 'none';
+  if (badge45) badge45.style.display = has45 ? 'inline-flex' : 'none';
+  if (badge90) badge90.style.display = has90 ? 'inline-flex' : 'none';
+
+  // ── Atualiza subtítulo do header ───────────────────────────────
+  var subEl = document.getElementById('header-normas-sub');
+  if (subEl) {
+    var ativos = [];
+    if (has14) ativos.push('ISO 14001:2015');
+    if (has45) ativos.push('ISO 45001:2018');
+    if (has90) ativos.push('ISO 9001:2026');
+    subEl.textContent = ativos.join(' + ') + ' · Cláusulas 4.1 · 4.2 · 6.1';
+  }
+
+  // ── Mostra/oculta seções específicas de cada norma ────────────
+  // Elementos com data-norma="env" só aparecem se 14001 ativa
+  // Elementos com data-norma="sst" só aparecem se 45001 ativa
+  document.querySelectorAll('[data-norma="env"]').forEach(function(el) {
+    el.style.display = has14 ? '' : 'none';
+  });
+  document.querySelectorAll('[data-norma="sst"]').forEach(function(el) {
+    el.style.display = has45 ? '' : 'none';
+  });
+  document.querySelectorAll('[data-norma="9001"]').forEach(function(el) {
+    el.style.display = has90 ? '' : 'none';
+  });
+
+  // ── Atualiza o módulo de Aspectos & Perigos ───────────────────
+  // Mostra/oculta os blocos de 14001 e 45001
+  var bloco14 = document.getElementById('ap-bloco-14001');
+  var bloco45 = document.getElementById('ap-bloco-45001');
+  if (bloco14) bloco14.style.display = has14 ? '' : 'none';
+  if (bloco45) bloco45.style.display = has45 ? '' : 'none';
+
+  // ── Filtros de Aspectos & Perigos ─────────────────────────────
+  var filtEnv = document.getElementById('fa-env');
+  var filtSST = document.getElementById('fa-sst');
+  if (filtEnv) filtEnv.style.display = has14 ? '' : 'none';
+  if (filtSST) filtSST.style.display = has45 ? '' : 'none';
+
+  // ── Atualiza texto orientativo do 4.1 ────────────────────────
+  var ctx41sub = document.getElementById('ctx41-sub');
+  if (ctx41sub) {
+    if (has14 && has45) {
+      ctx41sub.textContent = 'Identifique o que está fora e dentro da organização que pode influenciar o SGI ambiental e de SST.';
+    } else if (has14) {
+      ctx41sub.textContent = 'Identifique o que está fora e dentro da organização que pode influenciar o Sistema de Gestão Ambiental.';
+    } else if (has45) {
+      ctx41sub.textContent = 'Identifique o que está fora e dentro da organização que pode influenciar o Sistema de Gestão de SST.';
+    }
+  }
+
+  // ── Atualiza clima — conclusão separada ou unificada ──────────
+  var clima14 = document.getElementById('clima-bloco-14001');
+  var clima45 = document.getElementById('clima-bloco-45001');
+  if (clima14) clima14.style.display = has14 ? '' : 'none';
+  if (clima45) clima45.style.display = has45 ? '' : 'none';
+
+  // ── Nav sidebar — destaca normas ativas ───────────────────────
+  var nav14badge = document.querySelector('.nav-badge-14');
+  var nav45badge = document.querySelector('.nav-badge-45');
+  if (nav14badge) nav14badge.style.display = has14 ? 'inline' : 'none';
+  if (nav45badge) nav45badge.style.display = has45 ? 'inline' : 'none';
+
+  // ── Formulário de campo — ajusta tipo padrão ─────────────────
+  // Se só tiver uma norma, esconde o seletor de tipo no modal AP
+  var apTypeRow = document.getElementById('ap-type-row');
+  if (apTypeRow) {
+    if (has14 && has45) {
+      apTypeRow.style.display = '';
+    } else {
+      apTypeRow.style.display = 'none';
+      var apType = document.getElementById('ap-type');
+      if (apType) apType.value = has14 ? 'env' : 'sst';
+    }
+  }
+
+  // ── Análise Crítica — ajusta prompt do agente ─────────────────
+  S._normasAtivas = { has14: has14, has45: has45, has90: has90 };
+
+  console.log('SGI parametrizado:', SGI_NORMAS);
+}
+
+// Restaura parametrização do estado S ao carregar
+function restoreNormasConfig() {
+  if (!S.normas) return;
+  var cb14 = document.getElementById('cb14');
+  var cb45 = document.getElementById('cb45');
+  var cb90 = document.getElementById('cb90');
+  if (cb14) cb14.checked = S.normas.iso14001 !== false;
+  if (cb45) cb45.checked = S.normas.iso45001 !== false;
+  if (cb90) cb90.checked = S.normas.iso9001 === true;
+  applyNormasConfig();
 }
 
 
