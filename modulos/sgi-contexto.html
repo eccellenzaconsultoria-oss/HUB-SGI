@@ -1,46 +1,230 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SGI — Contexto da Organização | ISO 14001 + 45001</title>
 <link rel="stylesheet" href="../css/hub.css">
+
+<style>
+/* SGI-Contexto — Premium overrides */
+body { font-family: 'Inter', -apple-system, sans-serif; }
+
+/* Layout altura total */
+.layout { height: calc(100vh - 52px); overflow: hidden; }
+main { height: 100%; overflow-y: auto; }
+
+/* Seção de normas no canto superior direito da página (como no Manus) */
+.sec-norm-refs {
+  position: absolute;
+  top: 0; right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  font-size: 10px;
+  color: var(--gray-400, #9CA3AF);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Cards internos mais refinados */
+.card {
+  box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 2px 8px rgba(0,0,0,.04);
+  border-color: #E5E7EB;
+}
+
+/* Botão de configuração no canto do card */
+.card-settings-btn {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  border: 1px solid #E5E7EB;
+  background: #F9FAFB;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 140ms;
+  color: #9CA3AF;
+}
+.card-settings-btn:hover { background: #F3F4F6; color: #6B7280; }
+
+/* Foco nos inputs */
+input:focus, textarea:focus, select:focus {
+  border-color: #0F766E !important;
+  box-shadow: 0 0 0 3px rgba(15,118,110,.10) !important;
+}
+
+/* Análise Crítica IA — estilo especial */
+.nav-item[onclick*="s6"] {
+  background: linear-gradient(135deg, rgba(124,58,237,.05), rgba(13,148,136,.05));
+  border-left: 2px solid #7C3AED !important;
+  color: #5B21B6 !important;
+  font-weight: 600 !important;
+}
+.nav-item[onclick*="s6"]:hover {
+  background: linear-gradient(135deg, rgba(124,58,237,.10), rgba(13,148,136,.10));
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+/* Botões de sugestão chip */
+.btn.btn-sm {
+  border-radius: 5px;
+  font-size: 11.5px;
+}
+
+/* Info boxes */
+.info { border-radius: 0 6px 6px 0; }
+
+/* Modais */
+.mod-bg { backdrop-filter: blur(3px); background: rgba(17,24,39,.4); }
+.mod-box {
+  border-radius: 12px;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 8px 40px rgba(0,0,0,.12);
+}
+
+/* Página title area refinada */
+.ph { 
+  padding-bottom: 16px;
+  border-bottom: 1px solid #F3F4F6;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+/* Referências ISO no canto */
+.iso-ref-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #9CA3AF;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-left: 6px;
+}
+</style>
+
+<script>
+// ── Dark Mode Toggle ──────────────────────────────────────────
+(function() {
+  var KEY = 'sgi-theme';
+  var root = document.documentElement;
+
+  // Aplica tema salvo ou preferência do sistema
+  function applyTheme(theme) {
+    root.setAttribute('data-theme', theme);
+    localStorage.setItem(KEY, theme);
+  }
+
+  // Inicializa
+  var saved = localStorage.getItem(KEY);
+  var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(saved || (sysDark ? 'dark' : 'light'));
+
+  // Função global para toggle
+  window.toggleDarkMode = function() {
+    var current = root.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  };
+})();
+</script>
 </head>
 <body>
 <header>
   <div class="hdr">
-    <div class="logo">
-      <div class="logo-ico">S</div>
-      <div>
-        <div class="logo-t">SGI — Contexto da Organização</div>
-        <div class="logo-s"><span id="header-normas-sub">ISO 14001:2015 + ISO 45001:2018 · Cláusulas 4.1 · 4.2 · 6.1</span></div>
-      </div>
+    <!-- Botão voltar -->
+    <a href="../index.html" class="hdr-back" title="Voltar ao Hub">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <!-- Breadcrumb -->
+    <div class="hdr-breadcrumb">
+      <span>HUB-SGI</span>
+      <span class="hdr-breadcrumb-sep">/</span>
+      <span class="hdr-breadcrumb-current">Contexto da Organização</span>
+      <span class="hdr-clause" style="margin-left:6px">Cláusula 4 · <span id="header-normas-sub">ISO 14001 &amp; 45001</span></span>
     </div>
-    <div class="norms">
-      <span class="nb nb-env" id="header-badge-14001">🌿 ISO 14001:2015</span>
-      <span class="nb nb-sst" id="header-badge-45001">⛑️ ISO 45001:2018</span>
+    <!-- Normas + Salvar -->
+    <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
+      <div class="norms">
+        <span class="nb nb-env" id="header-badge-14001">ISO 14001</span>
+        <span class="nb nb-sst" id="header-badge-45001">ISO 45001</span>
+        <span class="nb nb-9001" id="header-badge-9001" style="display:none">ISO 9001</span>
+      </div>
+      <!-- Dark mode toggle -->
+      <button class="dark-toggle" onclick="toggleDarkMode()" title="Alternar modo claro/escuro">
+        <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      </button>
+      <button class="btn-save" onclick="alert('Dados salvos automaticamente no navegador (localStorage).')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+        </svg>
+        Salvar SGI
+      </button>
     </div>
   </div>
 </header>
 <div class="layout">
 <aside>
-  <div class="nav-lbl">Cláusula 4.1</div>
+  <div class="nav-lbl">Estrutura Normativa SGI</div>
+  <div style="font-size:10px;color:var(--gray-400);padding:0 14px 10px;line-height:1.5">ISO 14001 &amp; ISO 45001</div>
+
   <button class="nav-item on" onclick="goTo('s0')"><span class="nav-dot"></span>Contexto da Org.<span class="nav-cl">4.1</span></button>
-  <div class="nav-lbl">Cláusula 4.2</div>
   <button class="nav-item" onclick="goTo('s1')"><span class="nav-dot"></span>Partes Interessadas<span class="nav-cl">4.2</span></button>
-  <div class="nav-lbl">Cláusula 6.1</div>
+
+  <div class="nav-lbl" style="margin-top:4px">5. Liderança e Part.</div>
+  <button class="nav-item" style="opacity:.45;cursor:not-allowed" disabled>
+    <span class="nav-dot"></span>Em breve
+    <span class="nav-cl">5</span>
+  </button>
+
+  <div class="nav-lbl" style="margin-top:4px">6. Planejamento</div>
   <button class="nav-item" onclick="goTo('s2')"><span class="nav-dot"></span>Aspectos & Perigos<span class="nav-cl">6.1.2</span></button>
   <button class="nav-item" onclick="goTo('s3')"><span class="nav-dot"></span>Riscos & Oport.<span class="nav-cl">6.1.1</span></button>
-  <div class="nav-lbl">Cláusula 6.2</div>
-  <button class="nav-item" onclick="goTo('s7')"><span class="nav-dot"></span>Objetivos & Metas<span class="nav-cl" id="obj-nav-badge">0</span></button>
-  <div class="nav-lbl">Cláusula 7</div>
+  <button class="nav-item" onclick="goTo('s7')"><span class="nav-dot"></span>Objetivos & Metas<span class="nav-cl" id="obj-nav-badge">6.2</span></button>
+
+  <div class="nav-lbl" style="margin-top:4px">7. Apoio e Recursos</div>
   <button class="nav-item" onclick="goTo('s8')"><span class="nav-dot"></span>Apoio<span class="nav-cl">7</span></button>
-  <div class="nav-lbl">Cláusula 9</div>
+
+  <div class="nav-lbl" style="margin-top:4px">8. Operação e MOC</div>
+  <button class="nav-item" style="opacity:.45;cursor:not-allowed" disabled>
+    <span class="nav-dot"></span>Em breve
+    <span class="nav-cl">8</span>
+  </button>
+
+  <div class="nav-lbl" style="margin-top:4px">9. Avaliação</div>
   <button class="nav-item" onclick="goTo('s9')"><span class="nav-dot"></span>Indicadores KPI<span class="nav-cl" id="kpi-nav-badge">9.1</span></button>
-  <div class="nav-lbl">Consolidação</div>
-  <button class="nav-item" onclick="goTo('s5')"><span class="nav-dot"></span>Gestão de Ações<span class="nav-cl" id="action-nav-badge" style="background:#ffe4e4;color:var(--red)">0</span></button>
-  <button class="nav-item" onclick="goTo('s6')" style="border-left:3px solid var(--purple)!important"><span class="nav-dot" style="background:var(--purple)"></span><span style="color:var(--purple);font-weight:600">Análise Crítica IA</span><span class="nav-cl" style="background:var(--purple-l);color:var(--purple)">9.3</span></button>
+  <button class="nav-item" onclick="goTo('s5')"><span class="nav-dot"></span>Gestão de Ações<span class="nav-cl" id="action-nav-badge">0</span></button>
   <button class="nav-item" onclick="goTo('s4')"><span class="nav-dot"></span>Resumo & Exportar<span class="nav-cl">SGI</span></button>
+
+  <!-- Análise Assistida por IA -->
+  <div class="nav-ai-section" style="margin-top:12px">
+    <div class="nav-ai-title">Análise Assistida</div>
+    <div class="nav-ai-desc">O HUB-SGI premium oferece análise de compliance SGI assistida por IA.</div>
+    <button class="nav-ai-btn" onclick="goTo('s6')">Análise de Conformidade</button>
+  </div>
+
 </aside>
 <main>
 
@@ -66,15 +250,15 @@
       <div style="display:flex;gap:14px;margin-top:4px">
         <label style="margin:0;display:flex;align-items:center;gap:5px;font-size:13px;color:var(--text)">
           <input type="checkbox" id="cb14" checked onchange="applyNormasConfig()">
-          <span>🌿 ISO 14001:2015</span>
+          <span>🌿 ISO 14001</span>
         </label>
         <label style="margin:0;display:flex;align-items:center;gap:5px;font-size:13px;color:var(--text)">
           <input type="checkbox" id="cb45" checked onchange="applyNormasConfig()">
-          <span>⛑️ ISO 45001:2018</span>
+          <span>⛑️ ISO 45001</span>
         </label>
-        <label style="margin:0;display:flex;align-items:center;gap:5px;font-size:13px;color:var(--text2);cursor:not-allowed" title="Aguardando publicação ISO 9001:2026 — previsto set/2026">
+        <label style="margin:0;display:flex;align-items:center;gap:5px;font-size:13px;color:var(--text2);cursor:not-allowed" title="Aguardando publicação ISO 9001 — previsto set/2026">
           <input type="checkbox" id="cb90" disabled>
-          <span>📋 ISO 9001:2026 <span style="font-size:10px;background:var(--amber-l);color:var(--amber-d);padding:1px 6px;border-radius:10px;font-weight:600">Em breve</span></span>
+          <span>📋 ISO 9001 <span style="font-size:10px;background:var(--amber-l);color:var(--amber-d);padding:1px 6px;border-radius:10px;font-weight:600">Em breve</span></span>
         </label>
       </div>
     </div>
@@ -547,14 +731,14 @@
 
   <!-- FLUXO DE CAMPO -->
   <div id="ap-bloco-45001" data-norma="sst" style="background:var(--blue-l);border:1px solid #a8cef0;border-radius:var(--r);padding:12px 16px;margin-bottom:14px;font-size:12px;color:var(--blue-d);line-height:1.7">
-    💡 <strong>ISO 14001:2026 e ISO 45001:2018</strong> exigem identificação por <strong>Atividade, Produto e Serviço</strong>. A 14001 inclui também a <strong>perspectiva de ciclo de vida</strong> e avaliação de <strong>significância</strong>. A 45001 requer avaliação do <strong>grau do risco</strong> e aplicação da <strong>hierarquia de controles</strong>. Por isso, os levantamentos são exportados em planilhas <strong>separadas por norma</strong>.
+    💡 <strong>ISO 14001 e ISO 45001</strong> exigem identificação por <strong>Atividade, Produto e Serviço</strong>. A 14001 inclui também a <strong>perspectiva de ciclo de vida</strong> e avaliação de <strong>significância</strong>. A 45001 requer avaliação do <strong>grau do risco</strong> e aplicação da <strong>hierarquia de controles</strong>. Por isso, os levantamentos são exportados em planilhas <strong>separadas por norma</strong>.
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
 
     <!-- 14001 -->
     <div id="ap-bloco-14001" data-norma="env" style="background:var(--green-l);border:1px solid #a8dfc8;border-radius:var(--r);padding:14px 16px">
-      <div style="font-size:12px;font-weight:700;color:var(--green-d);margin-bottom:6px">🌿 ISO 14001:2026 — Aspectos &amp; Impactos Ambientais</div>
+      <div style="font-size:12px;font-weight:700;color:var(--green-d);margin-bottom:6px">🌿 ISO 14001 — Aspectos &amp; Impactos Ambientais</div>
       <p style="font-size:12px;color:var(--green-d);margin-bottom:10px;line-height:1.6">
         Inclui: <strong>Atividade/Produto/Serviço · Ciclo de vida · Aspecto · Impacto · P × S · Significância</strong>
       </p>
@@ -578,7 +762,7 @@
 
     <!-- 45001 -->
     <div style="background:var(--blue-l);border:1px solid #a8cef0;border-radius:var(--r);padding:14px 16px">
-      <div style="font-size:12px;font-weight:700;color:var(--blue-d);margin-bottom:6px">⛑️ ISO 45001:2018 — Perigos &amp; Riscos de SST</div>
+      <div style="font-size:12px;font-weight:700;color:var(--blue-d);margin-bottom:6px">⛑️ ISO 45001 — Perigos &amp; Riscos de SST</div>
       <p style="font-size:12px;color:var(--blue-d);margin-bottom:10px;line-height:1.6">
         Inclui: <strong>Atividade/Produto/Serviço · Perigo · Risco · P × S · Grau · Hierarquia de controles</strong>
       </p>
@@ -958,8 +1142,8 @@
   <div class="ac-header">
     <div class="ac-title">🧠 Análise Crítica pela Direção — Assistida por IA</div>
     <div class="ac-sub">
-      <span class="ac-badge">ISO 14001:2015 §9.3</span>
-      <span class="ac-badge">ISO 45001:2018 §9.3</span>
+      <span class="ac-badge">ISO 14001 §9.3</span>
+      <span class="ac-badge">ISO 45001 §9.3</span>
       O agente analisa todos os dados do SGI, sintetiza em linguagem executiva e prepara os pontos para deliberação da Alta Direção.
     </div>
   </div>
