@@ -199,8 +199,7 @@ header {
 /* ── LAYOUT ─────────────────────────────────────────────── */
 .layout {
   display: flex;
-  height: calc(100vh - 52px);
-  overflow: hidden;
+  min-height: calc(100vh - 52px);
 }
 
 /* ── SIDEBAR ─────────────────────────────────────────────── */
@@ -213,6 +212,10 @@ aside {
   padding: 16px 0;
   scrollbar-width: thin;
   scrollbar-color: var(--gray-200) transparent;
+  position: sticky;
+  top: 52px;
+  height: calc(100vh - 52px);
+  align-self: flex-start;
 }
 
 aside::-webkit-scrollbar { width: 3px; }
@@ -326,14 +329,10 @@ aside::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 4px
 /* ── MAIN ─────────────────────────────────────────────────── */
 main {
   flex: 1;
-  overflow-y: auto;
   padding: 24px 32px;
   background: var(--gray-050);
-  scrollbar-width: thin;
-  scrollbar-color: var(--gray-200) transparent;
+  min-width: 0;
 }
-main::-webkit-scrollbar { width: 5px; }
-main::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 4px; }
 
 /* Seções */
 .sec { display: none; }
@@ -967,11 +966,5 @@ select {
 [data-theme="dark"] .dark-toggle .icon-sun  { display: block; }
 [data-theme="dark"] .dark-toggle .icon-moon { display: none; }
 
-/* Transição suave ao alternar tema */
-*, *::before, *::after {
-  transition-property: background-color, border-color, color;
-  transition-duration: 200ms;
-  transition-timing-function: ease;
-}
-/* Garante que animações funcionais não sejam afetadas */
+/* Transições seletivas — apenas nos componentes necessários */
 .nav-dot, .status-dot { transition: background 160ms; }
