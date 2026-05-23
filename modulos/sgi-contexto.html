@@ -13,9 +13,9 @@
 /* SGI-Contexto — Premium overrides */
 body { font-family: 'Inter', -apple-system, sans-serif; }
 
-/* Layout altura total */
-.layout { height: calc(100vh - 52px); overflow: hidden; }
-main { height: 100%; overflow-y: auto; }
+/* Layout — scroll no body, não no main */
+.layout { min-height: calc(100vh - 52px); }
+main { overflow: visible; }
 
 /* Seção de normas no canto superior direito da página (como no Manus) */
 .sec-norm-refs {
@@ -110,27 +110,13 @@ input:focus, textarea:focus, select:focus {
 </style>
 
 <script>
-// ── Dark Mode Toggle ──────────────────────────────────────────
+// ── Dark Mode — inicializa ANTES do render para evitar flash ──
 (function() {
-  var KEY = 'sgi-theme';
-  var root = document.documentElement;
-
-  // Aplica tema salvo ou preferência do sistema
-  function applyTheme(theme) {
-    root.setAttribute('data-theme', theme);
-    localStorage.setItem(KEY, theme);
-  }
-
-  // Inicializa
-  var saved = localStorage.getItem(KEY);
-  var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  applyTheme(saved || (sysDark ? 'dark' : 'light'));
-
-  // Função global para toggle
-  window.toggleDarkMode = function() {
-    var current = root.getAttribute('data-theme');
-    applyTheme(current === 'dark' ? 'light' : 'dark');
-  };
+  try {
+    var saved = localStorage.getItem('sgi-theme');
+    var sys   = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', saved || (sys ? 'dark' : 'light'));
+  } catch(e) {}
 })();
 </script>
 </head>
@@ -138,7 +124,7 @@ input:focus, textarea:focus, select:focus {
 <header>
   <div class="hdr">
     <!-- Botão voltar -->
-    <a href="../index.html" class="hdr-back" title="Voltar ao Hub">
+    <a href="../index.html" class="hdr-back" title="Voltar ao Hub" onclick="window.location.href='../index.html';return false;">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
         <path d="M19 12H5M12 19l-7-7 7-7"/>
       </svg>
@@ -191,6 +177,11 @@ input:focus, textarea:focus, select:focus {
   <div style="font-size:10px;color:var(--gray-400);padding:0 14px 10px;line-height:1.5">ISO 14001 &amp; ISO 45001</div>
 
   <button class="nav-item on" onclick="goTo('s0')"><span class="nav-dot"></span>Contexto da Org.<span class="nav-cl">4.1</span></button>
+  <button class="nav-item" onclick="goTo('s_clima')" style="padding-left:26px">
+    <span class="nav-dot" style="background:var(--teal,#0D9488)"></span>
+    <span style="color:var(--teal-d,#0F766E)">Mudanças Climáticas</span>
+    <span class="nav-cl" style="background:#F0FDFA;color:#0F766E;border-color:#99F6E4">4.1</span>
+  </button>
   <button class="nav-item" onclick="goTo('s1')"><span class="nav-dot"></span>Partes Interessadas<span class="nav-cl">4.2</span></button>
 
   <div class="nav-lbl" style="margin-top:4px">5. Liderança e Part.</div>
@@ -405,8 +396,21 @@ input:focus, textarea:focus, select:focus {
   </div>
 </div>
 
+
+
+<!-- ===== S_CLIMA: MUDANÇAS CLIMÁTICAS 4.1 ===== -->
+<div class="sec" id="s_clima">
+  <div class="ph">
+    <div class="pt">
+      Mudanças Climáticas
+      <span class="ct">4.1 — Contexto</span>
+      <button class="help-btn" onclick="openClimaHelp()" title="Como analisar">?</button>
+    </div>
+    <p class="ps">Analise como o clima afeta a organização e como a organização contribui para as mudanças climáticas. Evidência obrigatória para auditoria (Anexo SL §4.1).</p>
+  </div>
+
 <!-- ===== MUDANÇAS CLIMÁTICAS — 4.1 ISO 14001 + 45001 (Anexo SL) ===== -->
-<div style="background:var(--white);border-radius:var(--r);padding:18px 20px;margin-top:16px;border:2px solid #1a6b9e;box-shadow:var(--shadow)">
+<div style="background:var(--white);border-radius:var(--r);padding:18px 20px;border:1px solid var(--gray-b);box-shadow:var(--shadow)">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;flex-wrap:wrap;gap:8px">
     <div style="display:flex;align-items:center;gap:10px">
       <span style="font-size:22px">🌡️</span>
@@ -671,6 +675,9 @@ input:focus, textarea:focus, select:focus {
 </div>
 
 
+
+
+</div>
 
 <!-- ===== S1: PARTES INTERESSADAS 4.2 ===== -->
 <div class="sec" id="s1">
@@ -1264,6 +1271,16 @@ input:focus, textarea:focus, select:focus {
   }
   setTimeout(waitRender,200);
 })();
+</script>
+
+<script>
+// Dark mode toggle global
+window.toggleDarkMode = function() {
+  var root  = document.documentElement;
+  var theme = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', theme);
+  try { localStorage.setItem('sgi-theme', theme); } catch(e) {}
+};
 </script>
 </body>
 </html>
