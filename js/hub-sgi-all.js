@@ -1,4 +1,4 @@
-// Hub SGI — Módulo completo SGI
+// Hub SGI
 
 
 var S = {
@@ -94,7 +94,7 @@ function renderFactors(){
         +'<div class="fitem-tags">'
         +'<span class="fitem-meta">'+nlbl[f.norm]+'</span>'
         +'<span class="dir-badge '+dirCls[f.dir]+'">'+dirLbl[f.dir]+'</span>'
-        +(notRel?'<span class="dir-badge" style="background:#f0f0f0;color:#999">❌ Não relevante</span>':'<span class="dir-badge" style="background:#e8f5ef;color:#0d6b50">✅ Relevante</span>')
+        +(notRel?'<span class="dir-badge" style="background:#f0f0f0;color:#999">❌ Não relevante</span>':'<span class="dir-badge" style="background:#F0FDFA;color:#0D5F5A">✅ Relevante</span>')
         +'</div>'
         +(f.just?'<div class="fitem-rel">💬 '+esc(f.just)+'</div>':'')
         +'</div>';
@@ -141,7 +141,7 @@ function renderPI(){
       +'<div class="pi-nr">📌 '+p.needs.length+' necessidade(s) · 💬 '+p.exps.length+' expectativa(s)</div>'
       +'<div class="pi-tags mt">'
       +'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--gray-l);color:'+clr[p.norm||'both']+'">'+nlb[p.norm||'both']+'</span>'
-      +(p.obrig==='sim'?'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:#e8f5ef;color:var(--green-d)">⚖️ Obrigação conf.</span>':p.obrig==='parcial'?'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--amber-l);color:var(--amber-d)">🔶 Parcial</span>':'')
+      +(p.obrig==='sim'?'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:#F0FDFA;color:var(--green-d)">⚖️ Obrigação conf.</span>':p.obrig==='parcial'?'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--amber-l);color:var(--amber-d)">🔶 Parcial</span>':'')
       +(p.relevante&&p.relevante==='nao'?'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--gray-l);color:var(--text2)">📋 Monitorar</span>':'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--green-l);color:var(--green-d)">✅ Relevante SGA</span>')
       +(p.condAmb&&p.condAmb.length?'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:#e8f4ff;color:var(--blue-d)">🌍 '+p.condAmb.join(', ')+'</span>':'')
       +(p.tratSGA&&p.tratSGA.length?'<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--purple-l);color:var(--purple)">⚙️ '+p.tratSGA.join(' · ')+'</span>':'')
@@ -196,7 +196,7 @@ function renderPIMap(){
     var key=(p.inf>=3?'t':'b')+(p.int>=3?'r':'l');
     qs[key].push(p);
   });
-  var clr={env:'#1D9E75',sst:'#185FA5',both:'#BA7517'};
+  var clr={env:'#0F766E',sst:'#185FA5',both:'#BA7517'};
   ['tl','tr','bl','br'].forEach(function(q){
     var el=document.getElementById('mq-'+q);
     if(!el)return;
@@ -241,7 +241,7 @@ function savePI(){
   var exps=tempExps.filter(function(e){return e.trim();});
   var grpEl=document.getElementById('pi-group');
 
-  // ISO 14001:2026 §4.2 — coleta condições ambientais
+  // ISO 14001 §4.2 — coleta condições ambientais
   var condAmb=[];
   ['pol','rec','clim','bio','eco'].forEach(function(c){
     var el=document.getElementById('pi-cond-'+c);
@@ -268,7 +268,7 @@ function savePI(){
     int:parseInt(document.getElementById('pi-int').value),
     obrig:obrigVal,
     group: grpEl&&grpEl.value?grpEl.value:undefined,
-    // ISO 14001:2026
+    // ISO 14001
     relevante:   relevante,
     obrigOrigem: obrigOrigem,
     condAmb:     condAmb,
@@ -396,7 +396,7 @@ function renderRO(){
   }
   updateActionBadge();
   if(!S.roItems.length){el.innerHTML='<div class="empty">Nenhum item registrado. Use a geração automática ou adicione manualmente.</div>';return;}
-  var dots={low:'#1D9E75',med:'#BA7517',high:'#E85D24',crit:'#A32D2D'};
+  var dots={low:'#0F766E',med:'#BA7517',high:'#E85D24',crit:'#A32D2D'};
   var lbl={low:'Baixo',med:'Médio',high:'Alto',crit:'Crítico'};
   var nlb={env:'ISO 14001',sst:'ISO 45001',both:'14001+45001'};
   el.innerHTML=S.roItems.map(function(r,i){
@@ -598,7 +598,7 @@ function updateActionBadge() {
   if(badge){
     var total = pending+overdue;
     badge.textContent = total;
-    badge.style.background = overdue>0?'var(--red-l)':total>0?'var(--amber-l)':'#e8f5ef';
+    badge.style.background = overdue>0?'var(--red-l)':total>0?'var(--amber-l)':'#F0FDFA';
     badge.style.color = overdue>0?'var(--red)':total>0?'var(--amber)':'var(--green-d)';
   }
 }
@@ -752,7 +752,7 @@ function renderActionMgr() {
     {v:stats.total,        l:'Total de ações',     e:'📋', bg:'var(--white)'},
     {v:stats.atrasada||0,  l:'Atrasadas',          e:'🔴', bg:'var(--red-l)'},
     {v:stats['em andamento']||0, l:'Em andamento', e:'🔄', bg:'var(--blue-l)'},
-    {v:stats.concluida||0, l:'Concluídas',         e:'✅', bg:'#e8f5ef'},
+    {v:stats.concluida||0, l:'Concluídas',         e:'✅', bg:'#F0FDFA'},
   ].map(function(c){
     return '<div style="background:'+c.bg+';border:1px solid var(--gray-b);border-radius:var(--r);padding:14px;text-align:center">'
       +'<div style="font-size:20px;margin-bottom:3px">'+c.e+'</div>'
@@ -780,7 +780,7 @@ function renderActionMgr() {
     return (x.a.prazo||'9999')>(y.a.prazo||'9999')?1:-1;
   });
   var lbl={low:'Baixo',med:'Médio',high:'Alto',crit:'Crítico'};
-  var dots={low:'#1D9E75',med:'#BA7517',high:'#E85D24',crit:'#A32D2D'};
+  var dots={low:'#0F766E',med:'#BA7517',high:'#E85D24',crit:'#A32D2D'};
   var stLbl={pendente:'🕐 Pendente','em andamento':'🔄 Em andamento',concluida:'✅ Concluída',atrasada:'🔴 Atrasada'};
   var stCls={pendente:'st-pend','em andamento':'st-prog',concluida:'st-done',atrasada:'st-over'};
   var lbl2=document.getElementById('action-filter-label');
@@ -878,7 +878,7 @@ function exportTxt(){
   var scope=document.getElementById('org-scope').value||'—';
   var L=[
     'SISTEMA DE GESTÃO INTEGRADO — CONTEXTO DA ORGANIZAÇÃO',
-    'ISO 14001:2015 + ISO 45001:2018 | Cláusulas 4.1 · 4.2 · 6.1',
+    'ISO 14001 + ISO 45001 | Cláusulas 4.1 · 4.2 · 6.1',
     '='.repeat(65),'',
     'CLÁUSULA 4.1 — CONTEXTO DA ORGANIZAÇÃO','-'.repeat(45),
     'Organização: '+org,'Setor/CNAE: '+sector,'Escopo: '+scope,'',
@@ -1773,7 +1773,7 @@ function exportFieldCSV() {
   // ════════════════════════════════════════════════════════════════════════
   // BLOCO 1 — CABEÇALHO INFORMATIVO
   // ════════════════════════════════════════════════════════════════════════
-  rows.push(wide('SGI — PLANILHA DE LEVANTAMENTO DE CAMPO  |  ISO 14001:2015 + ISO 45001:2018'));
+  rows.push(wide('SGI — PLANILHA DE LEVANTAMENTO DE CAMPO  |  ISO 14001 + ISO 45001'));
   rows.push(row('Organização: ' + org, '', '', '', '', 'Data: ' + dt, '', '', '', '', ''));
   rows.push(blank());
   rows.push(wide('COMO USAR:'));
@@ -1864,19 +1864,19 @@ function exportFieldXLSX() {
   // ── Estilos globais ──
   var baseStyle = [
     'body{font-family:Calibri,Arial,sans-serif;font-size:11pt;margin:0}',
-    'h2{font-size:13pt;color:#0d6b50;margin:0 0 4px}',
+    'h2{font-size:13pt;color:#0D5F5A;margin:0 0 4px}',
     '.info{font-size:9pt;color:#555;margin-bottom:12px;line-height:1.7}',
     'table{border-collapse:collapse;width:100%}',
     'th{padding:7px 10px;text-align:left;font-size:10pt;border:1px solid #999}',
     'td{padding:6px 10px;border:1px solid #ccc;font-size:10pt;vertical-align:top}',
-    '.th-data{background:#1D9E75;color:white}',
+    '.th-data{background:#0F766E;color:white}',
     '.th-cat{background:#185FA5;color:white}',
     'tr:nth-child(even) td{background:#f7fdf9}',
     '.ex td{background:#fffde7}',
     '.blank td{background:#ffffff;height:22px}',
     '.leg{font-size:9pt;color:#444;margin-top:16px;line-height:2;border-top:1px solid #ddd;padding-top:10px}',
     '.leg b{color:#185FA5}',
-    '.cat-env{background:#d1f5e8;color:#0d6b50;font-size:9pt;padding:1px 6px;border-radius:4px;font-weight:600}',
+    '.cat-env{background:#CCFBF1;color:#0D5F5A;font-size:9pt;padding:1px 6px;border-radius:4px;font-weight:600}',
     '.cat-sst{background:#dbeeff;color:#0e3d6e;font-size:9pt;padding:1px 6px;border-radius:4px;font-weight:600}',
     '.code{font-family:Courier New,monospace;font-weight:700;font-size:10pt}',
     'h3{font-size:12pt;color:#185FA5;margin:0 0 8px}',
@@ -1965,7 +1965,7 @@ function exportFieldXLSX() {
     + '<body>'
     // Aba 1
     + '<table x:str ss:Table="Levantamento de Campo">'
-    + '<tr><td colspan="11" style="font-size:13pt;font-weight:bold;color:#0d6b50;padding:8px">SGI — Planilha de Levantamento de Campo · ISO 14001 + ISO 45001</td></tr>'
+    + '<tr><td colspan="11" style="font-size:13pt;font-weight:bold;color:#0D5F5A;padding:8px">SGI — Planilha de Levantamento de Campo · ISO 14001 + ISO 45001</td></tr>'
     + '<tr><td colspan="11" style="font-size:9pt;color:#555;padding:4px 8px">Organização: ' + org + ' · Emitido em: ' + dt + ' · Apague os exemplos e preencha uma linha por aspecto/perigo. Salve como .csv UTF-8 e importe no SGI.</td></tr>'
     + '<tr>'
     + '<th class="th-data">Código</th><th class="th-data">Tipo</th><th class="th-data">Processo / Atividade</th>'
@@ -1975,7 +1975,7 @@ function exportFieldXLSX() {
     + '</tr>'
     + CSV_EXAMPLES.map(function(r){ return '<tr class="ex">' + r.map(function(c){return '<td>'+c+'</td>';}).join('') + '</tr>'; }).join('')
     + Array(40).fill('<tr class="blank">' + Array(11).fill('<td> </td>').join('') + '</tr>').join('')
-    + '<tr><td colspan="11" style="font-size:9pt;color:#777;padding:6px 8px;border-top:2px solid #1D9E75">Legenda: Tipo env=Ambiental/sst=SST · Condição N=Normal/A=Anormal/E=Emergência · P×S: 1-4 Baixo | 5-9 Médio | 10-16 Alto | 17-25 Crítico</td></tr>'
+    + '<tr><td colspan="11" style="font-size:9pt;color:#777;padding:6px 8px;border-top:2px solid #0F766E">Legenda: Tipo env=Ambiental/sst=SST · Condição N=Normal/A=Anormal/E=Emergência · P×S: 1-4 Baixo | 5-9 Médio | 10-16 Alto | 17-25 Crítico</td></tr>'
     + '</table>'
     // Separador de aba (page break para Excel interpretar como nova aba)
     + '<br style="page-break-before:always">'
@@ -2279,46 +2279,94 @@ function finalizeSWOT() {
 // GERAÇÃO AUTOMÁTICA DE RISCOS & OPORTUNIDADES
 // ═══════════════════════════════════════════════════════════
 function generateROFromSWOT() {
+  // ═══════════════════════════════════════════════════════════════
+  // SWOT → R&O (ISO 14001/45001 §6.1.1)
+  //
+  // Lógica normativa:
+  //   Força     (interno favorável)  → Oportunidade para o SGI
+  //   Fraqueza  (interno desfavorável) → Risco para o SGI
+  //   Oportunidade (externo favorável) → Oportunidade para o SGI
+  //   Ameaça    (externo desfavorável) → Risco para o SGI
+  //
+  // Rastreabilidade: origin='4.1-swot' + src com descrição da fonte
+  // ═══════════════════════════════════════════════════════════════
+
   var added = 0;
   var existing = S.roItems.map(function(r){ return r.desc.toLowerCase(); });
 
   function push(type, norm, desc, src, prob, sev, origin) {
-    if (existing.indexOf(desc.toLowerCase()) !== -1) return; // evita duplicata
+    if (existing.indexOf(desc.toLowerCase()) !== -1) return;
     var score = prob * sev;
     S.roItems.push({
-      type:type, norm:norm, desc:desc, src:src, prob:prob, sev:sev, score:score,
-      cls: score<=4?'low':score<=9?'med':score<=16?'high':'crit',
-      action:'', origin:origin, autoGen:true
+      type:    type,
+      norm:    norm,
+      desc:    desc,
+      src:     src,
+      prob:    prob,
+      sev:     sev,
+      score:   score,
+      cls:     score<=4?'low':score<=9?'med':score<=16?'high':'crit',
+      action:  '',
+      origin:  origin,
+      autoGen: true
     });
     existing.push(desc.toLowerCase());
     added++;
   }
 
-  // Ameaças → Riscos
-  S.factors.ext.filter(function(f){ return f.type==='des' && f.rel==='sim'; }).forEach(function(f) {
-    push('risk', f.norm==='env'?'env':f.norm==='sst'?'sst':'both',
-      'Risco decorrente de ameaça: ' + f.desc,
-      '4.1 — Contexto externo (Ameaça SWOT)', 3, 3, '4.1-swot');
-  });
+  function getNorm(f) {
+    return f.norm==='env'?'env': f.norm==='sst'?'sst':'both';
+  }
 
-  // Oportunidades externas → Oportunidades
-  S.factors.ext.filter(function(f){ return f.type==='fav' && f.rel==='sim'; }).forEach(function(f) {
-    push('opp', f.norm==='env'?'env':f.norm==='sst'?'sst':'both',
-      'Oportunidade: ' + f.desc,
-      '4.1 — Contexto externo (Oportunidade SWOT)', 3, 2, '4.1-swot');
-  });
+  // ── FATORES INTERNOS ──────────────────────────────────────────
+  // Força → Oportunidade
+  S.factors.int.filter(function(f){ return f.type==='fav' && f.rel==='sim'; })
+    .forEach(function(f) {
+      push('opp', getNorm(f),
+        f.desc,
+        '4.1 — Fator interno favorável (Força) → Oportunidade para o SGI',
+        2, 2, '4.1-swot');
+    });
 
-  // Fraquezas → Riscos internos
-  S.factors.int.filter(function(f){ return f.type==='des' && f.rel==='sim'; }).forEach(function(f) {
-    push('risk', f.norm==='env'?'env':f.norm==='sst'?'sst':'both',
-      'Risco interno decorrente de fraqueza: ' + f.desc,
-      '4.1 — Contexto interno (Fraqueza SWOT)', 2, 3, '4.1-swot');
-  });
+  // Fraqueza → Risco
+  S.factors.int.filter(function(f){ return f.type==='des' && f.rel==='sim'; })
+    .forEach(function(f) {
+      push('risk', getNorm(f),
+        f.desc,
+        '4.1 — Fator interno desfavorável (Fraqueza) → Risco para o SGI',
+        2, 3, '4.1-swot');
+    });
 
-  renderRO(); buildMatrix();
-  alert(added > 0
-    ? added + ' item(s) gerado(s) a partir da SWOT. Revise probabilidade, severidade e ação planejada.'
-    : 'Nenhum item novo gerado. Verifique se há fatores marcados como relevantes na aba 4.1.');
+  // ── FATORES EXTERNOS ──────────────────────────────────────────
+  // Oportunidade externa → Oportunidade
+  S.factors.ext.filter(function(f){ return f.type==='fav' && f.rel==='sim'; })
+    .forEach(function(f) {
+      push('opp', getNorm(f),
+        f.desc,
+        '4.1 — Fator externo favorável (Oportunidade) → Oportunidade para o SGI',
+        3, 2, '4.1-swot');
+    });
+
+  // Ameaça → Risco
+  S.factors.ext.filter(function(f){ return f.type==='des' && f.rel==='sim'; })
+    .forEach(function(f) {
+      push('risk', getNorm(f),
+        f.desc,
+        '4.1 — Fator externo desfavorável (Ameaça) → Risco para o SGI',
+        3, 3, '4.1-swot');
+    });
+
+  renderRO();
+  if (typeof buildMatrix === 'function') buildMatrix();
+
+  if (added > 0) {
+    alert('✅ ' + added + ' item(s) gerado(s) no 6.1.1 a partir da SWOT:\n\n'
+      + '• Forças e Oportunidades → Oportunidades para o SGI\n'
+      + '• Fraquezas e Ameaças → Riscos para o SGI\n\n'
+      + 'Acesse a cláusula 6.1.1 para revisar probabilidade, severidade e ação planejada.');
+  } else {
+    alert('Nenhum item novo gerado.\nVerifique se há fatores marcados como relevantes para o SGI na aba 4.1.');
+  }
 }
 
 function generateROFromPI() {
@@ -2491,7 +2539,7 @@ function buildAgentPrompt() {
 
   var tipoMap = {trimestral:'Análise parcial trimestral', semestral:'Análise semestral', anual:'Análise crítica anual completa'};
 
-  return `Você é um especialista sênior em Sistemas de Gestão Integrado (SGI), com profundo conhecimento em ISO 14001:2015 e ISO 45001:2018. Sua função é atuar como AGENTE DE ANÁLISE CRÍTICA — preparar um briefing executivo para deliberação da Alta Direção, conforme §9.3 de ambas as normas.
+  return `Você é um especialista sênior em Sistemas de Gestão Integrado (SGI), com profundo conhecimento em ISO 14001 e ISO 45001. Sua função é atuar como AGENTE DE ANÁLISE CRÍTICA — preparar um briefing executivo para deliberação da Alta Direção, conforme §9.3 de ambas as normas.
 
 ## DADOS DO SGI — ${org}
 - Setor/CNAE: ${sector}
@@ -2644,7 +2692,7 @@ async function runAIAnalysis() {
     // Renderiza o briefing
     document.getElementById('ac-briefing-body').innerHTML = text;
     document.getElementById('ac-briefing-status').textContent = '✅ Análise concluída';
-    document.getElementById('ac-briefing-status').style.background = '#e8f5ef';
+    document.getElementById('ac-briefing-status').style.background = '#F0FDFA';
     document.getElementById('ac-briefing-status').style.color = 'var(--green-d)';
 
     // Renderiza pontos de deliberação
@@ -2763,7 +2811,7 @@ async function generateAta() {
     '<h2>ATA DE ANÁLISE CRÍTICA PELA DIREÇÃO</h2>'
     +'<div class="ata-meta">'
     +org+(sector?' · '+sector:'')+'<br>'
-    +'ISO 14001:2015 + ISO 45001:2018 · Cláusula 9.3<br>'
+    +'ISO 14001 + ISO 45001 · Cláusula 9.3<br>'
     +'<strong>'+tipoMap[acType]+'</strong> · Período: '+dateFrom+' a '+dateTo+'<br>'
     +'Gerado em: '+now
     +'</div>'
@@ -2805,7 +2853,7 @@ async function generateAta() {
     +'<div style="text-align:center"><div style="border-top:1px solid var(--text);padding-top:8px;font-size:12px">Representante do SGI<br><small>Gestor do Sistema</small></div></div>'
     +'</div>'
     +'<div style="margin-top:20px;font-size:10px;color:var(--text2);text-align:center;border-top:1px solid var(--gray-b);padding-top:10px">'
-    +'Documento gerado automaticamente pelo Hub SGI · '+now+' · Cláusula 9.3 ISO 14001:2015 e ISO 45001:2018'
+    +'Documento gerado automaticamente pelo Hub SGI · '+now+' · Cláusula 9.3 ISO 14001 e ISO 45001'
     +'</div>';
 
   document.getElementById('ac-ata-content').innerHTML = ataHTML;
@@ -2874,7 +2922,7 @@ function scoreInfoFPSA(score) {
   if (score >= 250) return {color:'#A32D2D', nivel:'CRÍTICO',  cls:'crit'};
   if (score >= 100) return {color:'#E85D24', nivel:'ALTO',     cls:'high'};
   if (score >= 25)  return {color:'#BA7517', nivel:'MÉDIO',    cls:'med'};
-  return               {color:'#1D9E75', nivel:'BAIXO',    cls:'low'};
+  return               {color:'#0F766E', nivel:'BAIXO',    cls:'low'};
 }
 
 // ── Atualiza modal de Aspectos/Perigos no S2 ─────────────────────
@@ -3559,7 +3607,7 @@ function printClimaEvidencia() {
     + '</style></head><body>'
     + '<button onclick="window.print()" style="margin-bottom:20px;padding:8px 18px;background:#1a6b9e;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px">🖨️ Imprimir / Salvar PDF</button>'
     + '<h1>EVIDÊNCIA DE ANÁLISE — MUDANÇAS CLIMÁTICAS NO CONTEXTO ORGANIZACIONAL</h1>'
-    + '<div style="font-size:11px;color:#666;margin-bottom:16px">ISO 14001:2015/2026 §4.1 + ISO 45001:2018 §4.1 · Anexo SL (HLS)</div>'
+    + '<div style="font-size:11px;color:#666;margin-bottom:16px">ISO 14001 §4.1 + ISO 45001 §4.1 · Anexo SL (HLS)</div>'
     + '<table><tr>'
     + '<td style="width:25%;background:#f5f5f5;font-weight:600;padding:6px 8px;border:1px solid #ccc">Organização</td>'
     + '<td style="padding:6px 8px;border:1px solid #ccc">'+esc(org)+'</td>'
@@ -3572,7 +3620,7 @@ function printClimaEvidencia() {
     + '<td style="padding:6px 8px;border:1px solid #ccc">'+(S.clima.revisao ? new Date(S.clima.revisao+'T12:00:00').toLocaleDateString('pt-BR') : '—')+'</td>'
     + '</tr><tr>'
     + '<td style="background:#f5f5f5;font-weight:600;padding:6px 8px;border:1px solid #ccc">Norma(s)</td>'
-    + '<td style="padding:6px 8px;border:1px solid #ccc">'+({'both':'ISO 14001:2015/2026 + ISO 45001:2018','env':'ISO 14001:2015/2026','sst':'ISO 45001:2018'}[S.clima.norma]||'—')+'</td>'
+    + '<td style="padding:6px 8px;border:1px solid #ccc">'+({'both':'ISO 14001 + ISO 45001','env':'ISO 14001','sst':'ISO 45001'}[S.clima.norma]||'—')+'</td>'
     + '<td style="background:#f5f5f5;font-weight:600;padding:6px 8px;border:1px solid #ccc">Afeta objetivos SGI?</td>'
     + '<td style="padding:6px 8px;border:1px solid #ccc">'+afetaLabel+'</td>'
     + '</tr></table>'
@@ -3679,7 +3727,7 @@ if (document.readyState === 'loading') {
 var SGI_NORMAS = {
   iso14001: true,
   iso45001: true,
-  iso9001:  false, // Em breve — aguardando ISO 9001:2026
+  iso9001:  false, // Em breve — aguardando ISO 9001
 };
 
 // Aplica a parametrização em todo o sistema
@@ -3707,9 +3755,9 @@ function applyNormasConfig() {
   var subEl = document.getElementById('header-normas-sub');
   if (subEl) {
     var ativos = [];
-    if (has14) ativos.push('ISO 14001:2015');
-    if (has45) ativos.push('ISO 45001:2018');
-    if (has90) ativos.push('ISO 9001:2026');
+    if (has14) ativos.push('ISO 14001');
+    if (has45) ativos.push('ISO 45001');
+    if (has90) ativos.push('ISO 9001');
     subEl.textContent = ativos.join(' + ') + ' · Cláusulas 4.1 · 4.2 · 6.1';
   }
 
@@ -3795,6 +3843,70 @@ function restoreNormasConfig() {
 }
 
 
+
+// ═══════════════════════════════════════════════════════════════════
+// EXPORTAR HTML — ASPECTOS & PERIGOS
+// ═══════════════════════════════════════════════════════════════════
+function exportHTMLAP() {
+  var org = (document.getElementById('org-name')||{}).value || 'Organização';
+  var items = S.apItems || [];
+  if (!items.length) { alert('Nenhum aspecto/perigo cadastrado.'); return; }
+
+  var normas = [];
+  if (S.normas && S.normas.iso14001) normas.push('ISO 14001');
+  if (S.normas && S.normas.iso45001) normas.push('ISO 45001');
+  if (!normas.length) normas = ['ISO 14001','ISO 45001'];
+
+  var rows14 = items.filter(function(i){ return i.type==='env'; });
+  var rows45 = items.filter(function(i){ return i.type==='sst'; });
+
+  function buildTable(rows, tipo) {
+    if (!rows.length) return '<p style="color:#666;font-size:12px">Nenhum item cadastrado.</p>';
+    return '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:20px">'
+      + '<thead><tr style="background:'+(tipo==='env'?'#D1FAE5':'#CCFBF1')+'">'
+      + '<th style="padding:8px;border:1px solid #ccc;text-align:left">Processo</th>'
+      + '<th style="padding:8px;border:1px solid #ccc;text-align:left">'+(tipo==='env'?'Aspecto Ambiental':'Perigo SST')+'</th>'
+      + '<th style="padding:8px;border:1px solid #ccc;text-align:left">'+(tipo==='env'?'Impacto Ambiental':'Risco / Consequência')+'</th>'
+      + '<th style="padding:8px;border:1px solid #ccc;text-align:center">F</th>'
+      + '<th style="padding:8px;border:1px solid #ccc;text-align:center">P</th>'
+      + '<th style="padding:8px;border:1px solid #ccc;text-align:center">S</th>'
+      + '<th style="padding:8px;border:1px solid #ccc;text-align:center">A</th>'
+      + '<th style="padding:8px;border:1px solid #ccc;text-align:center">Score</th>'
+      + '<th style="padding:8px;border:1px solid #ccc;text-align:center">Sig.</th>'
+      + '</tr></thead><tbody>'
+      + rows.map(function(r, i) {
+          var bg = i%2===0 ? '#fff' : '#f9f9f9';
+          var sigColor = r.sig==='S' ? '#D97706' : '#16A34A';
+          return '<tr style="background:'+bg+'">'
+            + '<td style="padding:7px 8px;border:1px solid #ddd">'+esc(r.proc||'')+'</td>'
+            + '<td style="padding:7px 8px;border:1px solid #ddd;font-weight:500">'+esc(r.asp||'')+'</td>'
+            + '<td style="padding:7px 8px;border:1px solid #ddd;color:#555">'+esc(r.imp||r.risk||'')+'</td>'
+            + '<td style="padding:7px 8px;border:1px solid #ddd;text-align:center">'+(r.freq||'—')+'</td>'
+            + '<td style="padding:7px 8px;border:1px solid #ddd;text-align:center">'+(r.prob||'—')+'</td>'
+            + '<td style="padding:7px 8px;border:1px solid #ddd;text-align:center">'+(r.sev||'—')+'</td>'
+            + '<td style="padding:7px 8px;border:1px solid #ddd;text-align:center">'+(r.abrang||'—')+'</td>'
+            + '<td style="padding:7px 8px;border:1px solid #ddd;text-align:center;font-weight:700">'+(r.score||'—')+'</td>'
+            + '<td style="padding:7px 8px;border:1px solid #ddd;text-align:center;color:'+sigColor+';font-weight:700">'+(r.sig==='S'?'⚠️ Sim':'✅ Não')+'</td>'
+            + '</tr>';
+        }).join('')
+      + '</tbody></table>';
+  }
+
+  var win = window.open('','_blank');
+  win.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">'
+    + '<title>Aspectos & Perigos — '+esc(org)+'</title>'
+    + '<style>body{font-family:Arial,sans-serif;padding:30px;font-size:13px;color:#111}'
+    + 'h1{font-size:18px;margin-bottom:4px}h2{font-size:14px;color:#0F766E;margin:20px 0 10px}'
+    + '@media print{button{display:none}}</style></head><body>'
+    + '<button onclick="window.print()" style="margin-bottom:20px;padding:8px 18px;background:#0F766E;color:#fff;border:none;border-radius:6px;cursor:pointer">🖨️ Imprimir / Salvar PDF</button>'
+    + '<h1>Levantamento de Aspectos & Perigos</h1>'
+    + '<p style="color:#666;font-size:12px;margin-bottom:20px">'+esc(org)+' · '+normas.join(' + ')+' · Cláusula 6.1.2 · Emitido em '+new Date().toLocaleDateString('pt-BR')+'</p>'
+    + (rows14.length ? '<h2>🌿 Aspectos & Impactos Ambientais — ISO 14001</h2>' + buildTable(rows14,'env') : '')
+    + (rows45.length ? '<h2>⛑️ Perigos & Riscos de SST — ISO 45001</h2>' + buildTable(rows45,'sst') : '')
+    + '<hr style="margin:20px 0;border-color:#eee"><p style="font-size:11px;color:#999">Score = F × P × S × A · Significativo: Score ≥ 50 · Escala: 1–625</p>'
+    + '</body></html>');
+  win.document.close();
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // IMPORTAR JSON DO FORMULÁRIO DE CAMPO STANDALONE
@@ -3939,7 +4051,7 @@ function calcScore14(rowId) {
   var scoreEl = document.getElementById('c14-score-'+rowId);
   var sigEl   = document.getElementById('c14-sig-'+rowId);
   if (!scoreEl) return;
-  var color = score >= 17 ? '#A32D2D' : score >= 10 ? '#E85D24' : score >= 5 ? '#BA7517' : score > 0 ? '#1D9E75' : '#9e9c99';
+  var color = score >= 17 ? '#A32D2D' : score >= 10 ? '#E85D24' : score >= 5 ? '#BA7517' : score > 0 ? '#0F766E' : '#9e9c99';
   var nivel = score >= 17 ? 'Crítico' : score >= 10 ? 'Alto' : score >= 5 ? 'Médio' : score > 0 ? 'Baixo' : '—';
   scoreEl.innerHTML = '<div class="campo-score" style="color:'+color+';background:'+color+'15">'+(score||'—')+'</div><div class="campo-score-label">'+nivel+'</div>';
   if (sigEl) {
@@ -3955,7 +4067,7 @@ function calcScore45(rowId) {
   var score = p && s ? p * s : 0;
   var scoreEl = document.getElementById('c45-score-'+rowId);
   if (!scoreEl) return;
-  var color = score >= 17 ? '#A32D2D' : score >= 10 ? '#E85D24' : score >= 5 ? '#BA7517' : score > 0 ? '#1D9E75' : '#9e9c99';
+  var color = score >= 17 ? '#A32D2D' : score >= 10 ? '#E85D24' : score >= 5 ? '#BA7517' : score > 0 ? '#0F766E' : '#9e9c99';
   var nivel = score >= 17 ? 'CRÍTICO' : score >= 10 ? 'ALTO' : score >= 5 ? 'MÉDIO' : score > 0 ? 'BAIXO' : '—';
   scoreEl.innerHTML = '<div class="campo-score" style="color:'+color+';background:'+color+'15">'+(score||'—')+'</div><div class="campo-score-label">'+nivel+'</div>';
 }
@@ -4436,7 +4548,7 @@ function renderKPIGrid() {
         + '<span style="font-size:9px;color:var(--text3)">'+MONTHS_PT[globalIdx < 12 ? globalIdx : 0]+'</span></div>';
       var pct  = Math.round((v / maxVal) * 48);
       var clr  = calcSemaphore(Object.assign({}, kpi, {data:Object.assign({}, kpi.data, {[periodKey(year, globalIdx < 12 ? globalIdx : 0)]: v})})).sem;
-      var barColor = clr==='grn'?'#1D9E75':clr==='amb'?'#BA7517':'#A32D2D';
+      var barColor = clr==='grn'?'#0F766E':clr==='amb'?'#BA7517':'#A32D2D';
       return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer" onclick="event.stopPropagation();openKPIEntry('+realIdx+',\''+periodKey(year, globalIdx < 12 ? globalIdx : 0)+'\')">'
         + '<div style="width:14px;height:'+Math.max(pct,4)+'px;background:'+barColor+';border-radius:2px 2px 0 0;transition:height .3s"></div>'
         + '<span style="font-size:9px;color:var(--text2)">'+MONTHS_PT[globalIdx < 12 ? globalIdx : 0]+'</span></div>';
@@ -4513,7 +4625,7 @@ function updateKPIStats() {
   var gry = S.kpis.filter(function(k){return calcSemaphore(k).sem==='gry';}).length;
   el.innerHTML = [
     {v:S.kpis.length, l:'Total de KPIs',   e:'📊', bg:'var(--white)'},
-    {v:grn,           l:'Na meta',          e:'🟢', bg:'#e8f5ef'},
+    {v:grn,           l:'Na meta',          e:'🟢', bg:'#F0FDFA'},
     {v:amb,           l:'Atenção',          e:'🟡', bg:'var(--amber-l)'},
     {v:red,           l:'Fora da meta',     e:'🔴', bg:'var(--red-l)'},
     {v:gry,           l:'Sem dados',        e:'⚪', bg:'var(--gray-l)'},
@@ -4722,7 +4834,7 @@ function renderKPICatalogList() {
       + '<div style="font-size:11px;color:var(--text2)">'+esc(c.unit)+' &nbsp;|&nbsp; '+esc(c.normRef)+'</div>'
       + '</div>'
       + (already
-          ? '<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:#e8f5ef;color:var(--green-d)">✓ Adicionado</span>'
+          ? '<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:#F0FDFA;color:var(--green-d)">✓ Adicionado</span>'
           : '<button class="btn btn-sm" style="font-size:11px;white-space:nowrap">+ Adicionar</button>')
       + '</div>';
   }).join('') || '<div class="empty">Nenhum indicador encontrado.</div>';
@@ -5118,7 +5230,7 @@ function updateTrainStats() {
     {v:all.length,  l:'Total',        e:'📚', bg:'var(--white)'},
     {v:nPlan,       l:'Planejados',   e:'📅', bg:'var(--blue-l)'},
     {v:nLate,       l:'Atrasados',    e:'🔴', bg:'var(--red-l)'},
-    {v:nDone,       l:'Realizados',   e:'✅', bg:'#e8f5ef'},
+    {v:nDone,       l:'Realizados',   e:'✅', bg:'#F0FDFA'},
   ].map(function(c){
     return '<div style="background:'+c.bg+';border:1px solid var(--gray-b);border-radius:var(--r);padding:12px;text-align:center">'
       +'<div style="font-size:18px;margin-bottom:2px">'+c.e+'</div>'
@@ -5148,7 +5260,7 @@ function renderTrainCalendar() {
     var bg = items.length === 0 ? 'var(--gray-l)'
            : hasLate ? 'var(--red-l)'
            : hasPlano ? 'var(--blue-l)'
-           : '#e8f5ef';
+           : '#F0FDFA';
     var color = items.length === 0 ? 'var(--text3)'
               : hasLate ? 'var(--red)'
               : hasPlano ? 'var(--blue-d)'
@@ -5185,7 +5297,7 @@ function renderTrainList() {
       + '<span class="train-type '+(typeCSS[t.type]||'tt-both')+'">'+typeLbl[t.type||'both']+'</span>'
       + '<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--gray-l);color:var(--text2)">'+stLbl[t.status||'planejado']+'</span>'
       + (t.normReq?'<span style="font-size:11px;color:var(--text2)">📋 '+esc(t.normReq)+'</span>':'')
-      + (hasEvid?'<span style="font-size:10px;padding:1px 6px;border-radius:10px;background:#e8f5ef;color:var(--green-d)">📎 Com evidência</span>':'')
+      + (hasEvid?'<span style="font-size:10px;padding:1px 6px;border-radius:10px;background:#F0FDFA;color:var(--green-d)">📎 Com evidência</span>':'')
       + '</div>'
       + '<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">'+esc(t.title)+'</div>'
       + '<div style="font-size:11px;color:var(--text2);display:flex;gap:12px;flex-wrap:wrap">'
@@ -5286,7 +5398,7 @@ function updateDocStats() {
   if(!el) return;
   el.innerHTML = [
     {v:all.length, l:'Total de documentos', e:'📁', bg:'var(--white)'},
-    {v:nVig,       l:'Vigentes',            e:'✅', bg:'#e8f5ef'},
+    {v:nVig,       l:'Vigentes',            e:'✅', bg:'#F0FDFA'},
     {v:nRev,       l:'Em revisão',          e:'⚠️', bg:'var(--amber-l)'},
     {v:nObs,       l:'Obsoletos',           e:'🔴', bg:'var(--red-l)'},
   ].map(function(c){
@@ -5384,7 +5496,7 @@ var objEditIdx = null;
 var tempPAItems = [];
 
 // ── Cores por norma e prioridade ────────────────────────────────
-var OBJ_NORM_COLOR = { env:'#1D9E75', sst:'#185FA5', both:'#533AB7' };
+var OBJ_NORM_COLOR = { env:'#0F766E', sst:'#185FA5', both:'#533AB7' };
 var OBJ_PRIO_COLOR = { critica:'#A32D2D', alta:'#BA7517', media:'#185FA5', baixa:'#5F5E5A' };
 var OBJ_PRIO_LABEL = { critica:'🔴 Crítica', alta:'🟡 Alta', media:'🔵 Média', baixa:'⚪ Baixa' };
 var OBJ_NORM_LABEL = { env:'🌿 ISO 14001', sst:'⛑️ ISO 45001', both:'🌿+⛑️ Ambas' };
@@ -5395,7 +5507,7 @@ function calcObjStatus(obj) {
   var done  = (obj.pas||[]).filter(function(p){return p.done;}).length;
   var total = (obj.pas||[]).length;
   var pct   = total ? Math.round(done/total*100) : 0;
-  if (pct === 100) return {status:'concluido', pct:100, color:'#1D9E75'};
+  if (pct === 100) return {status:'concluido', pct:100, color:'#0F766E'};
   if (obj.deadline && obj.deadline < today) return {status:'atrasado', pct:pct, color:'#A32D2D'};
   return {status:'aberto', pct:pct, color:'#185FA5'};
 }
@@ -5709,7 +5821,7 @@ function updateObjStats() {
     {v:total,  l:'Total de objetivos',  e:'🎯', c:'var(--white)'},
     {v:aberto, l:'Em andamento',         e:'🔵', c:'var(--blue-l)'},
     {v:atras,  l:'Atrasados',            e:'🔴', c:'var(--red-l)'},
-    {v:conc,   l:'Concluídos',           e:'✅', c:'#e8f5ef'},
+    {v:conc,   l:'Concluídos',           e:'✅', c:'#F0FDFA'},
     {v:avgPct+'%', l:'Progresso médio',  e:'📈', c:'var(--amber-l)'},
   ].map(function(c){
     return '<div class="obj-stat" style="background:'+c.c+'">'
@@ -5837,7 +5949,7 @@ function suggestFactor(kind, desc, type, norm) {
   // Destaca o campo para o usuário perceber
   var el = document.getElementById(kind+'-desc');
   el.style.borderColor = 'var(--green)';
-  el.style.boxShadow   = '0 0 0 3px rgba(29,158,117,.15)';
+  el.style.boxShadow   = '0 0 0 3px rgba(15,118,110,.15)';
   el.focus();
   setTimeout(function(){ el.style.borderColor=''; el.style.boxShadow=''; }, 1800);
 }
@@ -5847,3 +5959,4 @@ renderFactors(); updateSWOT();
 renderPI();
 renderAP(); filterAP('all');
 buildMatrix(); renderRO();
+
